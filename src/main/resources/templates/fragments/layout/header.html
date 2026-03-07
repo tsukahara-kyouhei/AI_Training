@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="header" th:fragment="header">
+    <div class="container header__inner">
+        <a class="brand" href="/">
+            <img class="brand__logo" th:src="@{/images/office-order-logo.svg}" src="/images/office-order-logo.svg" alt="OFFICE ORDER">
+        </a>
+
+        <nav class="header__nav" aria-label="ヘッダナビゲーション">
+            <div class="navdrop">
+                <a class="navlink navlink--strong navdrop__trigger" role="button" aria-haspopup="true" tabindex="0">
+                    カテゴリから探す
+                    <span class="material-icons" aria-hidden="true">keyboard_arrow_down</span>
+                </a>
+                <div class="navdrop__menu" role="menu" aria-label="カテゴリ一覧">
+                    <a role="menuitem" href="/categories/desks"><span class="material-icons" aria-hidden="true">table_bar</span> デスク</a>
+                    <a role="menuitem" href="/categories/chairs"><span class="material-icons" aria-hidden="true">chair</span> チェア</a>
+                    <a role="menuitem" href="/categories/storages"><span class="material-icons" aria-hidden="true">inventory</span> 収納家具</a>
+                </div>
+            </div>
+
+            <a class="navlink navlink--muted" href="/about">OFFICE ORDER について</a>
+            <a class="navlink navlink--muted" href="/guide">ご利用ガイド</a>
+        </nav>
+
+        <form class="header__search" action="/products/search" method="get" role="search" aria-label="商品検索">
+            <span class="material-icons" aria-hidden="true">search</span>
+            <input type="search" name="q" placeholder="商品名・商品コード" aria-label="商品名・商品コードで検索">
+        </form>
+
+        <nav class="header__actions" aria-label="ヘッダー操作">
+            <a class="hdr-link" th:if="${!isLoggedIn}" href="/login" aria-label="ログイン・会員登録">
+                <span class="material-icons" aria-hidden="true">person</span>
+                ログイン・会員登録
+            </a>
+
+            <a class="hdr-link" th:if="${isLoggedIn}" href="/mypage/orders">
+                <span class="material-icons" aria-hidden="true">account_circle</span>
+                マイページ
+            </a>
+
+            <a class="pill pill--accent" href="/cart" aria-label="カート">
+                <span class="material-icons" aria-hidden="true">shopping_cart</span>
+                カート <span class="pill__badge" th:text="${cartItemCount}">0</span>
+            </a>
+        </nav>
+    </div>
+</header>
+</body>
+</html>

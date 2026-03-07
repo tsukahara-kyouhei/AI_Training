@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.OrderMapper">
+
+    <resultMap id="CheckoutMemberPrefillMap" type="jp.co.skig.officeorder.model.order.CheckoutMemberPrefill">
+        <constructor>
+            <arg column="personal_or_corporate" javaType="string"/>
+            <arg column="last_name" javaType="string"/>
+            <arg column="first_name" javaType="string"/>
+            <arg column="last_name_kana" javaType="string"/>
+            <arg column="first_name_kana" javaType="string"/>
+            <arg column="company_name" javaType="string"/>
+            <arg column="department_name" javaType="string"/>
+            <arg column="email" javaType="string"/>
+            <arg column="daytime_phone" javaType="string"/>
+            <arg column="fax" javaType="string"/>
+            <arg column="postal_code" javaType="string"/>
+            <arg column="prefecture" javaType="string"/>
+            <arg column="city" javaType="string"/>
+            <arg column="address_line" javaType="string"/>
+            <arg column="delivery_floor" javaType="java.lang.Integer"/>
+            <arg column="has_elevator" javaType="java.lang.Boolean"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="OrderCompleteRowMap" type="jp.co.skig.officeorder.mapper.row.OrderCompleteMapperRow">
+        <constructor>
+            <arg column="order_number" javaType="string"/>
+            <arg column="customer_last_name" javaType="string"/>
+            <arg column="customer_first_name" javaType="string"/>
+            <arg column="customer_email" javaType="string"/>
+            <arg column="shipping_postal_code" javaType="string"/>
+            <arg column="shipping_prefecture" javaType="string"/>
+            <arg column="shipping_city" javaType="string"/>
+            <arg column="shipping_address_line" javaType="string"/>
+            <arg column="shipping_floor" javaType="java.lang.Integer"/>
+            <arg column="shipping_has_elevator" javaType="java.lang.Boolean"/>
+            <arg column="payment_method" javaType="string"/>
+            <arg column="payment_instruction" javaType="java.lang.Object"/>
+            <arg column="subtotal_amount" javaType="java.math.BigDecimal"/>
+            <arg column="assembly_fee_total" javaType="java.math.BigDecimal"/>
+            <arg column="shipping_fee" javaType="java.math.BigDecimal"/>
+            <arg column="tax_amount" javaType="java.math.BigDecimal"/>
+            <arg column="total_amount" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberOrderHistoryRowMap" type="jp.co.skig.officeorder.mapper.row.MemberOrderHistoryMapperRow">
+        <constructor>
+            <arg column="order_number" javaType="string"/>
+            <arg column="order_datetime" javaType="java.time.OffsetDateTime"/>
+            <arg column="total_amount" javaType="java.math.BigDecimal"/>
+            <arg column="order_status" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberOrderDetailRowMap" type="jp.co.skig.officeorder.mapper.row.MemberOrderDetailMapperRow">
+        <constructor>
+            <arg column="order_number" javaType="string"/>
+            <arg column="order_datetime" javaType="java.time.OffsetDateTime"/>
+            <arg column="order_status" javaType="string"/>
+            <arg column="subtotal_amount" javaType="java.math.BigDecimal"/>
+            <arg column="assembly_fee_total" javaType="java.math.BigDecimal"/>
+            <arg column="shipping_fee" javaType="java.math.BigDecimal"/>
+            <arg column="tax_amount" javaType="java.math.BigDecimal"/>
+            <arg column="total_amount" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberOrderStatusHistoryRowMap" type="jp.co.skig.officeorder.mapper.row.MemberOrderStatusHistoryMapperRow">
+        <constructor>
+            <arg column="changed_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="status" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberOrderItemRowMap" type="jp.co.skig.officeorder.mapper.row.MemberOrderItemMapperRow">
+        <constructor>
+            <arg column="product_code" javaType="string"/>
+            <arg column="product_name" javaType="string"/>
+            <arg column="color_name" javaType="string"/>
+            <arg column="unit_price" javaType="java.math.BigDecimal"/>
+            <arg column="assembly_fee" javaType="java.math.BigDecimal"/>
+            <arg column="quantity" javaType="java.lang.Integer"/>
+            <arg column="line_subtotal" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="OrderReorderItemRowMap" type="jp.co.skig.officeorder.mapper.row.OrderReorderItemMapperRow">
+        <constructor>
+            <arg column="product_variant_id" javaType="java.lang.Long"/>
+            <arg column="product_code" javaType="string"/>
+            <arg column="quantity" javaType="java.lang.Integer"/>
+            <arg column="assembly_available" javaType="java.lang.Boolean"/>
+            <arg column="assembly_fee" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <select id="selectCheckoutMemberPrefill" resultMap="CheckoutMemberPrefillMap">
+        SELECT
+        m.personal_or_corporate,
+        m.last_name,
+        m.first_name,
+        m.last_name_kana,
+        m.first_name_kana,
+        m.company_name,
+        m.department_name,
+        m.email,
+        m.daytime_phone,
+        m.fax,
+        m.postal_code,
+        m.prefecture,
+        m.city,
+        m.address_line,
+        m.delivery_floor,
+        m.has_elevator
+        FROM members m
+        WHERE m.member_id = #{memberId}
+        AND m.member_status = 'active'
+    </select>
+
+    <select id="insertOrder" resultType="long">
+        INSERT INTO orders (
+        order_number,
+        order_datetime,
+        order_status,
+        customer_type,
+        personal_or_corporate,
+        member_id,
+        customer_last_name,
+        customer_first_name,
+        customer_last_name_kana,
+        customer_first_name_kana,
+        company_name,
+        department_name,
+        customer_email,
+        daytime_phone,
+        shipping_fax,
+        shipping_postal_code,
+        shipping_prefecture,
+        shipping_city,
+        shipping_address_line,
+        shipping_floor,
+        shipping_has_elevator,
+        payment_method,
+        payment_instruction,
+        shipping_method,
+        shipping_fee,
+        assembly_fee_total,
+        subtotal_amount,
+        tax_amount,
+        total_amount,
+        receipt_issued,
+        note,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{params.orderNumber},
+        #{params.orderDatetime},
+        'received',
+        #{params.customerType},
+        #{params.personalOrCorporate},
+        #{params.memberId},
+        #{params.customerLastName},
+        #{params.customerFirstName},
+        #{params.customerLastNameKana},
+        #{params.customerFirstNameKana},
+        #{params.companyName},
+        #{params.departmentName},
+        #{params.customerEmail},
+        #{params.daytimePhone},
+        #{params.shippingFax},
+        #{params.shippingPostalCode},
+        #{params.shippingPrefecture},
+        #{params.shippingCity},
+        #{params.shippingAddressLine},
+        #{params.shippingFloor},
+        #{params.shippingHasElevator},
+        #{params.paymentMethod},
+        <choose>
+            <when test="params.paymentInstructionJson != null">
+                CAST(#{params.paymentInstructionJson} AS jsonb)
+            </when>
+            <otherwise>
+                NULL
+            </otherwise>
+        </choose>,
+        #{params.shippingMethod},
+        #{params.shippingFee},
+        #{params.assemblyFeeTotal},
+        #{params.subtotalAmount},
+        #{params.taxAmount},
+        #{params.totalAmount},
+        FALSE,
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+        RETURNING order_id
+    </select>
+
+    <insert id="insertOrderItem">
+        INSERT INTO order_items (
+        order_id,
+        product_code,
+        product_name,
+        color_name,
+        unit_price,
+        quantity,
+        line_subtotal,
+        line_tax_amount,
+        line_total_amount,
+        assembly_available,
+        assembly_fee,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{params.orderId},
+        #{params.productCode},
+        #{params.productName},
+        #{params.colorName},
+        #{params.unitPrice},
+        #{params.quantity},
+        #{params.lineSubtotal},
+        #{params.lineTaxAmount},
+        #{params.lineTotalAmount},
+        #{params.assemblyAvailable},
+        #{params.assemblyFee},
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <insert id="insertOrderStatusHistory">
+        INSERT INTO order_status_histories (
+        order_id,
+        status,
+        changed_by_system,
+        changed_at
+        )
+        VALUES (
+        #{params.orderId},
+        #{params.status},
+        #{params.changedBySystem},
+        CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <select id="nextOrderSequence" parameterType="java.time.LocalDate" resultType="int">
+        INSERT INTO order_number_counters (
+        order_date,
+        last_sequence,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{orderDate},
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+        ON CONFLICT (order_date) DO UPDATE
+        SET
+        last_sequence = order_number_counters.last_sequence + 1,
+        updated_at = CURRENT_TIMESTAMP
+        RETURNING last_sequence
+    </select>
+
+    <select id="selectOrderCompleteByOrderNumber" resultMap="OrderCompleteRowMap">
+        SELECT
+        order_number,
+        customer_last_name,
+        customer_first_name,
+        customer_email,
+        shipping_postal_code,
+        shipping_prefecture,
+        shipping_city,
+        shipping_address_line,
+        shipping_floor,
+        shipping_has_elevator,
+        payment_method,
+        payment_instruction,
+        subtotal_amount,
+        assembly_fee_total,
+        shipping_fee,
+        tax_amount,
+        total_amount
+        FROM orders
+        WHERE order_number = #{orderNumber}
+    </select>
+
+    <select id="countMemberOrders" resultType="long">
+        SELECT COUNT(*)
+        FROM orders
+        WHERE member_id = #{memberId}
+    </select>
+
+    <select id="selectMemberOrders" resultMap="MemberOrderHistoryRowMap">
+        SELECT
+        order_number,
+        order_datetime,
+        total_amount,
+        order_status
+        FROM orders
+        WHERE member_id = #{memberId}
+        ORDER BY order_datetime DESC, order_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="selectMemberOrderDetail" resultMap="MemberOrderDetailRowMap">
+        SELECT
+        o.order_number,
+        o.order_datetime,
+        o.order_status,
+        o.subtotal_amount,
+        o.assembly_fee_total,
+        o.shipping_fee,
+        o.tax_amount,
+        o.total_amount
+        FROM orders o
+        WHERE o.member_id = #{memberId}
+        AND o.order_number = #{orderNumber}
+    </select>
+
+    <select id="selectMemberOrderStatusHistories" resultMap="MemberOrderStatusHistoryRowMap">
+        SELECT
+        osh.changed_at,
+        osh.status
+        FROM order_status_histories osh
+        JOIN orders o ON o.order_id = osh.order_id
+        WHERE o.member_id = #{memberId}
+        AND o.order_number = #{orderNumber}
+        ORDER BY osh.changed_at ASC, osh.order_status_history_id ASC
+    </select>
+
+    <select id="selectMemberOrderItems" resultMap="MemberOrderItemRowMap">
+        SELECT
+        oi.product_code,
+        oi.product_name,
+        oi.color_name,
+        oi.unit_price,
+        oi.assembly_fee,
+        oi.quantity,
+        oi.line_subtotal
+        FROM order_items oi
+        JOIN orders o ON o.order_id = oi.order_id
+        WHERE o.member_id = #{memberId}
+        AND o.order_number = #{orderNumber}
+        ORDER BY oi.order_item_id ASC
+    </select>
+
+    <select id="selectMemberReorderItems" resultMap="OrderReorderItemRowMap">
+        SELECT
+        pv.product_variant_id,
+        oi.product_code,
+        oi.quantity,
+        oi.assembly_available,
+        oi.assembly_fee
+        FROM order_items oi
+        JOIN orders o ON o.order_id = oi.order_id
+        LEFT JOIN product_variants pv ON pv.product_code = oi.product_code
+        WHERE o.member_id = #{memberId}
+        AND o.order_number = #{orderNumber}
+        ORDER BY oi.order_item_id ASC
+    </select>
+
+    <select id="selectCurrentTaxRatePercent" resultType="java.math.BigDecimal">
+        SELECT tax_rate_percent
+        FROM tax_rates
+        WHERE is_active = TRUE
+        AND effective_start_at &lt;= #{now}
+        AND (effective_end_at IS NULL OR effective_end_at &gt; #{now})
+        ORDER BY effective_start_at DESC
+        LIMIT 1
+    </select>
+</mapper>
+
+
+

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="commonScripts">
+    <script th:src="@{/js/modules/notice-rotator.js(v=${@assetVersion.version('/js/modules/notice-rotator.js')})}"
+            src="/js/modules/notice-rotator.js"></script>
+    <script th:src="@{/js/modules/modal.js(v=${@assetVersion.version('/js/modules/modal.js')})}"
+            src="/js/modules/modal.js"></script>
+    <script th:src="@{/js/modules/carousel.js(v=${@assetVersion.version('/js/modules/carousel.js')})}"
+            src="/js/modules/carousel.js"></script>
+    <script th:src="@{/js/modules/form-controls.js(v=${@assetVersion.version('/js/modules/form-controls.js')})}"
+            src="/js/modules/form-controls.js"></script>
+    <script th:src="@{/js/modules/submit-guard.js(v=${@assetVersion.version('/js/modules/submit-guard.js')})}"
+            src="/js/modules/submit-guard.js"></script>
+    <script th:src="@{/js/modules/product-detail.js(v=${@assetVersion.version('/js/modules/product-detail.js')})}"
+            src="/js/modules/product-detail.js"></script>
+    <script th:src="@{/js/modules/checkout-input.js(v=${@assetVersion.version('/js/modules/checkout-input.js')})}"
+            src="/js/modules/checkout-input.js"></script>
+    <script th:src="@{/js/modules/recently-viewed.js(v=${@assetVersion.version('/js/modules/recently-viewed.js')})}"
+            src="/js/modules/recently-viewed.js"></script>
+    <script th:src="@{/js/site.js(v=${@assetVersion.version('/js/site.js')})}" src="/js/site.js"></script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.ContactMapper">
+
+    <resultMap id="ContactMemberPrefillMap" type="jp.co.skig.officeorder.model.contact.ContactMemberPrefill">
+        <constructor>
+            <arg column="company_name" javaType="string"/>
+            <arg column="department_name" javaType="string"/>
+            <arg column="last_name" javaType="string"/>
+            <arg column="first_name" javaType="string"/>
+            <arg column="email" javaType="string"/>
+            <arg column="phone" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <select id="selectMemberContactPrefill" resultMap="ContactMemberPrefillMap">
+        SELECT
+        m.company_name,
+        m.department_name,
+        m.last_name,
+        m.first_name,
+        m.email,
+        m.daytime_phone AS phone
+        FROM members m
+        WHERE m.member_id = #{memberId}
+        AND m.member_status = 'active'
+    </select>
+
+    <select id="insertInquiry" resultType="long">
+        INSERT INTO inquiries (
+        member_id,
+        company_name,
+        department_name,
+        last_name,
+        first_name,
+        email,
+        phone,
+        inquiry_type,
+        order_phase,
+        product_name,
+        product_code,
+        message,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{memberId},
+        #{form.companyName},
+        #{form.departmentName},
+        #{form.lastName},
+        #{form.firstName},
+        #{form.email},
+        #{form.phone},
+        #{form.inquiryType},
+        #{form.orderPhase},
+        #{form.productName},
+        #{form.productCode},
+        #{form.message},
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+        RETURNING inquiry_id
+    </select>
+
+</mapper>
+
+

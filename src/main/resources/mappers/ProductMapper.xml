@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.ProductMapper">
+
+    <resultMap id="ProductListRowMap" type="jp.co.skig.officeorder.mapper.row.ProductListMapperRow">
+        <constructor>
+            <idArg column="product_id" javaType="long"/>
+            <arg column="product_name" javaType="string"/>
+            <arg column="min_price" javaType="java.math.BigDecimal"/>
+            <arg column="max_stock" javaType="int"/>
+            <arg column="product_code" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="ProductColorCodeRowMap" type="jp.co.skig.officeorder.mapper.row.ProductColorCodeMapperRow">
+        <constructor>
+            <idArg column="product_id" javaType="long"/>
+            <arg column="color_code" javaType="string"/>
+            <arg column="sort_order" javaType="int"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="ProductRankedRowMap" type="jp.co.skig.officeorder.mapper.row.ProductRankedMapperRow">
+        <constructor>
+            <arg column="rank" javaType="int"/>
+            <arg column="product_id" javaType="long"/>
+            <arg column="product_name" javaType="string"/>
+            <arg column="min_price" javaType="java.math.BigDecimal"/>
+            <arg column="max_stock" javaType="int"/>
+            <arg column="product_code" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="ProductDetailRowMap" type="jp.co.skig.officeorder.mapper.row.ProductDetailMapperRow">
+        <constructor>
+            <idArg column="product_id" javaType="long"/>
+            <arg column="product_name" javaType="string"/>
+            <arg column="description" javaType="string"/>
+            <arg column="category_id" javaType="string"/>
+            <arg column="assembly_available" javaType="boolean"/>
+            <arg column="assembly_fee" javaType="java.math.BigDecimal"/>
+            <arg column="has_variation" javaType="boolean"/>
+            <arg column="variation_group_id" javaType="java.lang.Long"/>
+            <arg column="variation_name" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="ProductVariantRowMap" type="jp.co.skig.officeorder.mapper.row.ProductVariantMapperRow">
+        <constructor>
+            <idArg column="product_variant_id" javaType="long"/>
+            <arg column="product_code" javaType="string"/>
+            <arg column="color_id" javaType="long"/>
+            <arg column="color_name" javaType="string"/>
+            <arg column="color_code" javaType="string"/>
+            <arg column="unit_price" javaType="java.math.BigDecimal"/>
+            <arg column="stock_quantity" javaType="int"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="ProductSeriesLinkRowMap" type="jp.co.skig.officeorder.mapper.row.ProductSeriesLinkMapperRow">
+        <constructor>
+            <idArg column="product_id" javaType="long"/>
+            <arg column="product_name" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="ProductFilterColorOptionRowMap" type="jp.co.skig.officeorder.mapper.row.ProductFilterColorOptionMapperRow">
+        <constructor>
+            <idArg column="color_id" javaType="java.lang.Long"/>
+            <arg column="color_name" javaType="string"/>
+            <arg column="color_code" javaType="string"/>
+            <arg column="swatch_type" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="ProductFilterOptionRowMap" type="jp.co.skig.officeorder.mapper.row.ProductFilterOptionMapperRow">
+        <constructor>
+            <idArg column="option_id" javaType="java.lang.Integer"/>
+            <arg column="display_name" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <sql id="VariantFilterPvf">
+        <if test="inStockOnly">
+            AND pvf.stock_quantity &gt; 0
+        </if>
+        <if test="colorIds != null and colorIds.size() &gt; 0">
+            AND pvf.color_id IN
+            <foreach collection="colorIds" item="colorId" open="(" close=")" separator=",">
+                #{colorId}
+            </foreach>
+        </if>
+        <if test="priceRanges != null and priceRanges.size() &gt; 0">
+            AND (
+            <foreach collection="priceRanges" item="range" separator=" OR ">
+                <choose>
+                    <when test="range.minInclusive == null">
+                        pvf.unit_price &lt;= #{range.maxInclusive}
+                    </when>
+                    <when test="range.maxInclusive == null">
+                        pvf.unit_price &gt;= #{range.minInclusive}
+                    </when>
+                    <otherwise>
+                        (pvf.unit_price &gt;= #{range.minInclusive} AND pvf.unit_price &lt;= #{range.maxInclusive})
+                    </otherwise>
+                </choose>
+            </foreach>
+            )
+        </if>
+    </sql>
+
+    <sql id="VariantFilterPv">
+        <if test="inStockOnly">
+            AND pv.stock_quantity &gt; 0
+        </if>
+        <if test="colorIds != null and colorIds.size() &gt; 0">
+            AND pv.color_id IN
+            <foreach collection="colorIds" item="colorId" open="(" close=")" separator=",">
+                #{colorId}
+            </foreach>
+        </if>
+        <if test="priceRanges != null and priceRanges.size() &gt; 0">
+            AND (
+            <foreach collection="priceRanges" item="range" separator=" OR ">
+                <choose>
+                    <when test="range.minInclusive == null">
+                        pv.unit_price &lt;= #{range.maxInclusive}
+                    </when>
+                    <when test="range.maxInclusive == null">
+                        pv.unit_price &gt;= #{range.minInclusive}
+                    </when>
+                    <otherwise>
+                        (pv.unit_price &gt;= #{range.minInclusive} AND pv.unit_price &lt;= #{range.maxInclusive})
+                    </otherwise>
+                </choose>
+            </foreach>
+            )
+        </if>
+    </sql>
+
+    <sql id="DeskAttributeFilter">
+        AND EXISTS (
+        SELECT 1
+        FROM product_desk_attributes da
+        WHERE da.product_id = p.product_id
+        <if test="deskTopShapeIds != null and deskTopShapeIds.size() &gt; 0">
+            AND da.top_shape_id IN
+            <foreach collection="deskTopShapeIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+        </if>
+        <if test="deskTasteIds != null and deskTasteIds.size() &gt; 0">
+            AND da.taste_id IN
+            <foreach collection="deskTasteIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+        </if>
+        <if test="deskWidthRanges != null and deskWidthRanges.size() &gt; 0">
+            AND (
+            <foreach collection="deskWidthRanges" item="range" separator=" OR ">
+                <choose>
+                    <when test="range.minInclusive == null">
+                        da.width_mm &lt;= #{range.maxInclusive}
+                    </when>
+                    <when test="range.maxInclusive == null">
+                        da.width_mm &gt;= #{range.minInclusive}
+                    </when>
+                    <otherwise>
+                        (da.width_mm &gt;= #{range.minInclusive} AND da.width_mm &lt;= #{range.maxInclusive})
+                    </otherwise>
+                </choose>
+            </foreach>
+            )
+        </if>
+        <if test="deskDepthRanges != null and deskDepthRanges.size() &gt; 0">
+            AND (
+            <foreach collection="deskDepthRanges" item="range" separator=" OR ">
+                <choose>
+                    <when test="range.minInclusive == null">
+                        da.depth_mm &lt;= #{range.maxInclusive}
+                    </when>
+                    <when test="range.maxInclusive == null">
+                        da.depth_mm &gt;= #{range.minInclusive}
+                    </when>
+                    <otherwise>
+                        (da.depth_mm &gt;= #{range.minInclusive} AND da.depth_mm &lt;= #{range.maxInclusive})
+                    </otherwise>
+                </choose>
+            </foreach>
+            )
+        </if>
+        <if test="deskHeightRanges != null and deskHeightRanges.size() &gt; 0">
+            AND (
+            <foreach collection="deskHeightRanges" item="range" separator=" OR ">
+                <choose>
+                    <when test="range.minInclusive == null">
+                        da.height_mm &lt;= #{range.maxInclusive}
+                    </when>
+                    <when test="range.maxInclusive == null">
+                        da.height_mm &gt;= #{range.minInclusive}
+                    </when>
+                    <otherwise>
+                        (da.height_mm &gt;= #{range.minInclusive} AND da.height_mm &lt;= #{range.maxInclusive})
+                    </otherwise>
+                </choose>
+            </foreach>
+            )
+        </if>
+        )
+    </sql>
+
+    <sql id="ChairAttributeFilter">
+        AND EXISTS (
+        SELECT 1
+        FROM product_chair_attributes ca
+        WHERE ca.product_id = p.product_id
+        <if test="chairFunctionIds != null and chairFunctionIds.size() &gt; 0">
+            AND ca.function_id IN
+            <foreach collection="chairFunctionIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+        </if>
+        <if test="chairMaterialIds != null and chairMaterialIds.size() &gt; 0">
+            AND ca.material_id IN
+            <foreach collection="chairMaterialIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+        </if>
+        <if test="chairTasteIds != null and chairTasteIds.size() &gt; 0">
+            AND ca.taste_id IN
+            <foreach collection="chairTasteIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+        </if>
+        )
+    </sql>
+
+    <sql id="StorageAttributeFilter">
+        AND EXISTS (
+        SELECT 1
+        FROM product_storage_attributes sa
+        WHERE sa.product_id = p.product_id
+        <if test="storageUsageIds != null and storageUsageIds.size() &gt; 0">
+            AND sa.usage_id IN
+            <foreach collection="storageUsageIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+        </if>
+        <if test="storageTasteIds != null and storageTasteIds.size() &gt; 0">
+            AND sa.taste_id IN
+            <foreach collection="storageTasteIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+        </if>
+        )
+    </sql>
+
+    <sql id="BaseProductWhere">
+        p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+        <if test="saleStartFrom != null">
+            AND p.sale_start_at &gt;= #{saleStartFrom}
+        </if>
+        <if test="categoryId != null and categoryId != ''">
+            AND p.category_id = #{categoryId}
+        </if>
+        <if test="keywordLike != null and keywordLike != ''">
+            AND (
+            p.product_name ILIKE #{keywordLike}
+            OR EXISTS (
+            SELECT 1
+            FROM product_variants pvk
+            WHERE pvk.product_id = p.product_id
+            AND pvk.product_code ILIKE #{keywordLike}
+            )
+            )
+        </if>
+        <if test="hasVariantFilter">
+            AND EXISTS (
+            SELECT 1
+            FROM product_variants pvf
+            WHERE pvf.product_id = p.product_id
+            <include refid="VariantFilterPvf"/>
+            )
+        </if>
+        <if test="hasDeskFilter">
+            <include refid="DeskAttributeFilter"/>
+        </if>
+        <if test="hasChairFilter">
+            <include refid="ChairAttributeFilter"/>
+        </if>
+        <if test="hasStorageFilter">
+            <include refid="StorageAttributeFilter"/>
+        </if>
+    </sql>
+
+    <select id="countProducts" parameterType="map" resultType="long">
+        SELECT COUNT(*)
+        FROM products p
+        WHERE
+        <include refid="BaseProductWhere"/>
+    </select>
+
+    <select id="selectProducts" parameterType="map" resultMap="ProductListRowMap">
+        SELECT
+        p.product_id,
+        p.product_name,
+        MIN(pv.unit_price) AS min_price,
+        MAX(pv.stock_quantity) AS max_stock,
+        MIN(pv.product_code) AS product_code
+        FROM products p
+        JOIN product_variants pv ON pv.product_id = p.product_id
+        WHERE
+        <include refid="BaseProductWhere"/>
+        <include refid="VariantFilterPv"/>
+        GROUP BY p.product_id, p.product_name
+        ORDER BY
+        <choose>
+            <when test="sort == 'price_asc'">
+                MIN(pv.unit_price) ASC, p.product_id ASC
+            </when>
+            <when test="sort == 'price_desc'">
+                MIN(pv.unit_price) DESC, p.product_id ASC
+            </when>
+            <when test="sort == 'newest'">
+                MAX(p.sale_start_at) DESC, p.product_id ASC
+            </when>
+            <otherwise>
+                p.product_id ASC
+            </otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="selectProductsByIds" resultMap="ProductListRowMap">
+        SELECT
+        p.product_id,
+        p.product_name,
+        MIN(pv.unit_price) AS min_price,
+        MAX(pv.stock_quantity) AS max_stock,
+        MIN(pv.product_code) AS product_code
+        FROM products p
+        JOIN product_variants pv ON pv.product_id = p.product_id
+        WHERE p.product_id IN
+        <foreach collection="productIds" item="productId" open="(" close=")" separator=",">
+            #{productId}
+        </foreach>
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+        GROUP BY p.product_id, p.product_name
+    </select>
+
+    <select id="selectColorCodes" resultMap="ProductColorCodeRowMap">
+        SELECT
+        pv.product_id,
+        c.color_code,
+        c.sort_order
+        FROM product_variants pv
+        JOIN colors c ON c.color_id = pv.color_id
+        WHERE pv.product_id IN
+        <foreach collection="productIds" item="productId" open="(" close=")" separator=",">
+            #{productId}
+        </foreach>
+        ORDER BY pv.product_id ASC, c.sort_order ASC
+    </select>
+
+    <select id="selectTopRankedProducts" resultMap="ProductRankedRowMap">
+        SELECT
+        r.rank,
+        p.product_id,
+        p.product_name,
+        MIN(pv.unit_price) AS min_price,
+        MAX(pv.stock_quantity) AS max_stock,
+        MIN(pv.product_code) AS product_code
+        FROM popular_product_rankings r
+        JOIN products p ON p.product_id = r.product_id
+        JOIN product_variants pv ON pv.product_id = p.product_id
+        WHERE r.ranking_date = (SELECT MAX(ranking_date) FROM popular_product_rankings)
+        GROUP BY r.rank, p.product_id, p.product_name
+        ORDER BY r.rank ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectProductDetail" resultMap="ProductDetailRowMap">
+        SELECT
+        p.product_id,
+        p.product_name,
+        p.description,
+        p.category_id,
+        p.assembly_available,
+        p.assembly_fee,
+        p.has_variation,
+        p.variation_group_id,
+        p.variation_name
+        FROM products p
+        WHERE p.product_id = #{productId}
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+    </select>
+
+    <select id="selectProductVariants" resultMap="ProductVariantRowMap">
+        SELECT
+        pv.product_variant_id,
+        pv.product_code,
+        pv.color_id,
+        c.color_name,
+        c.color_code,
+        pv.unit_price,
+        pv.stock_quantity
+        FROM product_variants pv
+        JOIN colors c ON c.color_id = pv.color_id
+        WHERE pv.product_id = #{productId}
+        ORDER BY c.sort_order ASC, pv.product_variant_id ASC
+    </select>
+
+    <select id="selectSeriesLinks" resultMap="ProductSeriesLinkRowMap">
+        SELECT
+        p.product_id,
+        p.product_name
+        FROM products p
+        WHERE p.variation_group_id = #{variationGroupId}
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+        ORDER BY p.product_id ASC
+    </select>
+
+    <select id="selectRecommendedProducts" resultMap="ProductRankedRowMap">
+        SELECT
+        r.rank,
+        p.product_id,
+        p.product_name,
+        MIN(pv.unit_price) AS min_price,
+        MAX(pv.stock_quantity) AS max_stock,
+        MIN(pv.product_code) AS product_code
+        FROM recommended_related_products r
+        JOIN products p ON p.product_id = r.recommended_product_id
+        JOIN product_variants pv ON pv.product_id = p.product_id
+        WHERE r.source_product_id = #{sourceProductId}
+        AND r.recommendation_date = (SELECT MAX(recommendation_date) FROM recommended_related_products)
+        GROUP BY r.rank, p.product_id, p.product_name
+        ORDER BY r.rank ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectActiveColorFilterOptions" resultMap="ProductFilterColorOptionRowMap">
+        SELECT
+        color_id,
+        color_name,
+        color_code,
+        swatch_type
+        FROM colors
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, color_id ASC
+    </select>
+
+    <select id="selectActiveDeskTopShapeOptions" resultMap="ProductFilterOptionRowMap">
+        SELECT
+        top_shape_id AS option_id,
+        display_name
+        FROM desk_top_shapes
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, top_shape_id ASC
+    </select>
+
+    <select id="selectActiveDeskTasteOptions" resultMap="ProductFilterOptionRowMap">
+        SELECT
+        taste_id AS option_id,
+        display_name
+        FROM desk_tastes
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, taste_id ASC
+    </select>
+
+    <select id="selectActiveChairFunctionOptions" resultMap="ProductFilterOptionRowMap">
+        SELECT
+        function_id AS option_id,
+        display_name
+        FROM chair_functions
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, function_id ASC
+    </select>
+
+    <select id="selectActiveChairMaterialOptions" resultMap="ProductFilterOptionRowMap">
+        SELECT
+        material_id AS option_id,
+        display_name
+        FROM chair_materials
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, material_id ASC
+    </select>
+
+    <select id="selectActiveChairTasteOptions" resultMap="ProductFilterOptionRowMap">
+        SELECT
+        taste_id AS option_id,
+        display_name
+        FROM chair_tastes
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, taste_id ASC
+    </select>
+
+    <select id="selectActiveStorageUsageOptions" resultMap="ProductFilterOptionRowMap">
+        SELECT
+        usage_id AS option_id,
+        display_name
+        FROM storage_usages
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, usage_id ASC
+    </select>
+
+    <select id="selectActiveStorageTasteOptions" resultMap="ProductFilterOptionRowMap">
+        SELECT
+        taste_id AS option_id,
+        display_name
+        FROM storage_tastes
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, taste_id ASC
+    </select>
+
+    <select id="selectCurrentTaxRatePercent" resultType="java.math.BigDecimal">
+        SELECT tax_rate_percent
+        FROM tax_rates
+        WHERE is_active = TRUE
+        AND effective_start_at &lt;= #{now}
+        AND (effective_end_at IS NULL OR effective_end_at &gt; #{now})
+        ORDER BY effective_start_at DESC
+        LIMIT 1
+    </select>
+
+</mapper>
+
+
+

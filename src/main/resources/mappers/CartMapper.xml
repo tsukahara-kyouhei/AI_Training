@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.CartMapper">
+
+    <resultMap id="CartProductSnapshotMap" type="jp.co.skig.officeorder.model.cart.CartProductSnapshot">
+        <constructor>
+            <idArg column="product_variant_id" javaType="long"/>
+            <arg column="product_id" javaType="long"/>
+            <arg column="product_name" javaType="string"/>
+            <arg column="product_code" javaType="string"/>
+            <arg column="color_name" javaType="string"/>
+            <arg column="unit_price" javaType="java.math.BigDecimal"/>
+            <arg column="stock_quantity" javaType="int"/>
+            <arg column="assembly_available" javaType="boolean"/>
+            <arg column="assembly_fee" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <select id="selectCartProductSnapshots" resultMap="CartProductSnapshotMap">
+        SELECT
+        pv.product_variant_id,
+        p.product_id,
+        p.product_name,
+        pv.product_code,
+        c.color_name,
+        pv.unit_price,
+        pv.stock_quantity,
+        p.assembly_available,
+        p.assembly_fee
+        FROM product_variants pv
+        JOIN products p ON p.product_id = pv.product_id
+        JOIN colors c ON c.color_id = pv.color_id
+        WHERE pv.product_variant_id IN
+        <foreach collection="productVariantIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+    </select>
+
+    <select id="selectCurrentTaxRatePercent" resultType="java.math.BigDecimal">
+        SELECT tax_rate_percent
+        FROM tax_rates
+        WHERE is_active = TRUE
+        AND effective_start_at &lt;= #{now}
+        AND (effective_end_at IS NULL OR effective_end_at &gt; #{now})
+        ORDER BY effective_start_at DESC
+        LIMIT 1
+    </select>
+</mapper>
+
+

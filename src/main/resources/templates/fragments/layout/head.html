@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title, pageCss)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">OFFICE ORDER</title>
+    <link rel="icon"
+          type="image/x-icon"
+          th:href="@{/favicon.ico(v=${@assetVersion.version('/favicon.ico')})}"
+          href="/favicon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet"
+          th:href="@{/css/base.css(v=${@assetVersion.version('/css/base.css')})}"
+          href="/css/base.css">
+    <link rel="stylesheet"
+          th:href="@{/css/layout.css(v=${@assetVersion.version('/css/layout.css')})}"
+          href="/css/layout.css">
+    <link rel="stylesheet"
+          th:href="@{/css/components.css(v=${@assetVersion.version('/css/components.css')})}"
+          href="/css/components.css">
+    <link rel="stylesheet"
+          th:if="${pageCss == 'top'}"
+          th:href="@{/css/pages/top.css(v=${@assetVersion.version('/css/pages/top.css')})}"
+          href="/css/pages/top.css">
+    <link rel="stylesheet"
+          th:if="${pageCss == 'product'}"
+          th:href="@{/css/pages/product.css(v=${@assetVersion.version('/css/pages/product.css')})}"
+          href="/css/pages/product.css">
+    <link rel="stylesheet"
+          th:if="${pageCss == 'commerce'}"
+          th:href="@{/css/pages/commerce.css(v=${@assetVersion.version('/css/pages/commerce.css')})}"
+          href="/css/pages/commerce.css">
+    <link rel="stylesheet"
+          th:if="${pageCss == 'account'}"
+          th:href="@{/css/pages/account.css(v=${@assetVersion.version('/css/pages/account.css')})}"
+          href="/css/pages/account.css">
+    <link rel="stylesheet"
+          th:if="${pageCss == 'error'}"
+          th:href="@{/css/pages/error.css(v=${@assetVersion.version('/css/pages/error.css')})}"
+          href="/css/pages/error.css">
+</head>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout/head :: head('OFFICE ORDERについて | OFFICE ORDER', '')}"></head>
+<body>
+<div class="page">
+    <div th:replace="~{fragments/layout/header :: header}"></div>
+    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+
+    <main class="main">
+        <div class="container">
+            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > OFFICE ORDERについて')}"></div>
+            <h1 class="page-title">OFFICE ORDERについて</h1>
+
+            <div class="card" style="margin-bottom:14px;">
+                <div class="card__pad" style="line-height:1.9;">
+                    <p style="margin:0;">
+                        OFFICE ORDER は、働く空間を「成果が出る場」にすることを目指すオフィス家具専門ECサイトです。
+                        デスク・チェア・収納家具を中心に、企業の移転、増員、レイアウト変更、在宅ワーク環境整備まで、
+                        必要な時に必要な数量を、わかりやすく選んで導入できる体験を提供します。
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid--2">
+                <div class="card">
+                    <div class="card__pad" style="line-height:1.8;">
+                        <h2 class="section__title" style="margin:0 0 10px;">商品のこだわり</h2>
+                        <ul style="margin:0; padding-left:18px;">
+                            <li>耐久性、使い勝手、メンテナンス性を重視したラインナップを採用</li>
+                            <li>サイズ・カラー・価格・在庫を発注単位で明確に表示</li>
+                            <li>オフィス利用を前提とした実用的な仕様情報を優先掲載</li>
+                            <li>シリーズ比較しやすい一覧設計で選定時間を短縮</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card__pad" style="line-height:1.8;">
+                        <h2 class="section__title" style="margin:0 0 10px;">サービスのこだわり</h2>
+                        <ul style="margin:0; padding-left:18px;">
+                            <li>カテゴリ別・条件別の絞り込みで商品を素早く探索</li>
+                            <li>会員機能により再購入、履歴確認、お気に入り管理を効率化</li>
+                            <li>組立・設置対応商品の費用を明細単位で可視化</li>
+                            <li>注文情報は受注システム連携を前提に正確に保存</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div class="section__head">
+                    <h2 class="section__title">ブランドの歴史</h2>
+                </div>
+                <div class="card">
+                    <div class="card__pad" style="line-height:1.9;">
+                        <p style="margin:0 0 8px;"><strong>2012年</strong> 法人向けオフィス家具販売事業として創業。</p>
+                        <p style="margin:0 0 8px;"><strong>2016年</strong> 自社物流ネットワークと施工パートナー連携を整備。</p>
+                        <p style="margin:0 0 8px;"><strong>2020年</strong> リモートワーク需要拡大に合わせて個人向け販売を開始。</p>
+                        <p style="margin:0;"><strong>2026年</strong> OFFICE ORDER を刷新し、検索性と再購入体験を強化。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section__head">
+                    <h2 class="section__title">会社概要</h2>
+                </div>
+                <div class="card">
+                    <div class="card__pad">
+                        <table class="table" aria-label="会社概要">
+                            <tbody>
+                            <tr><th style="width:220px;">会社名</th><td>株式会社OFFICE ORDER</td></tr>
+                            <tr><th>設立</th><td>2012年4月</td></tr>
+                            <tr><th>事業内容</th><td>オフィス家具の企画・販売、空間提案、配送・組立手配</td></tr>
+                            <tr><th>所在地</th><td>東京都千代田区丸の内1-1-1</td></tr>
+                            <tr><th>お問い合わせ</th><td>support@example.com</td></tr>
+                            <tr><th>営業時間</th><td>平日 9:30 - 18:00（土日祝除く）</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/layout/footer :: footer}"></div>
+</div>
+<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+</body>
+</html>

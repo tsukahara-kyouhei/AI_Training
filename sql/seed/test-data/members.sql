@@ -1,0 +1,104 @@
+INSERT INTO members (
+    personal_or_corporate,
+    last_name,
+    first_name,
+    last_name_kana,
+    first_name_kana,
+    company_name,
+    department_name,
+    email,
+    gender,
+    anniversary_date,
+    password_hash,
+    newsletter_opt_in,
+    postal_code,
+    prefecture,
+    city,
+    address_line,
+    delivery_floor,
+    has_elevator,
+    daytime_phone,
+    fax,
+    member_status,
+    withdrawn_at,
+    created_at,
+    updated_at
+)
+VALUES
+    ('personal', '山田', '太郎', 'ヤマダ', 'タロウ', NULL, NULL, 'member01@example.com', 'male', '1990-05-10', '$2a$10$ZHMbOm.9tLsk0AYvRD8l8.gfyRV/FJky6uq/rhuh468nusArsla16', TRUE, '1000001', '東京都', '千代田区', '丸の内1-1-1', 5, TRUE, '0311111111', NULL, 'active', NULL, NOW(), NOW()),
+    ('personal', '鈴木', '花子', 'スズキ', 'ハナコ', NULL, NULL, 'member02@example.com', 'female', '1992-08-20', '$2a$10$ZHMbOm.9tLsk0AYvRD8l8.gfyRV/FJky6uq/rhuh468nusArsla16', TRUE, '1500001', '東京都', '渋谷区', '神宮前2-2-2', 3, TRUE, '0366666666', NULL, 'active', NULL, NOW(), NOW()),
+    ('personal', '佐藤', '健', 'サトウ', 'ケン', NULL, NULL, 'member03@example.com', 'male', '1988-12-03', '$2a$10$ZHMbOm.9tLsk0AYvRD8l8.gfyRV/FJky6uq/rhuh468nusArsla16', FALSE, '5300001', '大阪府', '大阪市北区', '梅田3-3-3', 2, FALSE, '0666666666', NULL, 'active', NULL, NOW(), NOW()),
+    ('corporate', '高橋', '亮', 'タカハシ', 'リョウ', '株式会社アルファ', '総務部', 'member04@example.com', 'no_answer', '2010-04-01', '$2a$10$ZHMbOm.9tLsk0AYvRD8l8.gfyRV/FJky6uq/rhuh468nusArsla16', TRUE, '2200001', '神奈川県', '横浜市西区', 'みなとみらい4-4-4', 10, TRUE, '0457777777', '0457777700', 'active', NULL, NOW(), NOW()),
+    ('corporate', '伊藤', '彩', 'イトウ', 'アヤ', '株式会社ベータ', '購買課', 'member05@example.com', 'female', '2012-07-15', '$2a$10$ZHMbOm.9tLsk0AYvRD8l8.gfyRV/FJky6uq/rhuh468nusArsla16', FALSE, '4600001', '愛知県', '名古屋市中区', '栄5-5-5', 8, TRUE, '0528888888', NULL, 'active', NULL, NOW(), NOW()),
+    ('corporate', '渡辺', '誠', 'ワタナベ', 'マコト', '合同会社ガンマ', '管理部', 'member06@example.com', 'male', '2015-09-01', '$2a$10$ZHMbOm.9tLsk0AYvRD8l8.gfyRV/FJky6uq/rhuh468nusArsla16', TRUE, '5500001', '大阪府', '大阪市西区', '西本町1-1-1', 7, TRUE, '0662222222', NULL, 'active', NULL, NOW(), NOW()),
+    ('personal', '退会', '会員', 'タイカイ', 'カイイン', NULL, NULL, 'member07@example.com', 'no_answer', '1985-01-01', '$2a$10$ZHMbOm.9tLsk0AYvRD8l8.gfyRV/FJky6uq/rhuh468nusArsla16', FALSE, '1010001', '東京都', '千代田区', '神田1-1-1', 2, FALSE, '0312345678', NULL, 'withdrawn', NOW() - INTERVAL '30 days', NOW(), NOW());
+
+INSERT INTO member_additional_addresses (
+    member_id,
+    last_name,
+    first_name,
+    last_name_kana,
+    first_name_kana,
+    company_name,
+    department_name,
+    postal_code,
+    prefecture,
+    city,
+    address_line,
+    delivery_floor,
+    has_elevator,
+    daytime_phone,
+    fax,
+    created_at,
+    updated_at
+)
+SELECT
+    m.member_id,
+    v.last_name,
+    v.first_name,
+    v.last_name_kana,
+    v.first_name_kana,
+    v.company_name,
+    v.department_name,
+    v.postal_code,
+    v.prefecture,
+    v.city,
+    v.address_line,
+    v.delivery_floor,
+    v.has_elevator,
+    v.daytime_phone,
+    v.fax,
+    NOW(),
+    NOW()
+FROM members m
+JOIN (
+    VALUES
+      ('member01@example.com', '山田', '太郎', 'ヤマダ', 'タロウ', NULL, NULL, '1040031', '東京都', '中央区', '京橋1-2-3', 4, TRUE, '0333333333', NULL),
+      ('member01@example.com', '山田', '太郎', 'ヤマダ', 'タロウ', NULL, NULL, '1600022', '東京都', '新宿区', '新宿2-3-4', 6, TRUE, '0334444444', NULL),
+      ('member04@example.com', '高橋', '亮', 'タカハシ', 'リョウ', '株式会社アルファ', '総務部', '1050001', '東京都', '港区', '虎ノ門1-1-1', 12, TRUE, '0355555555', '0355555500'),
+      ('member05@example.com', '伊藤', '彩', 'イトウ', 'アヤ', '株式会社ベータ', '購買課', '5410001', '大阪府', '大阪市中央区', '北浜2-2-2', 9, FALSE, '0661111111', NULL),
+      ('member06@example.com', '渡辺', '誠', 'ワタナベ', 'マコト', '合同会社ガンマ', '管理部', '8120001', '福岡県', '福岡市博多区', '博多駅前3-3-3', 7, TRUE, '0922222222', NULL)
+) AS v(email, last_name, first_name, last_name_kana, first_name_kana, company_name, department_name, postal_code, prefecture, city, address_line, delivery_floor, has_elevator, daytime_phone, fax)
+  ON LOWER(m.email) = LOWER(v.email);
+
+INSERT INTO member_favorites (member_id, product_id, created_at, updated_at)
+SELECT
+    m.member_id,
+    p.product_id,
+    NOW() - (v.rank * INTERVAL '1 day'),
+    NOW() - (v.rank * INTERVAL '1 day')
+FROM (
+    VALUES
+      ('member01@example.com', 1),
+      ('member01@example.com', 2),
+      ('member01@example.com', 3),
+      ('member02@example.com', 2),
+      ('member02@example.com', 4),
+      ('member03@example.com', 5),
+      ('member04@example.com', 6),
+      ('member05@example.com', 7),
+      ('member06@example.com', 8),
+      ('member06@example.com', 9)
+) AS v(email, rank)
+JOIN members m ON LOWER(m.email) = LOWER(v.email)
+JOIN products p ON p.product_id = v.rank;

@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.MemberMapper">
+
+    <resultMap id="MemberCredentialMap" type="jp.co.skig.officeorder.model.member.MemberCredential">
+        <constructor>
+            <idArg column="member_id" javaType="long"/>
+            <arg column="email" javaType="string"/>
+            <arg column="last_name" javaType="string"/>
+            <arg column="first_name" javaType="string"/>
+            <arg column="password_hash" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberSessionUserMap" type="jp.co.skig.officeorder.model.member.MemberSessionUser">
+        <constructor>
+            <idArg column="member_id" javaType="long"/>
+            <arg column="email" javaType="string"/>
+            <arg column="last_name" javaType="string"/>
+            <arg column="first_name" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberAdditionalAddressViewMap" type="jp.co.skig.officeorder.model.member.MemberAdditionalAddressView">
+        <constructor>
+            <idArg column="member_address_id" javaType="long"/>
+            <arg column="member_id" javaType="long"/>
+            <arg column="last_name" javaType="string"/>
+            <arg column="first_name" javaType="string"/>
+            <arg column="last_name_kana" javaType="string"/>
+            <arg column="first_name_kana" javaType="string"/>
+            <arg column="company_name" javaType="string"/>
+            <arg column="department_name" javaType="string"/>
+            <arg column="postal_code" javaType="string"/>
+            <arg column="prefecture" javaType="string"/>
+            <arg column="city" javaType="string"/>
+            <arg column="address_line" javaType="string"/>
+            <arg column="delivery_floor" javaType="java.lang.Integer"/>
+            <arg column="has_elevator" javaType="boolean"/>
+            <arg column="daytime_phone" javaType="string"/>
+            <arg column="fax" javaType="string"/>
+            <arg column="created_at" javaType="java.time.OffsetDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberFavoriteProductRowMap" type="jp.co.skig.officeorder.mapper.row.MemberFavoriteProductMapperRow">
+        <constructor>
+            <idArg column="product_id" javaType="long"/>
+            <arg column="product_name" javaType="string"/>
+            <arg column="min_price" javaType="java.math.BigDecimal"/>
+            <arg column="max_stock" javaType="int"/>
+            <arg column="product_code" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberColorCodeRowMap" type="jp.co.skig.officeorder.mapper.row.MemberColorCodeMapperRow">
+        <constructor>
+            <idArg column="product_id" javaType="long"/>
+            <arg column="color_code" javaType="string"/>
+            <arg column="sort_order" javaType="int"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="MemberProfileEditRowMap" type="jp.co.skig.officeorder.mapper.row.MemberProfileEditMapperRow">
+        <constructor>
+            <arg column="personal_or_corporate" javaType="string"/>
+            <arg column="last_name" javaType="string"/>
+            <arg column="first_name" javaType="string"/>
+            <arg column="last_name_kana" javaType="string"/>
+            <arg column="first_name_kana" javaType="string"/>
+            <arg column="company_name" javaType="string"/>
+            <arg column="department_name" javaType="string"/>
+            <arg column="email" javaType="string"/>
+            <arg column="gender" javaType="string"/>
+            <arg column="anniversary_date" javaType="java.time.LocalDate"/>
+            <arg column="newsletter_opt_in" javaType="java.lang.Boolean"/>
+            <arg column="postal_code" javaType="string"/>
+            <arg column="prefecture" javaType="string"/>
+            <arg column="city" javaType="string"/>
+            <arg column="address_line" javaType="string"/>
+            <arg column="delivery_floor" javaType="java.lang.Integer"/>
+            <arg column="has_elevator" javaType="java.lang.Boolean"/>
+            <arg column="daytime_phone" javaType="string"/>
+            <arg column="fax" javaType="string"/>
+        </constructor>
+    </resultMap>
+
+    <select id="existsByEmail" resultType="boolean">
+        SELECT EXISTS(
+        SELECT 1
+        FROM members
+        WHERE LOWER(email) = LOWER(#{email})
+        )
+    </select>
+
+    <select id="existsByEmailForOtherMember" resultType="boolean">
+        SELECT EXISTS(
+        SELECT 1
+        FROM members
+        WHERE LOWER(email) = LOWER(#{email})
+        AND member_id &lt;&gt; #{memberId}
+        )
+    </select>
+
+    <select id="selectActiveCredentialByEmail" resultMap="MemberCredentialMap">
+        SELECT
+        member_id,
+        email,
+        last_name,
+        first_name,
+        password_hash
+        FROM members
+        WHERE LOWER(email) = LOWER(#{email})
+        AND member_status = 'active'
+    </select>
+
+    <select id="selectActiveById" resultMap="MemberSessionUserMap">
+        SELECT
+        member_id,
+        email,
+        last_name,
+        first_name
+        FROM members
+        WHERE member_id = #{memberId}
+        AND member_status = 'active'
+    </select>
+
+    <select id="selectProfileByMemberId" resultMap="MemberProfileEditRowMap">
+        SELECT
+        personal_or_corporate,
+        last_name,
+        first_name,
+        last_name_kana,
+        first_name_kana,
+        company_name,
+        department_name,
+        email,
+        gender,
+        anniversary_date,
+        newsletter_opt_in,
+        postal_code,
+        prefecture,
+        city,
+        address_line,
+        delivery_floor,
+        has_elevator,
+        daytime_phone,
+        fax
+        FROM members
+        WHERE member_id = #{memberId}
+        AND member_status = 'active'
+    </select>
+
+    <select id="insertMember" resultType="long">
+        INSERT INTO members (
+        personal_or_corporate,
+        last_name,
+        first_name,
+        last_name_kana,
+        first_name_kana,
+        company_name,
+        department_name,
+        email,
+        gender,
+        anniversary_date,
+        password_hash,
+        newsletter_opt_in,
+        postal_code,
+        prefecture,
+        city,
+        address_line,
+        delivery_floor,
+        has_elevator,
+        daytime_phone,
+        fax,
+        member_status,
+        withdrawn_at,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{form.personalOrCorporate},
+        #{form.lastName},
+        #{form.firstName},
+        #{form.lastNameKana},
+        #{form.firstNameKana},
+        #{form.companyName},
+        #{form.departmentName},
+        #{form.email},
+        #{form.gender},
+        #{form.anniversaryDate},
+        #{passwordHash},
+        #{form.newsletterOptIn},
+        #{form.postalCode},
+        #{form.prefecture},
+        #{form.city},
+        #{form.addressLine},
+        CAST(#{form.deliveryFloor} AS INTEGER),
+        #{form.hasElevator},
+        #{form.daytimePhone},
+        #{form.fax},
+        'active',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+        RETURNING member_id
+    </select>
+
+    <select id="selectMemberTypeById" resultType="string">
+        SELECT personal_or_corporate
+        FROM members
+        WHERE member_id = #{memberId}
+    </select>
+
+    <select id="countAdditionalAddresses" resultType="long">
+        SELECT COUNT(*)
+        FROM member_additional_addresses
+        WHERE member_id = #{memberId}
+    </select>
+
+    <select id="selectAdditionalAddresses" resultMap="MemberAdditionalAddressViewMap">
+        SELECT
+        member_address_id,
+        member_id,
+        last_name,
+        first_name,
+        last_name_kana,
+        first_name_kana,
+        company_name,
+        department_name,
+        postal_code,
+        prefecture,
+        city,
+        address_line,
+        delivery_floor,
+        has_elevator,
+        daytime_phone,
+        fax,
+        created_at
+        FROM member_additional_addresses
+        WHERE member_id = #{memberId}
+        ORDER BY created_at ASC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="selectAdditionalAddressById" resultMap="MemberAdditionalAddressViewMap">
+        SELECT
+        member_address_id,
+        member_id,
+        last_name,
+        first_name,
+        last_name_kana,
+        first_name_kana,
+        company_name,
+        department_name,
+        postal_code,
+        prefecture,
+        city,
+        address_line,
+        delivery_floor,
+        has_elevator,
+        daytime_phone,
+        fax,
+        created_at
+        FROM member_additional_addresses
+        WHERE member_id = #{memberId}
+        AND member_address_id = #{memberAddressId}
+    </select>
+
+    <insert id="insertAdditionalAddress">
+        INSERT INTO member_additional_addresses (
+        member_id,
+        last_name,
+        first_name,
+        last_name_kana,
+        first_name_kana,
+        company_name,
+        department_name,
+        postal_code,
+        prefecture,
+        city,
+        address_line,
+        delivery_floor,
+        has_elevator,
+        daytime_phone,
+        fax,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{memberId},
+        #{form.lastName},
+        #{form.firstName},
+        #{form.lastNameKana},
+        #{form.firstNameKana},
+        #{form.companyName},
+        #{form.departmentName},
+        #{form.postalCode},
+        #{form.prefecture},
+        #{form.city},
+        #{form.addressLine},
+        CAST(#{form.deliveryFloor} AS INTEGER),
+        #{form.hasElevator},
+        #{form.daytimePhone},
+        #{form.fax},
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateAdditionalAddress">
+        UPDATE member_additional_addresses
+        SET
+        last_name = #{form.lastName},
+        first_name = #{form.firstName},
+        last_name_kana = #{form.lastNameKana},
+        first_name_kana = #{form.firstNameKana},
+        company_name = #{form.companyName},
+        department_name = #{form.departmentName},
+        postal_code = #{form.postalCode},
+        prefecture = #{form.prefecture},
+        city = #{form.city},
+        address_line = #{form.addressLine},
+        delivery_floor = CAST(#{form.deliveryFloor} AS INTEGER),
+        has_elevator = #{form.hasElevator},
+        daytime_phone = #{form.daytimePhone},
+        fax = #{form.fax},
+        updated_at = CURRENT_TIMESTAMP
+        WHERE member_id = #{memberId}
+        AND member_address_id = #{memberAddressId}
+    </update>
+
+    <delete id="deleteAdditionalAddress">
+        DELETE FROM member_additional_addresses
+        WHERE member_id = #{memberId}
+        AND member_address_id = #{memberAddressId}
+    </delete>
+
+    <select id="countFavorites" resultType="long">
+        SELECT COUNT(*)
+        FROM member_favorites mf
+        JOIN products p ON p.product_id = mf.product_id
+        WHERE mf.member_id = #{memberId}
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+    </select>
+
+    <select id="selectFavorites" resultMap="MemberFavoriteProductRowMap">
+        SELECT
+        mf.product_id,
+        p.product_name,
+        MIN(pv.unit_price) AS min_price,
+        MAX(pv.stock_quantity) AS max_stock,
+        MIN(pv.product_code) AS product_code,
+        mf.created_at
+        FROM member_favorites mf
+        JOIN products p ON p.product_id = mf.product_id
+        JOIN product_variants pv ON pv.product_id = p.product_id
+        WHERE mf.member_id = #{memberId}
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+        GROUP BY mf.product_id, p.product_name, mf.created_at
+        ORDER BY mf.created_at DESC, mf.product_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="selectFavoriteColorCodes" resultMap="MemberColorCodeRowMap">
+        SELECT DISTINCT
+        pv.product_id,
+        c.color_code,
+        c.sort_order
+        FROM product_variants pv
+        JOIN colors c ON c.color_id = pv.color_id
+        WHERE pv.product_id IN
+        <foreach collection="productIds" item="productId" open="(" close=")" separator=",">
+            #{productId}
+        </foreach>
+        ORDER BY pv.product_id ASC, c.sort_order ASC
+    </select>
+
+    <select id="existsFavorite" resultType="boolean">
+        SELECT EXISTS(
+        SELECT 1
+        FROM member_favorites
+        WHERE member_id = #{memberId}
+        AND product_id = #{productId}
+        )
+    </select>
+
+    <insert id="insertFavorite">
+        INSERT INTO member_favorites (
+        member_id,
+        product_id,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{memberId},
+        #{productId},
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <delete id="deleteFavorite">
+        DELETE FROM member_favorites
+        WHERE member_id = #{memberId}
+        AND product_id = #{productId}
+    </delete>
+
+    <update id="updateProfile">
+        UPDATE members
+        SET
+        personal_or_corporate = #{form.personalOrCorporate},
+        last_name = #{form.lastName},
+        first_name = #{form.firstName},
+        last_name_kana = #{form.lastNameKana},
+        first_name_kana = #{form.firstNameKana},
+        company_name = #{form.companyName},
+        department_name = #{form.departmentName},
+        email = #{form.email},
+        gender = #{form.gender},
+        anniversary_date = #{form.anniversaryDate},
+        newsletter_opt_in = #{form.newsletterOptIn},
+        postal_code = #{form.postalCode},
+        prefecture = #{form.prefecture},
+        city = #{form.city},
+        address_line = #{form.addressLine},
+        delivery_floor = CAST(#{form.deliveryFloor} AS INTEGER),
+        has_elevator = #{form.hasElevator},
+        daytime_phone = #{form.daytimePhone},
+        fax = #{form.fax},
+        updated_at = CURRENT_TIMESTAMP
+        WHERE member_id = #{memberId}
+        AND member_status = 'active'
+    </update>
+
+    <update id="withdrawMember">
+        UPDATE members
+        SET
+        member_status = 'withdrawn',
+        withdrawn_at = #{now},
+        updated_at = CURRENT_TIMESTAMP
+        WHERE member_id = #{memberId}
+        AND member_status = 'active'
+    </update>
+
+</mapper>
+
+
+

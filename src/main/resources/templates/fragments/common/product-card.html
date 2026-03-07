@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<body>
+<a class="card" th:fragment="productCard(name, price, href)" th:href="${href}" href="/products/1" style="display:block;">
+    <div class="ph-img" aria-hidden="true"></div>
+    <div class="card__pad">
+        <p class="product-name" th:text="${name}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
+        <p class="product-price"><span class="price" th:text="${price}">12,800</span>円（税込）</p>
+        <div class="chips" aria-label="カラーラインナップ">
+            <span class="chip" style="background:#FFFFFF"></span>
+            <span class="chip" style="background:#000000"></span>
+            <span class="chip" style="background:#808080"></span>
+            <span class="chip" style="background:#D2B48C"></span>
+            <span class="chip" style="background:#8B4513"></span>
+        </div>
+    </div>
+</a>
+
+<a class="card"
+   th:fragment="productCardByView(product)"
+   th:href="${product != null ? product.detailUrl : '#'}"
+   href="/products/1"
+   style="display:block;">
+    <img class="product-card__image"
+         th:if="${product != null and product.productCode != null}"
+         th:src="@{|/images/products/${product.productCode}.png|}"
+         th:alt="${product.productName}"
+         loading="lazy">
+    <div class="ph-img" th:if="${product == null or product.productCode == null}" aria-hidden="true"></div>
+    <div class="card__pad">
+        <p class="product-name" th:text="${product != null ? product.productName : '商品名未設定'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
+        <p class="product-price"><span class="price" th:text="${product != null ? product.priceText : '0'}">12,800</span>円（税込）</p>
+        <div class="chips" aria-label="カラーラインナップ">
+            <span class="chip"
+                  th:each="colorCode : ${product != null ? product.colorCodes : T(java.util.List).of()}"
+                  th:style="'background:' + ${colorCode}"></span>
+        </div>
+    </div>
+</a>
+
+<a class="card product-card product-card--ranked" th:fragment="rankedProductCard(name, price, href, rank)" th:href="${href}" href="/products/1" style="display:block;">
+    <span class="rank-badge" th:text="'#' + ${rank}">#1</span>
+    <div class="ph-img" aria-hidden="true"></div>
+    <div class="card__pad">
+        <p class="product-name" th:text="${name}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
+        <p class="product-price"><span class="price" th:text="${price}">12,800</span>円（税込）</p>
+        <div class="chips" aria-label="カラーラインナップ">
+            <span class="chip" style="background:#FFFFFF"></span>
+            <span class="chip" style="background:#000000"></span>
+            <span class="chip" style="background:#808080"></span>
+            <span class="chip" style="background:#D2B48C"></span>
+            <span class="chip" style="background:#8B4513"></span>
+        </div>
+    </div>
+</a>
+
+<a class="card product-card product-card--ranked"
+   th:fragment="rankedProductCardByView(item)"
+   th:href="${item != null and item.product != null ? item.product.detailUrl : '#'}"
+   href="/products/1"
+   style="display:block;">
+    <span class="rank-badge" th:text="${item != null ? ('#' + item.rank) : '#-'}">#1</span>
+    <img class="product-card__image"
+         th:if="${item != null and item.product != null and item.product.productCode != null}"
+         th:src="@{|/images/products/${item.product.productCode}.png|}"
+         th:alt="${item.product.productName}"
+         loading="lazy">
+    <div class="ph-img" th:if="${item == null or item.product == null or item.product.productCode == null}" aria-hidden="true"></div>
+    <div class="card__pad">
+        <p class="product-name" th:text="${item != null and item.product != null ? item.product.productName : '商品名未設定'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
+        <p class="product-price"><span class="price" th:text="${item != null and item.product != null ? item.product.priceText : '0'}">12,800</span>円（税込）</p>
+        <div class="chips" aria-label="カラーラインナップ">
+            <span class="chip"
+                  th:each="colorCode : ${item != null and item.product != null ? item.product.colorCodes : T(java.util.List).of()}"
+                  th:style="'background:' + ${colorCode}"></span>
+        </div>
+    </div>
+</a>
+</body>
+</html>

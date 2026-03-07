@@ -1,0 +1,26 @@
+{customer_last_name} {customer_first_name} 様
+
+このたびはOFFICE ORDERをご利用いただきありがとうございます。
+以下の内容でご注文を受け付けました。
+
+注文番号: {order_number}
+注文日時: {order_datetime}
+
+■お届け情報
+氏名: {shipping_name}
+住所: 〒{shipping_postal_code} {shipping_prefecture}{shipping_city}{shipping_address_line}
+階数: {shipping_floor}
+エレベーター: {shipping_has_elevator}
+電話番号: {daytime_phone}
+
+■ご注文内容
+{order_items_lines}
+
+商品小計: {subtotal_amount}円
+組立・設置費: {assembly_fee_total}円
+送料: {shipping_fee}円
+消費税: {tax_amount}円
+合計: {total_amount}円（税込）
+
+お問い合わせ先:
+{contact_email}

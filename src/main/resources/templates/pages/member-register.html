@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout/head :: head('会員登録 | OFFICE ORDER', '')}"></head>
+<body>
+<div class="page">
+    <div th:replace="~{fragments/layout/header :: header}"></div>
+    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+
+    <main class="main">
+        <div class="container">
+            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > 会員登録')}"></div>
+            <h1 class="page-title">会員登録</h1>
+
+            <div class="card">
+                <div class="card__pad">
+                    <form class="form" aria-label="会員登録フォーム" th:action="@{/members/register/confirm}" th:object="${registerForm}" method="post">
+                        <div class="field">
+                            <label>個人/法人 <span class="req">必須</span></label>
+                            <div class="kvs">
+                                <label class="kv"><input type="radio" th:field="*{personalOrCorporate}" value="personal"> 個人</label>
+                                <label class="kv"><input type="radio" th:field="*{personalOrCorporate}" value="corporate"> 法人</label>
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('personalOrCorporate')}" th:errors="*{personalOrCorporate}"></div>
+                        </div>
+                        <div class="field">
+                            <label>お名前 <span class="req">必須</span></label>
+                            <div class="field__row">
+                                <input type="text" th:field="*{lastName}" placeholder="姓">
+                                <input type="text" th:field="*{firstName}" placeholder="名">
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                            <div class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                        </div>
+                        <div class="field">
+                            <label>お名前（ヨミガナ） <span class="req">必須</span></label>
+                            <div class="field__row">
+                                <input type="text" th:field="*{lastNameKana}" placeholder="セイ（全角カタカナ）">
+                                <input type="text" th:field="*{firstNameKana}" placeholder="メイ（全角カタカナ）">
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('lastNameKana')}" th:errors="*{lastNameKana}"></div>
+                            <div class="error" th:if="${#fields.hasErrors('firstNameKana')}" th:errors="*{firstNameKana}"></div>
+                        </div>
+                        <div class="field">
+                            <label>会社名</label>
+                            <input type="text" th:field="*{companyName}" placeholder="法人の場合必須">
+                            <div class="error" th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}"></div>
+                        </div>
+                        <div class="field">
+                            <label>部署名</label>
+                            <input type="text" th:field="*{departmentName}" placeholder="任意">
+                            <div class="error" th:if="${#fields.hasErrors('departmentName')}" th:errors="*{departmentName}"></div>
+                        </div>
+                        <div class="field">
+                            <label>メールアドレス <span class="req">必須</span></label>
+                            <input type="email" th:field="*{email}" placeholder="example@example.com">
+                            <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                        <div class="field">
+                            <label>性別 <span class="req">必須</span></label>
+                            <div class="kvs">
+                                <label class="kv"><input type="radio" th:field="*{gender}" value="male"> 男性</label>
+                                <label class="kv"><input type="radio" th:field="*{gender}" value="female"> 女性</label>
+                                <label class="kv"><input type="radio" th:field="*{gender}" value="no_answer"> 無回答</label>
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+                        </div>
+                        <div class="field">
+                            <label>生年月日/記念日 <span class="req">必須</span></label>
+                            <input type="date" th:field="*{anniversaryDate}">
+                            <div class="error" th:if="${#fields.hasErrors('anniversaryDate')}" th:errors="*{anniversaryDate}"></div>
+                        </div>
+                        <div class="field">
+                            <label>パスワード <span class="req">必須</span></label>
+                            <input type="password" th:field="*{password}" placeholder="半角英数字記号8〜64文字">
+                            <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                        </div>
+                        <div class="field">
+                            <label>メールマガジンの送付希望 <span class="req">必須</span></label>
+                            <div class="kvs">
+                                <label class="kv"><input type="radio" th:field="*{newsletterOptIn}" value="true"> 希望する</label>
+                                <label class="kv"><input type="radio" th:field="*{newsletterOptIn}" value="false"> 希望しない</label>
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('newsletterOptIn')}" th:errors="*{newsletterOptIn}"></div>
+                        </div>
+
+                        <hr style="border:none; border-top:1px solid var(--border); margin:12px 0;">
+                        <div class="field">
+                            <label>郵便番号 <span class="req">必須</span></label>
+                            <div class="field__row--zip">
+                                <input class="input--zip3 input--fit" type="text" th:field="*{postalCodePart1}" inputmode="numeric" maxlength="3" placeholder="123">
+                                <span class="zip-sep">-</span>
+                                <input class="input--zip4 input--fit" type="text" th:field="*{postalCodePart2}" inputmode="numeric" maxlength="4" placeholder="4567">
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('postalCodePart1')}" th:errors="*{postalCodePart1}"></div>
+                            <div class="error" th:if="${#fields.hasErrors('postalCodePart2')}" th:errors="*{postalCodePart2}"></div>
+                        </div>
+                        <div class="field">
+                            <label>住所（都道府県） <span class="req">必須</span></label>
+                            <input type="text" th:field="*{prefecture}" placeholder="例: 東京都">
+                            <div class="error" th:if="${#fields.hasErrors('prefecture')}" th:errors="*{prefecture}"></div>
+                        </div>
+                        <div class="field">
+                            <label>住所（市区町村名） <span class="req">必須</span></label>
+                            <input type="text" th:field="*{city}" placeholder="例: 千代田区">
+                            <div class="error" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></div>
+                        </div>
+                        <div class="field">
+                            <label>住所（番地・ビル名） <span class="req">必須</span></label>
+                            <input type="text" th:field="*{addressLine}" placeholder="例: 丸の内1-1-1 ○○ビル 5F">
+                            <div class="error" th:if="${#fields.hasErrors('addressLine')}" th:errors="*{addressLine}"></div>
+                        </div>
+                        <div class="field">
+                            <label>お届け先階数 <span class="req">必須</span></label>
+                            <div class="field__inline">
+                                <input class="input--floor input--fit" type="text" th:field="*{deliveryFloor}" inputmode="numeric" pattern="[0-9]*">
+                                <span>階</span>
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('deliveryFloor')}" th:errors="*{deliveryFloor}"></div>
+                        </div>
+                        <div class="field">
+                            <label>エレベーターの有無 <span class="req">必須</span></label>
+                            <div class="kvs">
+                                <label class="kv"><input type="radio" th:field="*{hasElevator}" value="true"> あり</label>
+                                <label class="kv"><input type="radio" th:field="*{hasElevator}" value="false"> なし</label>
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('hasElevator')}" th:errors="*{hasElevator}"></div>
+                        </div>
+                        <div class="field">
+                            <label>日中連絡可能な電話番号 <span class="req">必須</span></label>
+                            <input type="text" th:field="*{daytimePhone}" inputmode="numeric" placeholder="ハイフンなし（数字10〜12桁）">
+                            <div class="error" th:if="${#fields.hasErrors('daytimePhone')}" th:errors="*{daytimePhone}"></div>
+                        </div>
+                        <div class="field">
+                            <label>FAX</label>
+                            <input type="text" th:field="*{fax}" inputmode="numeric" placeholder="任意（数字10〜12桁）">
+                            <div class="error" th:if="${#fields.hasErrors('fax')}" th:errors="*{fax}"></div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn btn--cart-action" type="submit">入力内容の確認に進む</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/layout/footer :: footer}"></div>
+</div>
+<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="footer">
+    <section class="section footer-recent" aria-label="最近見た商品">
+        <div class="container">
+            <div class="section__head">
+                <h2 class="section__title">最近見た商品</h2>
+            </div>
+            <div class="grid grid--4" data-recently-viewed-grid></div>
+            <div class="card" data-recently-viewed-empty>
+                <div class="card__pad">
+                    <p class="muted" style="margin:0;">最近見た商品はありません。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer__inner">
+            <div>
+                <p class="footer__title">OFFICE ORDER</p>
+                <p class="muted" style="margin:0; line-height:1.6;">
+                    オフィス家具の比較・検討・ご購入を、サポート。<br>
+                    ご不明点はお問い合わせフォームからご連絡ください。
+                </p>
+            </div>
+            <div class="footer__links" aria-label="固定ページ">
+                <a href="/about">OFFICE ORDERについて</a>
+                <a href="/guide">ご利用ガイド</a>
+                <a href="/contact">お問い合わせ</a>
+            </div>
+            <div class="footer__links" aria-label="法務">
+                <a href="/legal/terms">利用規約</a>
+                <a href="/legal/privacy">プライバシーポリシー</a>
+                <a href="/legal/tokusho">特定商取引法に基づく表記</a>
+            </div>
+        </div>
+    </footer>
+</div>
+</body>
+</html>

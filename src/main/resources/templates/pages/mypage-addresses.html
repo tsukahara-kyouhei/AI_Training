@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout/head :: head('お届け先管理 | OFFICE ORDER', 'account')}"></head>
+<body class="is-logged-in">
+<div class="page">
+    <div th:replace="~{fragments/layout/header :: header}"></div>
+    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+    <main class="main">
+        <div class="container">
+            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > マイページ > お届け先管理')}"></div>
+            <h1 class="page-title">お届け先管理（追加お届け先）</h1>
+
+            <div class="mypage">
+                <aside aria-label="マイページメニュー">
+                    <div class="card">
+                        <div class="card__pad">
+                            <div class="navlist">
+                                <a class="navitem" href="/mypage/orders">購入履歴</a>
+                                <a class="navitem" href="/mypage/favorites">お気に入り</a>
+                                <a class="navitem" href="/mypage/profile">会員登録内容変更</a>
+                                <a class="navitem is-active" href="/mypage/addresses">お届け先管理</a>
+                                <a class="navitem" href="/mypage/withdraw">退会手続き</a>
+                            <form class="navitem-form" th:action="@{/logout}" method="post">
+                                <button class="navitem navitem--button" type="submit">ログアウト</button>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <section aria-label="追加お届け先一覧">
+                    <div class="card">
+                        <div class="card__pad">
+                            <div class="toolbar" style="margin-top:0;">
+                                <div class="toolbar__group">
+                                    <span class="badge" th:text="'登録数: ' + ${addressCount} + ' / ' + ${addressLimit}">登録数: 5 / 20</span>
+                                </div>
+                                <div class="toolbar__group">
+                                    <a class="btn btn--primary" href="/mypage/addresses/new" th:if="${!addressLimitReached}">追加</a>
+                                    <button class="btn btn--primary" type="button" disabled th:if="${addressLimitReached}">追加</button>
+                                </div>
+                            </div>
+                            <div class="error" th:if="${addressLimitError}" th:text="${addressLimitError}" style="margin:0 0 8px;"></div>
+                            <div class="error" th:if="${addressLimitReached and addressLimitError == null}" style="margin:0 0 8px;">
+                                これ以上お届け先を追加できません。
+                            </div>
+
+                            <table class="table" aria-label="追加お届け先一覧（20件/ページ）">
+                                <thead>
+                                <tr>
+                                    <th>宛名</th>
+                                    <th>住所</th>
+                                    <th style="width:160px;">電話</th>
+                                    <th style="width:180px;">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${#lists.isEmpty(addresses)}">
+                                    <td colspan="4" class="muted">登録済みのお届け先はありません。</td>
+                                </tr>
+                                <tr th:each="address : ${addresses}">
+                                    <td><strong th:text="${address.fullName()}">山田 太郎</strong></td>
+                                    <td th:text="${address.addressSummary()}">〒1040031 東京都中央区京橋1-2-3（4F/EVあり）</td>
+                                    <td th:text="${address.daytimePhone()}">0333333333</td>
+                                    <td>
+                                        <a class="btn" th:href="@{/mypage/addresses/{id}/edit(id=${address.memberAddressId()})}">変更</a>
+                                        <form th:action="@{/mypage/addresses/{id}/delete(id=${address.memberAddressId()})}" method="post" style="display:inline;">
+                                            <button class="btn btn--ghost" type="submit">削除</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <nav aria-label="ページネーション" th:if="${totalPages > 1}" style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;">
+                                <a class="btn btn--ghost"
+                                   th:if="${currentPage > 1}"
+                                   th:href="@{/mypage/addresses(page=${currentPage - 1})}">前へ</a>
+                                <span class="btn btn--ghost is-disabled" th:if="${currentPage <= 1}">前へ</span>
+
+                                <a class="btn btn--ghost"
+                                   th:each="p : ${#numbers.sequence(1, totalPages)}"
+                                   th:classappend="${p == currentPage} ? ' is-disabled' : ''"
+                                   th:href="@{/mypage/addresses(page=${p})}"
+                                   th:text="${p}">1</a>
+
+                                <a class="btn btn--ghost"
+                                   th:if="${currentPage < totalPages}"
+                                   th:href="@{/mypage/addresses(page=${currentPage + 1})}">次へ</a>
+                                <span class="btn btn--ghost is-disabled" th:if="${currentPage >= totalPages}">次へ</span>
+                            </nav>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <div th:replace="~{fragments/layout/footer :: footer}"></div>
+</div>
+<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+</body>
+</html>

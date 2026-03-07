@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout/head :: head('お知らせ一覧 | OFFICE ORDER', 'top')}"></head>
+<body>
+<div class="page">
+    <div th:replace="~{fragments/layout/header :: header}"></div>
+    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+
+    <main class="main">
+        <div class="container">
+            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > お知らせ一覧')}"></div>
+            <h1 class="page-title">お知らせ一覧</h1>
+
+            <div class="notice-list" aria-label="お知らせ一覧">
+                <article class="card notice-card" th:if="${announcements == null or #lists.isEmpty(announcements)}">
+                    <div class="card__pad">
+                        <div class="notice-card__head">
+                            <h2 class="notice-card__title">現在お知らせはありません。</h2>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="card notice-card" th:each="announcement : ${announcements}">
+                    <div class="card__pad">
+                        <div class="notice-card__head">
+                            <time class="notice-card__date"
+                                  th:attr="datetime=${announcement.publishedDateIso}"
+                                  th:text="${announcement.publishedDateDisplay}">
+                                2026/02/13
+                            </time>
+                            <h2 class="notice-card__title" th:text="${announcement.title}">配送遅延のお知らせ</h2>
+                        </div>
+                        <div class="notice-card__body" style="white-space: pre-line;" th:text="${announcement.body}">
+                            お知らせ本文
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="card" style="margin-top:14px;">
+                <div class="card__pad">
+                    <p class="muted" style="margin:0; line-height:1.8;">
+                        ヘッダ直下のお知らせは「掲載日 + タイトル」を5秒ローテーションで表示します。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/layout/footer :: footer}"></div>
+</div>
+<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+</body>
+</html>

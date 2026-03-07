@@ -1,0 +1,16 @@
+{last_name} {first_name} 様
+
+OFFICE ORDERをご利用いただきありがとうございます。
+会員登録が完了しました。
+
+会員ID: {member_id}
+
+今後ともOFFICE ORDERをよろしくお願いいたします。
+
+ご登録ありがとうございます。
+
+サイトURL:
+{site_url}
+
+お問い合わせ先:
+{contact_email}

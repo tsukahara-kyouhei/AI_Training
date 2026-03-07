@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout/head :: head('お問い合わせ | OFFICE ORDER', '')}"></head>
+<body>
+<div class="page">
+    <div th:replace="~{fragments/layout/header :: header}"></div>
+    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+
+    <main class="main">
+        <div class="container">
+            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > お問い合わせ')}"></div>
+            <h1 class="page-title">お問い合わせ</h1>
+
+            <div class="card">
+                <div class="card__pad">
+                    <div class="alert"
+                         style="margin:0 0 12px; background:rgba(6, 95, 70, 0.08); border-color:rgba(6, 95, 70, 0.24); color:#065f46;"
+                         th:if="${contactSuccessMessage}">
+                        <span th:text="${contactSuccessMessage}">お問い合わせを受け付けました。</span>
+                        <span th:if="${contactInquiryNumber}" th:text="' 受付番号: ' + ${contactInquiryNumber}"></span>
+                    </div>
+                    <div class="alert" style="margin:0 0 12px;" th:if="${contactError}" th:text="${contactError}"></div>
+                    <p class="muted" style="margin:0 0 14px; line-height:1.8;">
+                        ログイン中の場合は、お客様情報にある項目を自動反映します。
+                    </p>
+                    <form class="form" aria-label="お問い合わせフォーム" th:action="@{/contact}" th:object="${contactForm}" method="post">
+                        <div class="field">
+                            <label>会社名</label>
+                            <input type="text" th:field="*{companyName}" placeholder="任意">
+                            <div class="error" th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}"></div>
+                        </div>
+                        <div class="field">
+                            <label>部署名</label>
+                            <input type="text" th:field="*{departmentName}" placeholder="任意">
+                            <div class="error" th:if="${#fields.hasErrors('departmentName')}" th:errors="*{departmentName}"></div>
+                        </div>
+                        <div class="field">
+                            <label>お名前 <span class="req">必須</span></label>
+                            <div class="field__row">
+                                <input type="text" th:field="*{lastName}" placeholder="姓">
+                                <input type="text" th:field="*{firstName}" placeholder="名">
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                            <div class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                        </div>
+                        <div class="field">
+                            <label>メールアドレス <span class="req">必須</span></label>
+                            <input type="email" th:field="*{email}" placeholder="example@example.com">
+                            <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                        <div class="field">
+                            <label>電話番号</label>
+                            <input type="text" th:field="*{phone}" placeholder="任意（数字10〜12桁）">
+                            <div class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                        </div>
+                        <div class="field">
+                            <label>お問い合わせの種類 <span class="req">必須</span></label>
+                            <div class="kvs">
+                                <label class="kv"><input type="radio" th:field="*{inquiryType}" value="product"> 商品について</label>
+                                <label class="kv"><input type="radio" th:field="*{inquiryType}" value="delivery_date"> 納期について</label>
+                                <label class="kv"><input type="radio" th:field="*{inquiryType}" value="order"> 注文について</label>
+                                <label class="kv"><input type="radio" th:field="*{inquiryType}" value="shipping"> 配送について</label>
+                                <label class="kv"><input type="radio" th:field="*{inquiryType}" value="return_cancel"> 返品・キャンセル</label>
+                                <label class="kv"><input type="radio" th:field="*{inquiryType}" value="other"> その他</label>
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('inquiryType')}" th:errors="*{inquiryType}"></div>
+                        </div>
+                        <div class="field">
+                            <label>注文状況 <span class="req">必須</span></label>
+                            <div class="kvs">
+                                <label class="kv"><input type="radio" th:field="*{orderPhase}" value="before_order"> 注文前</label>
+                                <label class="kv"><input type="radio" th:field="*{orderPhase}" value="after_order"> 注文後</label>
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('orderPhase')}" th:errors="*{orderPhase}"></div>
+                        </div>
+                        <div class="field">
+                            <label>お問い合わせ商品名</label>
+                            <input type="text" th:field="*{productName}" placeholder="任意">
+                            <div class="error" th:if="${#fields.hasErrors('productName')}" th:errors="*{productName}"></div>
+                        </div>
+                        <div class="field">
+                            <label>商品コード</label>
+                            <input type="text" th:field="*{productCode}" placeholder="任意">
+                            <div class="error" th:if="${#fields.hasErrors('productCode')}" th:errors="*{productCode}"></div>
+                        </div>
+                        <div class="field">
+                            <label>お問い合わせ内容 <span class="req">必須</span></label>
+                            <textarea th:field="*{message}" placeholder="1000文字以内"></textarea>
+                            <div class="help">1000文字以内で入力してください。</div>
+                            <div class="error" th:if="${#fields.hasErrors('message')}" th:errors="*{message}"></div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn--cart-action" type="submit">送信する</button>
+                        </div>
+                        <div class="help">送信完了後の自動返信メールは送信しません。</div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/layout/footer :: footer}"></div>
+</div>
+<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+</body>
+</html>

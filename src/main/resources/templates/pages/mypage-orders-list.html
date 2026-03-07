@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout/head :: head('購入履歴一覧 | OFFICE ORDER', 'account')}"></head>
+<body class="is-logged-in">
+<div class="page">
+    <div th:replace="~{fragments/layout/header :: header}"></div>
+    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+    <main class="main">
+        <div class="container">
+            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > マイページ > 購入履歴')}"></div>
+            <h1 class="page-title">購入履歴</h1>
+
+            <div class="mypage">
+                <aside aria-label="マイページメニュー">
+                    <div class="card">
+                        <div class="card__pad">
+                            <div class="navlist">
+                                <a class="navitem is-active" href="/mypage/orders">購入履歴</a>
+                                <a class="navitem" href="/mypage/favorites">お気に入り</a>
+                                <a class="navitem" href="/mypage/profile">会員登録内容変更</a>
+                                <a class="navitem" href="/mypage/addresses">お届け先管理</a>
+                                <a class="navitem" href="/mypage/withdraw">退会手続き</a>
+                            <form class="navitem-form" th:action="@{/logout}" method="post">
+                                <button class="navitem navitem--button" type="submit">ログアウト</button>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <section aria-label="購入履歴一覧（10件/ページ）">
+                    <div class="card">
+                        <div class="card__pad">
+                            <div class="help" th:if="${cartMessage}" th:text="${cartMessage}" style="margin:0 0 8px;"></div>
+                            <div class="error" th:if="${cartError}" th:text="${cartError}" style="margin:0 0 8px;"></div>
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th style="width:200px;">注文番号</th>
+                                    <th style="width:180px;">注文日時</th>
+                                    <th>合計</th>
+                                    <th style="width:140px;">ステータス</th>
+                                    <th style="width:200px;">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${orders == null or #lists.isEmpty(orders)}">
+                                    <td colspan="5" class="muted">購入履歴はありません。</td>
+                                </tr>
+                                <tr th:each="order : ${orders}">
+                                    <td>
+                                        <a th:href="@{/mypage/orders/{orderNumber}(orderNumber=${order.orderNumber()})}">
+                                            <strong th:text="${order.orderNumber()}">ORD20260216-0001</strong>
+                                        </a>
+                                    </td>
+                                    <td th:text="${order.orderDatetimeDisplay()}">2026-02-16 10:40</td>
+                                    <td><strong th:text="${order.totalAmountText()}">43,340円</strong></td>
+                                    <td><span class="badge" th:text="${order.orderStatusLabel()}">処理中</span></td>
+                                    <td>
+                                        <a class="btn" th:href="@{/mypage/orders/{orderNumber}(orderNumber=${order.orderNumber()})}">詳細</a>
+                                        <form th:action="@{/mypage/orders/{orderNumber}/reorder(orderNumber=${order.orderNumber()})}"
+                                              method="post"
+                                              style="display:inline;">
+                                            <button class="btn btn--ghost" type="submit">再購入</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <nav aria-label="ページネーション"
+                                 th:if="${totalPages != null and totalPages > 1}"
+                                 style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;">
+                                <a class="btn btn--ghost"
+                                   th:if="${currentPage > 1}"
+                                   th:href="@{/mypage/orders(page=${currentPage - 1})}">前へ</a>
+                                <span class="btn btn--ghost is-disabled" th:if="${currentPage <= 1}">前へ</span>
+
+                                <th:block th:each="p : ${#numbers.sequence(1, totalPages)}">
+                                    <a class="btn btn--ghost"
+                                       th:if="${p != currentPage}"
+                                       th:href="@{/mypage/orders(page=${p})}"
+                                       th:text="${p}">1</a>
+                                    <span class="btn btn--ghost is-disabled" th:if="${p == currentPage}" th:text="${p}">1</span>
+                                </th:block>
+
+                                <a class="btn btn--ghost"
+                                   th:if="${currentPage < totalPages}"
+                                   th:href="@{/mypage/orders(page=${currentPage + 1})}">次へ</a>
+                                <span class="btn btn--ghost is-disabled" th:if="${currentPage >= totalPages}">次へ</span>
+                            </nav>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <div th:replace="~{fragments/layout/footer :: footer}"></div>
+</div>
+<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+</body>
+</html>

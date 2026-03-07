@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16
+    container_name: office-order-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: office_order
+      POSTGRES_USER: office_order
+      POSTGRES_PASSWORD: office_order
+    volumes:
+      - office-order-postgres-data:/var/lib/postgresql/data
+      - ./sql/init/init.sql:/docker-entrypoint-initdb.d/00-init.sql
+      - ./sql/schema:/docker-entrypoint-initdb.d/schema
+      - ./sql/seed:/docker-entrypoint-initdb.d/seed
+
+  mailpit:
+    image: axllent/mailpit:v1.20
+    container_name: office-order-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  dbgate:
+    image: dbgate/dbgate:latest
+    container_name: office-order-dbgate
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - office-order-dbgate-data:/root/.dbgate
+    environment:
+      CONNECTIONS: con1
+      LABEL_con1: OFFICE_ORDER
+      SERVER_con1: db
+      PORT_con1: 5432
+      USER_con1: office_order
+      PASSWORD_con1: office_order
+      DATABASE_con1: office_order
+      ENGINE_con1: postgres@dbgate-plugin-postgres
+
+volumes:
+  office-order-postgres-data:
+  office-order-dbgate-data:

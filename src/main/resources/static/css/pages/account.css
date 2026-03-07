@@ -1,0 +1,60 @@
+/* マイページ・お気に入りの固有スタイル */
+
+.favorite-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.favorite-card__actions {
+  margin-top: auto;
+  padding-top: 6px !important;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mypage {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 1023px) {
+  .mypage {
+    grid-template-columns: 1fr;
+  }
+}
+
+.navlist {
+  display: grid;
+  gap: 8px;
+}
+
+.navitem {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.80);
+  font-weight: 900;
+  color: var(--text);
+}
+
+.navitem.is-active {
+  color: var(--brand);
+  border-color: rgba(11, 58, 91, 0.28);
+  background: rgba(11, 58, 91, 0.08);
+}
+
+.navitem-form {
+  margin: 0;
+}
+
+.navitem--button {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: inherit;
+}
+

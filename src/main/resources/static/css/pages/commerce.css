@@ -1,0 +1,150 @@
+/* カート・購入導線の固有スタイル */
+
+.checkout-method-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.checkout-method-right {
+  display: grid;
+  gap: 18px;
+}
+
+@media (max-width: 1023px) {
+  .checkout-method-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.table--cart th:first-child,
+.table--cart td:first-child {
+  min-width: 360px;
+}
+
+.table--cart .qty input {
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  outline: none;
+  background: #fff;
+}
+
+.table--cart .qty {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.table--cart .qty .btn {
+  width: 100%;
+  padding: 6px 7px;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.cart-item__thumb {
+  width: 92px;
+  max-width: 92px;
+  height: 92px;
+  aspect-ratio: 1 / 1;
+  display: block;
+  object-fit: cover;
+  border-radius: 8px;
+  border-bottom: none !important;
+}
+
+.cart-item__name {
+  margin: 0;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.cart-item__meta {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.steps {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0 18px;
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.70);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.step.is-active {
+  color: var(--brand);
+  border-color: rgba(11, 58, 91, 0.28);
+  background: rgba(11, 58, 91, 0.08);
+}
+
+
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 1023px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary {
+  position: sticky;
+  top: 110px;
+}
+
+@media (max-width: 1023px) {
+  .summary {
+    position: static;
+  }
+}
+
+.summary__rows {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.summary__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.summary__row strong {
+  color: var(--text);
+}
+
+.summary__total {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 6px;
+}
+

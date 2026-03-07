@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.AnnouncementMapper">
+
+    <resultMap id="AnnouncementRowMap" type="jp.co.skig.officeorder.mapper.row.AnnouncementMapperRow">
+        <constructor>
+            <idArg column="announcement_id" javaType="long"/>
+            <arg column="title" javaType="string"/>
+            <arg column="body" javaType="string"/>
+            <arg column="published_start_at" javaType="java.time.OffsetDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <select id="selectActiveAnnouncements" resultMap="AnnouncementRowMap">
+        SELECT
+            a.announcement_id,
+            a.title,
+            COALESCE(NULLIF(a.body, ''), a.summary) AS body,
+            a.published_start_at
+        FROM announcements a
+        WHERE a.is_active = TRUE
+          AND a.published_start_at &lt;= #{now}
+          AND (a.published_end_at IS NULL OR a.published_end_at &gt; #{now})
+        ORDER BY a.published_start_at DESC, a.announcement_id DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+</mapper>
+
+
+

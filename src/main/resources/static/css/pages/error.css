@@ -1,0 +1,78 @@
+/* エラーページの固有スタイル */
+
+.error-page__main {
+  display: flex;
+  align-items: center;
+}
+
+.error-page__container {
+  max-width: 760px;
+}
+
+.error-panel {
+  overflow: visible;
+}
+
+.error-panel__pad {
+  padding: 40px 32px;
+}
+
+.error-panel__status {
+  margin: 0 0 10px;
+  color: #b42318;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.error-panel__title {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.error-panel__message {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.error-panel__note {
+  margin: 20px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.error-panel__meta {
+  margin: 20px 0 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(16, 24, 40, 0.04);
+  border: 1px solid rgba(16, 24, 40, 0.08);
+}
+
+.error-panel__meta-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.error-panel__meta-row + .error-panel__meta-row {
+  margin-top: 10px;
+}
+
+.error-panel__meta dt {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.error-panel__meta dd {
+  margin: 0;
+  word-break: break-all;
+  font-weight: 800;
+}
+
+.error-panel__actions {
+  margin-top: 24px;
+}

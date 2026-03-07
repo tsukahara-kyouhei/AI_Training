@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.BatchMapper">
+
+    <resultMap id="BatchPopularRankingCandidateRowMap" type="jp.co.skig.officeorder.mapper.row.BatchPopularRankingCandidateMapperRow">
+        <constructor>
+            <idArg column="product_id" javaType="long"/>
+            <arg column="sold_quantity_1m" javaType="int"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="BatchOrderProductOccurrenceRowMap" type="jp.co.skig.officeorder.mapper.row.BatchOrderProductOccurrenceMapperRow">
+        <constructor>
+            <arg column="order_id" javaType="long"/>
+            <arg column="product_id" javaType="long"/>
+        </constructor>
+    </resultMap>
+
+    <select id="selectPopularRankingCandidates" resultMap="BatchPopularRankingCandidateRowMap">
+        SELECT
+        pv.product_id,
+        SUM(oi.quantity)::INTEGER AS sold_quantity_1m
+        FROM orders o
+        JOIN order_items oi ON oi.order_id = o.order_id
+        JOIN product_variants pv ON pv.product_code = oi.product_code
+        JOIN products p ON p.product_id = pv.product_id
+        WHERE o.order_datetime &gt;= #{sinceAt}
+        AND o.order_status &lt;&gt; 'cancelled'
+        AND p.sale_start_at &lt;= #{asOf}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{asOf})
+        GROUP BY pv.product_id
+        ORDER BY sold_quantity_1m DESC, pv.product_id ASC
+        LIMIT 10
+    </select>
+
+    <delete id="deletePopularRankingsByDate">
+        DELETE FROM popular_product_rankings
+        WHERE ranking_date = #{rankingDate}
+    </delete>
+
+    <insert id="insertPopularRanking">
+        INSERT INTO popular_product_rankings (
+        ranking_date,
+        rank,
+        product_id,
+        sold_quantity_1m,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{rankingDate},
+        #{rank},
+        #{productId},
+        #{soldQuantity1m},
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <select id="selectOrderProductOccurrences" resultMap="BatchOrderProductOccurrenceRowMap">
+        SELECT
+        o.order_id,
+        pv.product_id
+        FROM orders o
+        JOIN order_items oi ON oi.order_id = o.order_id
+        JOIN product_variants pv ON pv.product_code = oi.product_code
+        WHERE o.order_datetime &gt;= #{sinceAt}
+        AND o.order_status &lt;&gt; 'cancelled'
+        GROUP BY o.order_id, pv.product_id
+        ORDER BY o.order_id ASC, pv.product_id ASC
+    </select>
+
+    <delete id="deleteRecommendedRelatedByDate">
+        DELETE FROM recommended_related_products
+        WHERE recommendation_date = #{recommendationDate}
+    </delete>
+
+    <insert id="insertRecommendedRelated">
+        INSERT INTO recommended_related_products (
+        recommendation_date,
+        source_product_id,
+        rank,
+        recommended_product_id,
+        score,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{recommendationDate},
+        #{sourceProductId},
+        #{rank},
+        #{recommendedProductId},
+        #{score},
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+        )
+    </insert>
+
+</mapper>
+
+
+
