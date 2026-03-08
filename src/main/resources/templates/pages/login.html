@@ -27,24 +27,24 @@
                         <form class="form" aria-label="ログインフォーム" th:action="@{/login}" th:object="${loginForm}" method="post">
                             <div class="field">
                                 <label>メールアドレス <span class="req">必須</span></label>
-                                <input type="email" th:field="*{email}">
+                                <input type="email" th:field="*{email}" tabindex="1">
                                 <label class="check-item" style="margin-top:8px;">
-                                    <input type="checkbox" name="remember_me" value="1">
+                                    <input type="checkbox" name="remember_me" value="1" th:checked="${rememberLoginEmail}" tabindex="4">
                                     次回から入力を省略する
                                 </label>
                                 <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                             </div>
                             <div class="field">
                                 <label>パスワード <span class="req">必須</span></label>
-                                <input id="login-password" type="password" th:field="*{password}">
+                                <input id="login-password" type="password" th:field="*{password}" tabindex="2">
                                 <label class="check-item" style="margin-top:8px;">
-                                    <input type="checkbox" data-password-toggle data-target="login-password">
+                                    <input type="checkbox" data-password-toggle data-target="login-password" tabindex="5">
                                     パスワード表示
                                 </label>
                                 <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                             </div>
                             <input type="hidden" th:field="*{redirectPath}">
-                            <button class="btn btn--cart-action" type="submit" style="width:100%;">ログイン</button>
+                            <button class="btn btn--cart-action" type="submit" style="width:100%;" tabindex="3">ログイン</button>
                         </form>
                     </div>
                 </div>

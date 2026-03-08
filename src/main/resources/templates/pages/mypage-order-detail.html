@@ -37,7 +37,7 @@
                                 <span class="kv">ステータス: <strong th:text="${orderDetail.orderStatusLabel()}">処理中</strong></span>
                             </div>
                             <div class="help" style="margin-top:8px;">
-                                サイト上でのキャンセルは不可です（お問い合わせへ誘導）。
+                                本サイト上ではキャンセルを承っておりません。キャンセルをご希望の場合はお問い合わせください。
                             </div>
                             <div class="actions" style="margin-top:12px;">
                                 <form th:action="@{/mypage/orders/{orderNumber}/reorder(orderNumber=${orderDetail.orderNumber()})}"

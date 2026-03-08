@@ -30,8 +30,6 @@ mybatis:
 
 app:
   time-zone: Asia/Tokyo
-  security:
-    remember-me-key: ${APP_SECURITY_REMEMBER_ME_KEY:office-order-remember-me-key-v1}
   cookie:
     cart:
       secure-mode: auto

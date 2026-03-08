@@ -13,8 +13,6 @@ public class AppProperties {
 
     /** アプリ標準のタイムゾーン。 */
     private String timeZone = "Asia/Tokyo";
-    /** セキュリティ関連設定。 */
-    private final Security security = new Security();
     /** Cookie関連設定。 */
     private final Cookie cookie = new Cookie();
     /** バッチ関連設定。 */
@@ -38,15 +36,6 @@ public class AppProperties {
      */
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
-    }
-
-    /**
-     * セキュリティ関連設定を返す。
-     *
-     * @return セキュリティ関連設定
-     */
-    public Security getSecurity() {
-        return security;
     }
 
     /**
@@ -74,33 +63,6 @@ public class AppProperties {
      */
     public Mail getMail() {
         return mail;
-    }
-
-    /**
-     * セキュリティ関連の独自設定。
-     */
-    public static class Security {
-
-        /** remember-me Cookie署名キー。 */
-        private String rememberMeKey = "office-order-remember-me-key-v1";
-
-        /**
-         * remember-me Cookie署名キーを返す。
-         *
-         * @return remember-me署名キー
-         */
-        public String getRememberMeKey() {
-            return rememberMeKey;
-        }
-
-        /**
-         * remember-me Cookie署名キーを設定する。
-         *
-         * @param rememberMeKey remember-me署名キー
-         */
-        public void setRememberMeKey(String rememberMeKey) {
-            this.rememberMeKey = rememberMeKey;
-        }
     }
 
     /**

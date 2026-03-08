@@ -13,6 +13,7 @@ import jp.co.skig.officeorder.service.member.MemberService;
 import jp.co.skig.officeorder.service.order.OrderService;
 import jp.co.skig.officeorder.model.order.CheckoutInputForm;
 import jp.co.skig.officeorder.model.order.OrderCompleteView;
+import jp.co.skig.officeorder.web.auth.LoginEmailCookieService;
 import jp.co.skig.officeorder.web.auth.MemberSessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,8 @@ public class CartController {
     private final CartService cartService;
     /** 会員セッションサービス。 */
     private final MemberSessionService memberSessionService;
+    /** ログイン画面のメールアドレス記憶Cookieサービス。 */
+    private final LoginEmailCookieService loginEmailCookieService;
     /** 会員関連サービス。 */
     private final MemberService memberService;
     /** 注文サービス。 */
@@ -66,17 +69,20 @@ public class CartController {
      *
      * @param cartService カートサービス
      * @param memberSessionService 会員セッションサービス
+     * @param loginEmailCookieService ログイン画面メールアドレス記憶Cookieサービス
      * @param memberService 会員サービス
      * @param orderService 注文サービス
      * @param messageSource 利用者向けメッセージ取得元
      */
     public CartController(CartService cartService,
                           MemberSessionService memberSessionService,
+                          LoginEmailCookieService loginEmailCookieService,
                           MemberService memberService,
                           OrderService orderService,
                           MessageSource messageSource) {
         this.cartService = cartService;
         this.memberSessionService = memberSessionService;
+        this.loginEmailCookieService = loginEmailCookieService;
         this.memberService = memberService;
         this.orderService = orderService;
         this.messages = new MessageSourceAccessor(messageSource);
@@ -202,6 +208,8 @@ public class CartController {
     /**
      * 購入方法選択画面を表示する。
      *
+     * <p>ログイン補助用に、記憶済みメールアドレスCookieがあれば左パネルのログインフォームへ反映する。
+     *
      * @param request 現在リクエスト
      * @param response 現在レスポンス
      * @param model 画面モデル
@@ -215,6 +223,7 @@ public class CartController {
         if (cart.isEmpty()) {
             return "redirect:/cart";
         }
+        bindRememberedLoginEmail(request, model);
         model.addAttribute("checkoutRedirectPath", "/checkout/input");
         return "pages/checkout-method";
     }
@@ -445,6 +454,18 @@ public class CartController {
                 .items();
         model.addAttribute("checkoutAdditionalAddresses", addresses);
         model.addAttribute("hasCheckoutAdditionalAddresses", !addresses.isEmpty());
+    }
+
+    /**
+     * 購入方法選択画面のログインフォームへ記憶済みメールアドレスを反映する。
+     *
+     * @param request 現在リクエスト
+     * @param model 画面モデル
+     */
+    private void bindRememberedLoginEmail(HttpServletRequest request, Model model) {
+        Optional<String> rememberedEmail = loginEmailCookieService.findRememberedEmail(request);
+        model.addAttribute("rememberedLoginEmail", rememberedEmail.orElse(""));
+        model.addAttribute("rememberLoginEmail", rememberedEmail.isPresent());
     }
 
     /**

@@ -28,7 +28,7 @@
          loading="lazy">
     <div class="ph-img" th:if="${product == null or product.productCode == null}" aria-hidden="true"></div>
     <div class="card__pad">
-        <p class="product-name" th:text="${product != null ? product.productName : '商品名未設定'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
+        <p class="product-name" th:text="${product != null ? product.productName : '商品情報'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
         <p class="product-price"><span class="price" th:text="${product != null ? product.priceText : '0'}">12,800</span>円（税込）</p>
         <div class="chips" aria-label="カラーラインナップ">
             <span class="chip"
@@ -67,7 +67,7 @@
          loading="lazy">
     <div class="ph-img" th:if="${item == null or item.product == null or item.product.productCode == null}" aria-hidden="true"></div>
     <div class="card__pad">
-        <p class="product-name" th:text="${item != null and item.product != null ? item.product.productName : '商品名未設定'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
+        <p class="product-name" th:text="${item != null and item.product != null ? item.product.productName : '商品情報'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
         <p class="product-price"><span class="price" th:text="${item != null and item.product != null ? item.product.priceText : '0'}">12,800</span>円（税込）</p>
         <div class="chips" aria-label="カラーラインナップ">
             <span class="chip"

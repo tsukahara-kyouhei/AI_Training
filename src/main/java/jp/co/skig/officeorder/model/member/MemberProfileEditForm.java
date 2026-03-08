@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jp.co.skig.officeorder.common.validation.ValidationPatterns;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.StringUtils;
 
 /**
@@ -20,7 +22,7 @@ public class MemberProfileEditForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @NotBlank(message = "{validation.personalOrCorporate.required}")
-    @Pattern(regexp = "personal|corporate", message = "{validation.personalOrCorporate.invalid}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_PERSONAL_OR_CORPORATE, message = "{validation.personalOrCorporate.invalid}")
     private String personalOrCorporate = "personal";
 
     @NotBlank(message = "{validation.lastName.required}")
@@ -33,12 +35,12 @@ public class MemberProfileEditForm implements Serializable {
 
     @NotBlank(message = "{validation.lastNameKana.required}")
     @Size(max = 50, message = "{validation.lastNameKana.max}")
-    @Pattern(regexp = "^[ァ-ヶー]+$", message = "{validation.lastNameKana.pattern}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_KATAKANA, message = "{validation.lastNameKana.pattern}")
     private String lastNameKana;
 
     @NotBlank(message = "{validation.firstNameKana.required}")
     @Size(max = 50, message = "{validation.firstNameKana.max}")
-    @Pattern(regexp = "^[ァ-ヶー]+$", message = "{validation.firstNameKana.pattern}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_KATAKANA, message = "{validation.firstNameKana.pattern}")
     private String firstNameKana;
 
     @Size(max = 120, message = "{validation.companyName.max}")
@@ -53,21 +55,22 @@ public class MemberProfileEditForm implements Serializable {
     private String email;
 
     @NotBlank(message = "{validation.gender.required}")
-    @Pattern(regexp = "male|female|no_answer", message = "{validation.gender.invalid}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_GENDER, message = "{validation.gender.invalid}")
     private String gender = "male";
 
     @NotNull(message = "{validation.anniversaryDate.required}")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate anniversaryDate;
 
     @NotNull(message = "{validation.newsletterOptIn.required}")
     private Boolean newsletterOptIn = Boolean.TRUE;
 
     @NotBlank(message = "{validation.postalCodePart1.required}")
-    @Pattern(regexp = "^[0-9]{3}$", message = "{validation.postalCodePart1.pattern}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_POSTAL_CODE_PART1, message = "{validation.postalCodePart1.pattern}")
     private String postalCodePart1;
 
     @NotBlank(message = "{validation.postalCodePart2.required}")
-    @Pattern(regexp = "^[0-9]{4}$", message = "{validation.postalCodePart2.pattern}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_POSTAL_CODE_PART2, message = "{validation.postalCodePart2.pattern}")
     private String postalCodePart2;
 
     @NotBlank(message = "{validation.prefecture.required}")
@@ -83,17 +86,17 @@ public class MemberProfileEditForm implements Serializable {
     private String addressLine;
 
     @NotBlank(message = "{validation.deliveryFloor.required}")
-    @Pattern(regexp = "^[0-9]+$", message = "{validation.deliveryFloor.pattern}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_FLOOR_NUMBER, message = "{validation.deliveryFloor.pattern}")
     private String deliveryFloor;
 
     @NotNull(message = "{validation.hasElevator.required}")
     private Boolean hasElevator = Boolean.TRUE;
 
     @NotBlank(message = "{validation.daytimePhone.required}")
-    @Pattern(regexp = "^[0-9]{10,12}$", message = "{validation.daytimePhone.pattern}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_PHONE_NUMBER, message = "{validation.daytimePhone.pattern}")
     private String daytimePhone;
 
-    @Pattern(regexp = "^$|^[0-9]{10,12}$", message = "{validation.fax.pattern}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_PHONE_NUMBER, message = "{validation.fax.pattern}")
     private String fax;
 
     /**
@@ -310,4 +313,3 @@ public class MemberProfileEditForm implements Serializable {
         this.fax = fax;
     }
 }
-

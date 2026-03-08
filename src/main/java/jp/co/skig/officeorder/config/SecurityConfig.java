@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jp.co.skig.officeorder.logging.LogEvent;
 import jp.co.skig.officeorder.logging.LogMaskingUtil;
 import jp.co.skig.officeorder.web.auth.AuthRedirectUtils;
+import jp.co.skig.officeorder.web.auth.LoginEmailCookieService;
 import jp.co.skig.officeorder.web.auth.MemberPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -32,24 +32,22 @@ public class SecurityConfig {
 
     /** 認証系ログ出力用ロガー。 */
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
-    /** remember-me チェックボックスのパラメータ名。 */
-    private static final String REMEMBER_ME_PARAMETER = "remember_me";
-    /** remember-me Cookie名。 */
-    private static final String REMEMBER_ME_COOKIE_NAME = "office_order_remember_me";
-    /** remember-me の有効期限。 */
-    private static final int REMEMBER_ME_TOKEN_VALIDITY_SECONDS = 60 * 60 * 24 * 30;
+    /** メールアドレス記憶チェックボックスのパラメータ名。 */
+    private static final String REMEMBER_EMAIL_PARAMETER = "remember_me";
+    /** 旧認証 remember-me Cookie名。 */
+    private static final String LEGACY_REMEMBER_ME_COOKIE_NAME = "office_order_remember_me";
     /** 会員専用領域のパス接頭辞。 */
     private static final String MEMBER_AREA_PATH = "/mypage";
-    /** remember-me トークン署名キー。 */
-    private final String rememberMeKey;
+    /** ログイン画面メールアドレス記憶Cookieサービス。 */
+    private final LoginEmailCookieService loginEmailCookieService;
 
     /**
      * Security設定を生成する。
      *
-     * @param appProperties 独自アプリ設定
+     * @param loginEmailCookieService ログイン画面メールアドレス記憶Cookieサービス
      */
-    public SecurityConfig(AppProperties appProperties) {
-        this.rememberMeKey = appProperties.getSecurity().getRememberMeKey();
+    public SecurityConfig(LoginEmailCookieService loginEmailCookieService) {
+        this.loginEmailCookieService = loginEmailCookieService;
     }
 
     /**
@@ -63,16 +61,14 @@ public class SecurityConfig {
     }
 
     /**
-     * 認証・認可・remember-me・ログアウトのフィルタチェーンを構成する。
+     * 認証・認可・ログアウトのフィルタチェーンを構成する。
      *
      * @param http HttpSecurity
-     * @param userDetailsService 会員認証情報取得サービス
      * @return SecurityFilterChain
      * @throws Exception 構成失敗時
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   UserDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/internal/batch/**")
@@ -98,19 +94,12 @@ public class SecurityConfig {
                         .failureHandler(loginFailureHandler())
                         .permitAll()
                 )
-                .rememberMe(rememberMe -> rememberMe
-                        .rememberMeParameter(REMEMBER_ME_PARAMETER)
-                        .rememberMeCookieName(REMEMBER_ME_COOKIE_NAME)
-                        .tokenValiditySeconds(REMEMBER_ME_TOKEN_VALIDITY_SECONDS)
-                        .key(rememberMeKey)
-                        .userDetailsService(userDetailsService)
-                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID", REMEMBER_ME_COOKIE_NAME)
+                        .deleteCookies("JSESSIONID", LEGACY_REMEMBER_ME_COOKIE_NAME)
                         .permitAll()
                 )
                 .sessionManagement(session -> session
@@ -139,6 +128,7 @@ public class SecurityConfig {
             } else {
                 log.info("event={} redirectPath={}", LogEvent.AUTH_LOGIN_SUCCESS.value(), redirectPath);
             }
+            updateRememberedLoginEmail(request, response);
             response.sendRedirect(request.getContextPath() + redirectPath);
         };
     }
@@ -247,5 +237,24 @@ public class SecurityConfig {
         expired.setHttpOnly(true);
         expired.setSecure(request.isSecure());
         response.addCookie(expired);
+    }
+
+    /**
+     * ログイン成功時にメールアドレス記憶Cookieを更新する。
+     *
+     * <p>チェックありならメールアドレスを保存し、チェックなしなら保存済みCookieを削除する。
+     *
+     * @param request 現在リクエスト
+     * @param response 現在レスポンス
+     */
+    void updateRememberedLoginEmail(HttpServletRequest request, HttpServletResponse response) {
+        if (StringUtils.hasText(request.getParameter(REMEMBER_EMAIL_PARAMETER))) {
+            String email = request.getParameter("email");
+            if (StringUtils.hasText(email)) {
+                loginEmailCookieService.rememberEmail(request, response, email);
+                return;
+            }
+        }
+        loginEmailCookieService.clearRememberedEmail(request, response);
     }
 }

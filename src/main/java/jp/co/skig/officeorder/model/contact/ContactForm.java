@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jp.co.skig.officeorder.common.validation.ValidationPatterns;
 import org.springframework.util.StringUtils;
 
 /**
@@ -36,18 +37,18 @@ public class ContactForm implements Serializable {
     @Size(max = 254, message = "{validation.email.max}")
     private String email;
 
-    @Pattern(regexp = "^$|^[0-9]{10,12}$", message = "{validation.daytimePhone.pattern}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_PHONE_NUMBER, message = "{validation.daytimePhone.pattern}")
     private String phone;
 
     @NotBlank(message = "{validation.inquiryType.required}")
     @Pattern(
-            regexp = "product|delivery_date|order|shipping|return_cancel|other",
+            regexp = ValidationPatterns.BLANK_OR_INQUIRY_TYPE,
             message = "{validation.inquiryType.invalid}"
     )
     private String inquiryType = "product";
 
     @NotBlank(message = "{validation.orderPhase.required}")
-    @Pattern(regexp = "before_order|after_order", message = "{validation.orderPhase.invalid}")
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_ORDER_PHASE, message = "{validation.orderPhase.invalid}")
     private String orderPhase = "before_order";
 
     @Size(max = 255, message = "{validation.productName.max}")
@@ -174,4 +175,3 @@ public class ContactForm implements Serializable {
         this.message = message;
     }
 }
-

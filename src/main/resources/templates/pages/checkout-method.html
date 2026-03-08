@@ -21,22 +21,22 @@
                         <form class="form" th:action="@{/login}" method="post">
                             <div class="field">
                                 <label for="checkout-login-mail">メールアドレス</label>
-                                <input id="checkout-login-mail" type="email" name="email" placeholder="sample@example.com">
+                                <input id="checkout-login-mail" type="email" name="email" th:value="${rememberedLoginEmail}" tabindex="1">
                                 <label class="check-item" style="margin-top:8px;">
-                                    <input type="checkbox" name="remember_me" value="1">
+                                    <input type="checkbox" name="remember_me" value="1" th:checked="${rememberLoginEmail}" tabindex="4">
                                     次回から入力を省略する
                                 </label>
                             </div>
                             <div class="field">
                                 <label for="checkout-login-password">パスワード</label>
-                                <input id="checkout-login-password" type="password" name="password" placeholder="パスワード">
+                                <input id="checkout-login-password" type="password" name="password" tabindex="2">
                                 <label class="check-item" style="margin-top:8px;">
-                                    <input type="checkbox" data-password-toggle data-target="checkout-login-password">
+                                    <input type="checkbox" data-password-toggle data-target="checkout-login-password" tabindex="5">
                                     パスワード表示
                                 </label>
                             </div>
                             <input type="hidden" name="redirectPath" th:value="${checkoutRedirectPath != null ? checkoutRedirectPath : '/checkout/input'}" value="/checkout/input">
-                            <button class="btn btn--cart-action" type="submit" style="width:100%;">ログイン</button>
+                            <button class="btn btn--cart-action" type="submit" style="width:100%;" tabindex="3">ログイン</button>
                         </form>
                     </div>
                 </div>
