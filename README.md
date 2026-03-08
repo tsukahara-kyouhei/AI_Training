@@ -75,7 +75,7 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 1. Compose を停止
    `docker compose down`
 2. PostgreSQL ボリュームのみ削除
-   `docker volume rm office-order-postgres-data`
+   `docker volume rm office-order_office-order-postgres-data`
 3. Compose を再起動
    `docker compose up -d`
 
