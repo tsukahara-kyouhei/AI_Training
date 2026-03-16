@@ -56,8 +56,20 @@ public class ProductFilterOptionService {
                 productFilterOptionRepository.findActiveChairMaterialOptions(),
                 productFilterOptionRepository.findActiveChairTasteOptions(),
                 productFilterOptionRepository.findActiveStorageUsageOptions(),
-                productFilterOptionRepository.findActiveStorageTasteOptions()
+                productFilterOptionRepository.findActiveStorageTasteOptions(),
+                loadSearchTasteOptions()
         );
+    }
+
+    /**
+     * 商品検索結果画面向けのテイスト選択肢一覧を取得する。
+     *
+     * <p>全カテゴリのテイストマスタを統合し、同一名称は1件にまとめて返す。
+     *
+     * @return 重複排除済みテイスト名一覧
+     */
+    public List<String> loadSearchTasteOptions() {
+        return productFilterOptionRepository.findAllTasteDisplayNames();
     }
 
     /**

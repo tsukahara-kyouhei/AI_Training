@@ -46,7 +46,8 @@ $schemaFiles = @(
     "orders.sql",
     "spring-batch-metadata.sql",
     "content.sql",
-    "batch.sql"
+    "batch.sql",
+    "search-functions.sql"
 )
 
 $seedFiles = @(

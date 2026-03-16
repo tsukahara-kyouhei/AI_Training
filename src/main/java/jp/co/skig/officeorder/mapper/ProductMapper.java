@@ -112,6 +112,21 @@ public interface ProductMapper {
     List<ProductFilterOptionMapperRow> selectActiveStorageTasteOptions();
 
     /**
+     * 全デスクテイストの表示名を取得する。
+     */
+    List<String> selectAllDeskTasteNames();
+
+    /**
+     * 全チェアテイストの表示名を取得する。
+     */
+    List<String> selectAllChairTasteNames();
+
+    /**
+     * 全収納家具テイストの表示名を取得する。
+     */
+    List<String> selectAllStorageTasteNames();
+
+    /**
      * 指定時点で有効な消費税率を取得する。
      */
     BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);

@@ -1,6 +1,8 @@
 package jp.co.skig.officeorder.repository;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.SequencedSet;
 
 import jp.co.skig.officeorder.mapper.ProductMapper;
 import jp.co.skig.officeorder.mapper.row.ProductFilterColorOptionMapperRow;
@@ -126,6 +128,22 @@ public class ProductFilterOptionRepository {
                 .map(this::toCategoryFilterOption)
                 .filter(option -> option != null)
                 .toList();
+    }
+
+    /**
+     * 全カテゴリのテイスト名を重複排除して取得する。
+     *
+     * <p>desk_tastes / chair_tastes / storage_tastes を統合し、
+     * 同一名称は1件にまとめる（最初の出現順を維持）。
+     *
+     * @return 重複排除済みテイスト名一覧
+     */
+    public List<String> findAllTasteDisplayNames() {
+        SequencedSet<String> names = new LinkedHashSet<>();
+        names.addAll(productMapper.selectAllDeskTasteNames());
+        names.addAll(productMapper.selectAllChairTasteNames());
+        names.addAll(productMapper.selectAllStorageTasteNames());
+        return List.copyOf(names);
     }
 
     /**

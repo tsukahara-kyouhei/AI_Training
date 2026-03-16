@@ -6,6 +6,7 @@ import jp.co.skig.officeorder.model.product.ProductListPage;
 import jp.co.skig.officeorder.model.product.ProductListSearchResult;
 import jp.co.skig.officeorder.model.product.ProductSearchCondition;
 import jp.co.skig.officeorder.model.product.ProductSort;
+import jp.co.skig.officeorder.util.SearchKeywordNormalizer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,6 +74,57 @@ public class ProductListSearchService {
                 size,
                 defaultSort,
                 optionsBundle
+        );
+    }
+
+    /**
+     * 検索結果画面向けに、キーワード正規化とテイスト絞り込みを含む検索条件を組み立てる。
+     *
+     * @param categoryId カテゴリーID
+     * @param keyword 生キーワード（正規化前）
+     * @param rawTasteNames テイスト名の生入力値
+     * @param inStockOnly 在庫ありのみ条件
+     * @param rawPriceBandIds 価格帯の生入力値
+     * @param rawColorKeys カラーの生入力値
+     * @param sort 並び順
+     * @param page ページ番号
+     * @param size 表示件数
+     * @param defaultSort デフォルト並び順
+     * @param optionsBundle 使用する絞り込み候補群
+     * @return 正規化済み検索条件
+     */
+    public ProductSearchCondition buildCondition(String categoryId,
+                                                 String keyword,
+                                                 List<String> rawTasteNames,
+                                                 boolean inStockOnly,
+                                                 List<Integer> rawPriceBandIds,
+                                                 List<String> rawColorKeys,
+                                                 String sort,
+                                                 int page,
+                                                 int size,
+                                                 ProductSort defaultSort,
+                                                 ProductFilterOptionsBundle optionsBundle) {
+        String normalizedKeyword = SearchKeywordNormalizer.normalize(keyword);
+        List<Integer> selectedPriceBandIds = productFilterOptionService.normalizePriceBandIds(rawPriceBandIds);
+        ProductFilterOptionsBundle resolvedBundle = optionsBundle == null
+                ? productFilterOptionService.loadOptionsBundle()
+                : optionsBundle;
+        List<String> selectedColorKeys = productFilterOptionService.normalizeColorKeys(rawColorKeys, resolvedBundle);
+        List<Long> colorIds = productFilterOptionService.resolveColorIds(selectedColorKeys, resolvedBundle);
+        List<String> tasteNames = rawTasteNames == null
+                ? List.of()
+                : rawTasteNames.stream().filter(t -> t != null && !t.isBlank()).distinct().toList();
+        return productService.buildCondition(
+                categoryId,
+                normalizedKeyword,
+                inStockOnly,
+                selectedPriceBandIds,
+                colorIds,
+                tasteNames,
+                sort,
+                page,
+                size,
+                defaultSort
         );
     }
 
@@ -177,6 +229,7 @@ public class ProductListSearchService {
                     condition.inStockOnly(),
                     condition.priceBands(),
                     condition.colorIds(),
+                    condition.tasteNames() == null ? List.of() : condition.tasteNames(),
                     condition.categoryFilter(),
                     condition.sort(),
                     totalPages,

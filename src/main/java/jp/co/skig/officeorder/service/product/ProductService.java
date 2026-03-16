@@ -122,6 +122,7 @@ public class ProductService {
                 inStockOnly,
                 priceBandIds,
                 colorIds,
+                List.of(),
                 sort,
                 page,
                 size,
@@ -160,6 +161,48 @@ public class ProductService {
                 inStockOnly,
                 priceBandIds,
                 colorIds,
+                List.of(),
+                sort,
+                page,
+                size,
+                defaultSort,
+                ProductCategoryFilter.empty(),
+                null
+        );
+    }
+
+    /**
+     * 検索結果画面向けの検索条件を組み立てる（テイスト絞り込み対応）。
+     *
+     * @param categoryId カテゴリーID
+     * @param keyword キーワード（正規化済み）
+     * @param inStockOnly 在庫ありのみ条件
+     * @param priceBandIds 価格帯ID一覧
+     * @param colorIds 色ID一覧
+     * @param tasteNames テイスト名一覧
+     * @param sort 並び順
+     * @param page ページ番号
+     * @param size 表示件数
+     * @param defaultSort デフォルト並び順
+     * @return 正規化済み検索条件
+     */
+    public ProductSearchCondition buildCondition(String categoryId,
+                                                 String keyword,
+                                                 boolean inStockOnly,
+                                                 List<Integer> priceBandIds,
+                                                 List<Long> colorIds,
+                                                 List<String> tasteNames,
+                                                 String sort,
+                                                 int page,
+                                                 int size,
+                                                 ProductSort defaultSort) {
+        return buildCondition(
+                categoryId,
+                keyword,
+                inStockOnly,
+                priceBandIds,
+                colorIds,
+                tasteNames,
                 sort,
                 page,
                 size,
@@ -200,6 +243,7 @@ public class ProductService {
                 inStockOnly,
                 priceBandIds,
                 colorIds,
+                List.of(),
                 sort,
                 page,
                 size,
@@ -236,6 +280,39 @@ public class ProductService {
                                                  ProductSort defaultSort,
                                                  ProductCategoryFilter categoryFilter,
                                                  OffsetDateTime saleStartFrom) {
+        return buildCondition(categoryId, keyword, inStockOnly, priceBandIds, colorIds,
+                List.of(), sort, page, size, defaultSort, categoryFilter, saleStartFrom);
+    }
+
+    /**
+     * 全条件を受け取り、一覧検索用の条件オブジェクトを構築する。
+     *
+     * @param categoryId カテゴリーID
+     * @param keyword キーワード
+     * @param inStockOnly 在庫ありのみ条件
+     * @param priceBandIds 価格帯ID一覧
+     * @param colorIds 色ID一覧
+     * @param tasteNames テイスト名一覧
+     * @param sort 並び順
+     * @param page ページ番号
+     * @param size 表示件数
+     * @param defaultSort デフォルト並び順
+     * @param categoryFilter カテゴリ固有条件
+     * @param saleStartFrom 販売開始日時の下限
+     * @return 正規化済み検索条件
+     */
+    public ProductSearchCondition buildCondition(String categoryId,
+                                                 String keyword,
+                                                 boolean inStockOnly,
+                                                 List<Integer> priceBandIds,
+                                                 List<Long> colorIds,
+                                                 List<String> tasteNames,
+                                                 String sort,
+                                                 int page,
+                                                 int size,
+                                                 ProductSort defaultSort,
+                                                 ProductCategoryFilter categoryFilter,
+                                                 OffsetDateTime saleStartFrom) {
         List<PriceBand> bands = new ArrayList<>();
         if (priceBandIds != null) {
             for (Integer id : priceBandIds) {
@@ -251,12 +328,16 @@ public class ProductService {
         List<Long> uniqueColorIds = colorIds == null
                 ? List.of()
                 : colorIds.stream().filter(id -> id != null).distinct().toList();
+        List<String> normalizedTasteNames = tasteNames == null
+                ? List.of()
+                : tasteNames.stream().filter(t -> t != null && !t.isBlank()).distinct().toList();
         return normalize(new ProductSearchCondition(
                 categoryId,
                 keyword == null ? null : keyword.trim(),
                 inStockOnly,
                 bands,
                 uniqueColorIds,
+                normalizedTasteNames,
                 categoryFilter == null ? ProductCategoryFilter.empty() : categoryFilter.normalize(),
                 ProductSort.fromValue(sort, defaultSort),
                 page,
@@ -280,6 +361,7 @@ public class ProductService {
                 condition.inStockOnly(),
                 condition.priceBands() == null ? List.of() : condition.priceBands(),
                 condition.colorIds() == null ? List.of() : condition.colorIds(),
+                condition.tasteNames() == null ? List.of() : condition.tasteNames(),
                 condition.categoryFilter() == null ? ProductCategoryFilter.empty() : condition.categoryFilter().normalize(),
                 condition.sort() == null ? ProductSort.RECOMMENDED : condition.sort(),
                 page,

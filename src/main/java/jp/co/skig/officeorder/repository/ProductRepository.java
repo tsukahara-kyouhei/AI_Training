@@ -174,6 +174,7 @@ public class ProductRepository {
                 false,
                 List.of(),
                 List.of(),
+                List.of(),
                 ProductCategoryFilter.empty(),
                 ProductSort.NEWEST,
                 1,
@@ -316,6 +317,9 @@ public class ProductRepository {
 
         params.put("categoryId", normalizedCategoryId);
         params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keyword", condition.keyword());
+        params.put("keywordPrefix", toKeywordPrefix(condition.keyword()));
+        params.put("productCodeExactMatch", isProductCodeExactMatch(condition.keyword()));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -337,6 +341,7 @@ public class ProductRepository {
         params.put("chairTasteIds", chairTasteIds);
         params.put("storageUsageIds", storageUsageIds);
         params.put("storageTasteIds", storageTasteIds);
+        params.put("tasteNames", condition.tasteNames() == null ? List.of() : condition.tasteNames());
         return params;
     }
 
@@ -385,6 +390,31 @@ public class ProductRepository {
             return null;
         }
         return "%" + keyword.trim() + "%";
+    }
+
+    /**
+     * 商品コード前方一致用のLIKE文字列を生成する。
+     *
+     * @param keyword キーワード
+     * @return 前方一致LIKE文字列。キーワードがない場合はnull
+     */
+    private String toKeywordPrefix(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        return keyword.trim() + "%";
+    }
+
+    /**
+     * 入力キーワードの文字数から商品コード完全一致を適用するか判定する。
+     *
+     * <p>9文字以上の場合は完全一致、未満の場合は前方一致。
+     *
+     * @param keyword キーワード
+     * @return 9文字以上である場合{@code true}
+     */
+    private boolean isProductCodeExactMatch(String keyword) {
+        return keyword != null && keyword.trim().length() >= 9;
     }
 
     /**
@@ -445,6 +475,7 @@ public class ProductRepository {
                     null,
                     null,
                     false,
+                    List.of(),
                     List.of(),
                     List.of(),
                     ProductCategoryFilter.empty(),

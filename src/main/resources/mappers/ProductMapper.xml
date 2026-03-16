@@ -257,6 +257,40 @@
         )
     </sql>
 
+    <sql id="SearchTasteFilter">
+        <if test="tasteNames != null and !tasteNames.isEmpty()">
+            AND (
+            EXISTS (
+            SELECT 1 FROM product_desk_attributes da
+            JOIN desk_tastes dt ON dt.taste_id = da.taste_id
+            WHERE da.product_id = p.product_id
+            AND dt.display_name IN
+            <foreach item="name" collection="tasteNames" open="(" separator="," close=")">
+                #{name}
+            </foreach>
+            )
+            OR EXISTS (
+            SELECT 1 FROM product_chair_attributes ca
+            JOIN chair_tastes ct ON ct.taste_id = ca.taste_id
+            WHERE ca.product_id = p.product_id
+            AND ct.display_name IN
+            <foreach item="name" collection="tasteNames" open="(" separator="," close=")">
+                #{name}
+            </foreach>
+            )
+            OR EXISTS (
+            SELECT 1 FROM product_storage_attributes sa
+            JOIN storage_tastes st ON st.taste_id = sa.taste_id
+            WHERE sa.product_id = p.product_id
+            AND st.display_name IN
+            <foreach item="name" collection="tasteNames" open="(" separator="," close=")">
+                #{name}
+            </foreach>
+            )
+            )
+        </if>
+    </sql>
+
     <sql id="BaseProductWhere">
         p.sale_start_at &lt;= #{now}
         AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
@@ -268,12 +302,23 @@
         </if>
         <if test="keywordLike != null and keywordLike != ''">
             AND (
-            p.product_name ILIKE #{keywordLike}
+            normalize_search_text(p.product_name) LIKE #{keywordLike}
+            OR normalize_search_text(p.variation_name) LIKE #{keywordLike}
+            OR normalize_search_text(p.description) LIKE #{keywordLike}
             OR EXISTS (
             SELECT 1
             FROM product_variants pvk
             WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
+            AND (
+            <choose>
+                <when test="productCodeExactMatch == true">
+                    normalize_search_text(pvk.product_code) = #{keyword}
+                </when>
+                <otherwise>
+                    normalize_search_text(pvk.product_code) LIKE #{keywordPrefix}
+                </otherwise>
+            </choose>
+            )
             )
             )
         </if>
@@ -294,6 +339,7 @@
         <if test="hasStorageFilter">
             <include refid="StorageAttributeFilter"/>
         </if>
+        <include refid="SearchTasteFilter"/>
     </sql>
 
     <select id="countProducts" parameterType="map" resultType="long">
@@ -516,6 +562,18 @@
         FROM storage_tastes
         WHERE is_active = TRUE
         ORDER BY sort_order ASC, taste_id ASC
+    </select>
+
+    <select id="selectAllDeskTasteNames" resultType="string">
+        SELECT display_name FROM desk_tastes ORDER BY sort_order ASC, taste_id ASC
+    </select>
+
+    <select id="selectAllChairTasteNames" resultType="string">
+        SELECT display_name FROM chair_tastes ORDER BY sort_order ASC, taste_id ASC
+    </select>
+
+    <select id="selectAllStorageTasteNames" resultType="string">
+        SELECT display_name FROM storage_tastes ORDER BY sort_order ASC, taste_id ASC
     </select>
 
     <select id="selectCurrentTaxRatePercent" resultType="java.math.BigDecimal">
