@@ -13,48 +13,67 @@
 
 ### 1.1 キーワード検索
 
-```
-[ブラウザ]
-    │  GET /products/search?q=キーワード&...
-    ▼
-[CatalogController#searchResults]
-    │  1. ProductFilterOptionService.loadOptionsBundle()
-    │     └─ DB: colors, price_range 取得
-    │  2. ProductListSearchService.buildSearchCondition()
-    │     ├─ キーワードの全角→半角正規化（Java層）
-    │     ├─ 価格帯ID・カラーキー → 型付きオブジェクトへ変換
-    │     └─ ページ番号・サイズのバリデーション
-    │  3. ProductListSearchService.searchWithPageCorrection()
-    │     └─ ProductService.searchProducts(condition)
-    │        └─ ProductRepository(MyBatis)
-    │           └─ SQL:
-    │              ① 商品コード完全一致検索
-    │              ② ヒット無しの場合のみ商品コード前方一致検索
-    │              ③ product_name / variation_name / description 部分一致検索
-    │              ④ カテゴリ・カラー・価格帯・在庫フィルタ適用
-    │  4. ページ超過時は最終ページへ補正し再検索
-    │  5. Model に検索結果・フィルタ選択肢を設定
-    ▼
-[product-list-search-results.html レンダリング]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant C as CatalogController
+    participant FO as ProductFilterOptionService
+    participant LS as ProductListSearchService
+    participant PS as ProductService
+    participant DB as Database
+
+    B->>C: GET /products/search?q=キーワード&...
+    C->>FO: loadOptionsBundle()
+    FO->>DB: colors, price_range 取得
+    DB-->>FO: 絞り込み候補
+    FO-->>C: ProductFilterOptionsBundle
+    C->>LS: buildSearchCondition(...)
+    Note over LS: 全角→半角正規化<br/>価格帯ID・カラーキー変換<br/>ページ番号・サイズ検証
+    LS-->>C: ProductSearchCondition
+    C->>LS: searchWithPageCorrection(condition)
+    LS->>PS: searchProducts(condition)
+    PS->>DB: ① 商品コード完全一致検索
+    alt ヒットなし
+        PS->>DB: ② 商品コード前方一致検索
+    end
+    PS->>DB: ③ product_name等 部分一致検索 + フィルタ適用
+    DB-->>PS: 検索結果
+    PS-->>LS: ProductListPage
+    alt ページ超過
+        LS->>PS: 最終ページで再検索
+        PS-->>LS: 補正後結果
+    end
+    LS-->>C: ProductListSearchResult
+    Note over C: Model へ検索結果・フィルタ選択肢を設定
+    C-->>B: product-list-search-results.html
 ```
 
 ### 1.2 商品詳細表示
 
-```
-[ブラウザ]
-    │  GET /products/{productId}
-    ▼
-[CatalogController#productDetail]
-    │  1. ProductService.findDetail(productId, selectedVariantId?)
-    │     └─ DB: products, product_variants, colors,
-    │             product_desk/chair/storage_attributes,
-    │             recommended_related_products 結合取得
-    │  2. 選択中バリアント・在庫状態を解決
-    │  3. ログイン会員の場合: お気に入り状態を取得
-    │  4. セッションより「最近見た商品」リストを更新
-    │  5. Model に ProductDetailView を設定
-    ▼
-[product-detail.html レンダリング]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant C as CatalogController
+    participant PS as ProductService
+    participant MS as MemberService
+    participant DB as Database
+    participant S as Session
+
+    B->>C: GET /products/{productId}
+    C->>PS: findDetail(productId, selectedVariantId?)
+    PS->>DB: products, product_variants, colors,<br/>product_desk/chair/storage_attributes,<br/>recommended_related_products 結合取得
+    DB-->>PS: 商品詳細データ
+    Note over PS: 選択中バリアント・在庫状態を解決
+    PS-->>C: ProductDetailView
+    opt ログイン会員
+        C->>MS: isFavorite(memberId, productId)
+        MS->>DB: member_favorites 確認
+        DB-->>MS: お気に入り状態
+        MS-->>C: boolean
+    end
+    C->>S: 最近見た商品リストを更新（上限４件）
+    Note over C: Model に ProductDetailView を設定
+    C-->>B: product-detail.html
 ```
 
 ---
@@ -63,132 +82,138 @@
 
 ### 2.1 カート追加
 
-```
-[ブラウザ]
-    │  POST /cart/add  (productVariantId, quantity, assemblyRequested)
-    ▼
-[CartController#addToCart]
-    │  1. CartService.addToCart(request, response, ...)
-    │     ├─ Cookie から CartCookieStore を取得
-    │     ├─ 同一バリアント・同一組立フラグが既存ならば数量加算（上限99）
-    │     └─ Cookie を更新して保存
-    │  2. flash メッセージ設定
-    ▼
-[redirect: 元の商品詳細ページ or カート]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant C as CartController
+    participant CS as CartService
+
+    B->>C: POST /cart/add (productVariantId, quantity, assemblyRequested)
+    C->>CS: addToCart(request, response, ...)
+    Note over CS: Cookie から CartCookieStore を取得
+    alt 同一バリアント・同一組立フラグが既存
+        Note over CS: 数量加算（上限99）
+    else 新規アイテム
+        Note over CS: リストへ追加
+    end
+    Note over CS: Cookie を更新して保存（有効期限30日）
+    CS-->>C: 更新済みカート
+    Note over C: flash メッセージ設定
+    C-->>B: redirect: 元の商品詳細ページ or カート
 ```
 
 ### 2.2 購入フロー（注文確定まで）
 
-```
-[ブラウザ]
-    │  GET /cart/checkout/method
-    ▼
-[CartController#checkoutMethod]
-    │  カート空チェック → 空の場合はカートへリダイレクト
-    ▼
-[checkout-method.html]（ゲスト / 会員ログイン 選択）
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant C as CartController
+    participant OS as OrderService
+    participant CS as CartService
+    participant NS as NotificationMailService
+    participant DB as Database
+    participant S as Session
 
-    │  POST /cart/checkout/method
-    ▼
-[CartController#submitCheckoutMethod]
-    │  選択方式をセッション保存後 /cart/checkout/input へ転送
+    B->>C: GET /cart/checkout/method
+    Note over C: カート空チェック（空ならカートへリダイレクト）
+    C-->>B: checkout-method.html（ゲスト/会員ログイン選択）
 
-─────────────────────────────────────────
-[ブラウザ]
-    │  GET /cart/checkout/input
-    ▼
-[CartController#checkoutInput]
-    │  1. ログイン会員の場合: OrderService.buildMemberPrefill()
-    │     └─ DB: members テーブルから氏名・住所取得
-    │  2. Model に CheckoutInputForm（初期値あり）を設定
-    ▼
-[checkout-input.html]
+    B->>C: POST /cart/checkout/method
+    Note over C,S: 選択方式をセッション保存
+    C-->>B: redirect: /cart/checkout/input
 
-    │  POST /cart/checkout/input
-    ▼
-[CartController#submitCheckoutInput]
-    │  1. Bean Validation（@Valid）
-    │  2. 条件付きバリデーション（法人の場合 company_name 必須 等）
-    │  3. フォームを正規化（全角→半角 等）
-    │  4. セッション保存（CHECKOUT_FORM_SESSION_KEY）
-    │  5. ワンタイムトークン生成・セッション保存
-    ▼
-[redirect: /cart/checkout/confirm]
+    B->>C: GET /cart/checkout/input
+    opt ログイン会員
+        C->>OS: buildMemberPrefill(member)
+        OS->>DB: members テーブルから氏名・住所取得
+        DB-->>OS: 会員情報
+        OS-->>C: CheckoutMemberPrefill
+    end
+    C-->>B: checkout-input.html（初期値あり）
 
-─────────────────────────────────────────
-[ブラウザ]
-    │  GET /cart/checkout/confirm
-    ▼
-[CartController#checkoutConfirm]
-    │  1. セッションから CheckoutInputForm 取得
-    │  2. CartService.getCart() でカート内容取得
-    │  3. 消費税率を DB から取得
-    │  4. 送料・組立費・税込合計を計算表示
-    ▼
-[checkout-confirm.html]
+    B->>C: POST /cart/checkout/input
+    Note over C: Bean Validation + 条件付き検証（法人時 company_name 必須）
+    Note over C: フォーム正規化（全角→半角等）
+    Note over C,S: セッション保存（CheckoutInputForm）・ワンタイムトークン生成
+    C-->>B: redirect: /cart/checkout/confirm
 
-    │  POST /cart/checkout/confirm  (one-time token)
-    ▼
-[CartController#submitCheckoutConfirm]
-    │  1. セッション内トークンと照合（CSRF二重送信防止）
-    │  2. OrderService.placeOrder(cartView, form, member?)
-    │     ├─ 注文番号採番（order_number_counters テーブルをロック更新）
-    │     ├─ orders / order_items / order_status_histories INSERT
-    │     ├─ CartService.clearCart() （Cookie クリア）
-    │     └─ トランザクションコミット後メール送信予約
-    │  3. セッションから CheckoutInputForm・トークンを削除
-    │  4. 注文完了情報をフラッシュ属性へ設定
-    ▼
-[redirect: /cart/checkout/complete]
+    B->>C: GET /cart/checkout/confirm
+    C->>CS: getCart()
+    CS-->>C: CartView
+    C->>DB: 消費税率取得
+    DB-->>C: tax_rate_percent
+    Note over C: 送料・組立費・税込合計を計算
+    C-->>B: checkout-confirm.html
 
-─────────────────────────────────────────
-[ブラウザ]
-    │  GET /cart/checkout/complete
-    ▼
-[CartController#checkoutComplete]
-    │  フラッシュ属性から OrderCompleteView 取得
-    ▼
-[checkout-complete.html]
+    B->>C: POST /cart/checkout/confirm（one-time token）
+    Note over C: セッション内トークンと照合（二重送信防止）
+    C->>OS: placeOrder(cartView, form, member?)
+    OS->>DB: order_number_counters SELECT FOR UPDATE → 採番
+    OS->>DB: orders INSERT
+    OS->>DB: order_items INSERT（カート明細分）
+    OS->>DB: order_status_histories INSERT（received）
+    Note over OS: トランザクションコミット
+    OS->>CS: clearCart()
+    Note over CS: Cookie クリア
+    OS->>NS: sendOrderCompleteMail()（コミット後非同期）
+    OS-->>C: OrderCompleteView
+    Note over C,S: セッションからフォーム・トークンを削除
+    C-->>B: redirect: /cart/checkout/complete
+
+    B->>C: GET /cart/checkout/complete
+    Note over C: フラッシュ属性から OrderCompleteView 取得
+    C-->>B: checkout-complete.html
 ```
 
 ---
 
 ## 3. 会員登録フロー
 
-```
-[ブラウザ]
-    │  GET /members/register
-    ▼
-[MemberRegistrationController#showForm]
-    │  セッションに保留フォームあれば初期値として設定
-    ▼
-[member-register.html]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant C as MemberRegistrationController
+    participant MS as MemberService
+    participant SS as MemberSessionService
+    participant NS as NotificationMailService
+    participant DB as Database
+    participant S as Session
 
-    │  POST /members/register/confirm
-    ▼
-[MemberRegistrationController#confirm]
-    │  1. Bean Validation
-    │  2. メールアドレス重複チェック（MemberService.existsByEmail）
-    │  3. 条件付きバリデーション（法人区分 等）
-    │  4. フォームをセッション保存
-    ▼
-[member-register-confirm.html]
+    B->>C: GET /members/register
+    opt セッションに保留フォームあり
+        C->>S: 保留フォームを取得し初期値設定
+    end
+    C-->>B: member-register.html
 
-    │  POST /members/register/complete
-    ▼
-[MemberRegistrationController#complete]
-    │  1. セッションから保留フォーム取得
-    │  2. MemberService.registerMember(form)
-    │     ├─ メールアドレス重複チェック（二重送信対策）
-    │     ├─ パスワードをBCryptでハッシュ化
-    │     └─ members テーブルへ INSERT
-    │  3. MemberSessionService.login() でセッション確立
-    │  4. NotificationMailService.sendMemberRegistrationMail()
-    │  5. セッションから保留フォームを削除
-    ▼
-[redirect: /members/register/complete]
-    ▼
-[member-register-complete.html]
+    B->>C: POST /members/register/confirm
+    Note over C: Bean Validation
+    C->>MS: existsByEmail(email)
+    MS->>DB: members テーブル検索
+    DB-->>MS: 存在確認結果
+    MS-->>C: boolean
+    Note over C: 条件付きバリデーション（法人区分等）
+    alt エラーあり
+        C-->>B: member-register.html（エラー表示）
+    else エラーなし
+        Note over C: フォーム正規化
+        C->>S: 保留フォームをセッション保存
+        C-->>B: member-register-confirm.html
+    end
+
+    B->>C: POST /members/register/complete
+    C->>S: 保留フォームを取得
+    C->>MS: registerMember(form)
+    Note over MS: existsByEmail（二重送信対策再チェック）
+    Note over MS: BCryptPasswordEncoder#encode(password)
+    MS->>DB: members テーブルへ INSERT
+    DB-->>MS: member_id
+    MS-->>C: 登録済み会員情報
+    C->>SS: login(session, memberSessionUser)
+    C->>NS: sendMemberRegistrationMail(member)
+    C->>S: 保留フォームを削除
+    C-->>B: redirect: /members/register/complete
+    B->>C: GET /members/register/complete
+    C-->>B: member-register-complete.html
 ```
 
 ---
@@ -197,29 +222,36 @@
 
 ### 4.1 ログイン
 
-```
-[ブラウザ]
-    │  POST /login  (spring security フォームログイン)
-    ▼
-[Spring Security UserDetailsService（MemberCredential）]
-    │  1. DB: members テーブルからメールアドレス（小文字で）検索
-    │  2. BCryptPasswordEncoder でパスワード検証
-    │  3. member_status = 'active' チェック
-    │  4. セッションに MemberSessionUser を保存
-    │  5. redirect パラメータに応じた戻り先へリダイレクト
-    ▼
-[ログイン後戻り先（マイページ等）]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant SP as Spring Security
+    participant UDS as UserDetailsService
+    participant DB as Database
+    participant S as Session
+
+    B->>SP: POST /login（email, password）
+    SP->>UDS: loadUserByUsername(email)
+    UDS->>DB: members テーブルをメールアドレス（小文字）で検索
+    DB-->>UDS: 会員情報
+    Note over UDS: BCryptPasswordEncoder でパスワード検証
+    Note over UDS: member_status = 'active' チェック
+    UDS-->>SP: UserDetails
+    Note over SP,S: セッションに MemberSessionUser を保存
+    SP-->>B: redirect パラメータに応じたページへ遷移
 ```
 
 ### 4.2 ログアウト
 
-```
-[ブラウザ]
-    │  POST /logout  (spring security)
-    ▼
-    │  セッション破棄
-    ▼
-[redirect: /]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant SP as Spring Security
+    participant S as Session
+
+    B->>SP: POST /logout
+    Note over SP,S: セッション破棄
+    SP-->>B: redirect: /
 ```
 
 ---
@@ -228,78 +260,94 @@
 
 ### 5.1 購入履歴・再注文
 
-```
-[ブラウザ]
-    │  GET /mypage/orders
-    ▼
-[MyPageController#orders]
-    │  認証チェック → 未認証はログイン画面へ
-    │  OrderService.findOrderHistory(memberId, page)
-    │  └─ DB: orders / order_items ページ付きで取得
-    ▼
-[mypage-orders-list.html]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant C as MyPageController
+    participant OS as OrderService
+    participant CS as CartService
+    participant DB as Database
 
-    │  POST /mypage/orders/{orderId}/reorder
-    ▼
-[MyPageController#reorder]
-    │  1. OrderService.findReorderItems(orderId, memberId)
-    │  2. CartService.bulkAddToCart(reorderItems, ...)
-    ▼
-[redirect: /cart]
+    B->>C: GET /mypage/orders
+    Note over C: 認証チェック（未認証はログイン画面へ）
+    C->>OS: findOrderHistory(memberId, page)
+    OS->>DB: orders / order_items をページ付きで取得
+    DB-->>OS: 注文一覧
+    OS-->>C: MemberOrderHistoryPage
+    C-->>B: mypage-orders-list.html
+
+    B->>C: POST /mypage/orders/{orderId}/reorder
+    C->>OS: findReorderItems(orderId, memberId)
+    OS->>DB: order_items 取得
+    DB-->>OS: 注文明細
+    OS-->>C: List 注文再購入情報
+    C->>CS: bulkAddToCart(reorderItems, ...)
+    C-->>B: redirect: /cart
 ```
 
 ### 5.2 お気に入り
 
-```
-[ブラウザ]
-    │  POST /products/{productId}/favorite  (Ajax / form)
-    ▼
-[CatalogController#toggleFavorite]
-    │  1. 認証チェック
-    │  2. MemberService.toggleFavorite(memberId, productId)
-    │     ├─ 未登録なら INSERT (上限20件チェック)
-    │     └─ 登録済みなら DELETE
-    ▼
-[JSONレスポンス or redirect]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant C as CatalogController
+    participant MS as MemberService
+    participant DB as Database
+
+    B->>C: POST /products/{productId}/favorite
+    Note over C: 認証チェック（未認証は401）
+    C->>MS: toggleFavorite(memberId, productId)
+    MS->>DB: member_favorites 確認
+    alt 未登録
+        Note over MS: 件数チェック（上限20件）
+        MS->>DB: INSERT
+    else 登録済み
+        MS->>DB: DELETE
+    end
+    DB-->>MS: 完了
+    MS-->>C: 更新後状態
+    C-->>B: JSON レスポンス or redirect
 ```
 
 ---
 
 ## 6. バッチ処理フロー
 
-```
-[スケジューラ / 手動起動]
-    │  POST /internal/batch/ranking
-    ▼
-[InternalBatchController]
-    │  Spring Batch Job 起動
-    │  └─ 売れ筋ランキング集計ジョブ
-    │     ├─ Step1: orders / order_items から直近1か月の販売数集計
-    │     ├─ Step2: popular_product_rankings テーブルを UPSERT
-    │     └─ Step3: recommended_related_products テーブルを更新
-    ▼
-[ジョブ実行結果ログ出力]
+```mermaid
+flowchart TD
+    A(["スケジューラ / 手動起動\nPOST /internal/batch/ranking"])
+    B["InternalBatchController"]
+    C["Spring Batch Job 起動\n売れ筋ランキング集計ジョブ"]
+    D["Step1: orders / order_items から\n直近1か月の販売数集計"]
+    E["Step2: popular_product_rankings\nテーブルを UPSERT"]
+    F["Step3: recommended_related_products\nテーブルを更新"]
+    G(["ジョブ実行結果ログ出力"])
+
+    A --> B --> C --> D --> E --> F --> G
 ```
 
 ---
 
 ## 7. お問い合わせフロー
 
-```
-[ブラウザ]
-    │  GET /contact
-    ▼
-[ContactController#showForm]
-    │  ログイン会員の場合は氏名・メールアドレスを初期値設定
-    ▼
-[contact.html]
+```mermaid
+sequenceDiagram
+    participant B as ブラウザ
+    participant C as ContactController
+    participant CS as ContactService
+    participant DB as Database
 
-    │  POST /contact
-    ▼
-[ContactController#submit]
-    │  1. Bean Validation
-    │  2. ContactService.save(form)
-    │     └─ DB: inquiries テーブルへ INSERT
-    ▼
-[redirect: /contact?submitted=true]
+    B->>C: GET /contact
+    opt ログイン会員
+        Note over C: 氏名・メールアドレスを初期値設定
+    end
+    C-->>B: contact.html
+
+    B->>C: POST /contact
+    Note over C: Bean Validation
+    C->>CS: save(form)
+    CS->>DB: inquiries テーブルへ INSERT
+    DB-->>CS: inquiry_id
+    CS-->>C: 保存完了
+    C-->>B: redirect: /contact?submitted=true
 ```

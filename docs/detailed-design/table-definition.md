@@ -258,10 +258,23 @@
 
 **注文ステータス遷移:**
 
-```
-received → awaiting_payment → processing → completed
-                            ↘
-                             cancelled
+```mermaid
+stateDiagram-v2
+    state "受付" as received
+    state "入金待ち" as awaiting_payment
+    state "処理中" as processing
+    state "完了" as completed
+    state "キャンセル" as cancelled
+
+    [*] --> received : 注文受付
+    received --> awaiting_payment : 入金待ちへ
+    received --> cancelled : キャンセル
+    awaiting_payment --> processing : 入金確認
+    awaiting_payment --> cancelled : キャンセル
+    processing --> completed : 処理完了
+    processing --> cancelled : キャンセル
+    completed --> [*]
+    cancelled --> [*]
 ```
 
 ---
@@ -386,29 +399,36 @@ received → awaiting_payment → processing → completed
 
 ## ER図（概念）
 
-```
-members ─────────── member_additional_addresses
-  │  └────────────── member_favorites ──────────────┐
-  │                                                   │
-  └─── orders ───── order_items                      │
-           │                                          │
-           └─── order_status_histories                │
-                                                      │
-products ─────── product_variants ── colors           │
-  │   └──────────────────────────────────────────────┘
-  ├── product_desk_attributes ─── desk_top_shapes
-  │                            └── desk_tastes
-  ├── product_chair_attributes ─── chair_functions
-  │                             ├── chair_materials
-  │                             └── chair_tastes
-  └── product_storage_attributes ─ storage_usages
-                                 └── storage_tastes
+```mermaid
+erDiagram
+    members ||--o{ member_additional_addresses : "holds"
+    members ||--o{ member_favorites : "registers"
+    members ||--o{ orders : "places"
+    members ||--o{ inquiries : "sends"
 
-popular_product_rankings ──── products
-recommended_related_products ─ products (source / recommended)
+    products ||--o{ product_variants : "has"
+    products ||--o| product_desk_attributes : "has"
+    products ||--o| product_chair_attributes : "has"
+    products ||--o| product_storage_attributes : "has"
+    products ||--o{ member_favorites : "favorited_in"
+    products ||--o{ popular_product_rankings : "ranked_in"
+    products ||--o{ recommended_related_products : "is_source_of"
+    products ||--o{ recommended_related_products : "is_recommended_by"
 
-tax_rates
-order_number_counters
-announcements
-inquiries ─── members (optional)
+    product_variants }o--|| colors : "has_color"
+
+    product_desk_attributes }o--|| desk_top_shapes : "has_shape"
+    product_desk_attributes }o--|| desk_tastes : "has_taste"
+
+    product_chair_attributes }o--|| chair_functions : "has_function"
+    product_chair_attributes }o--|| chair_materials : "has_material"
+    product_chair_attributes }o--|| chair_tastes : "has_taste"
+
+    product_storage_attributes }o--|| storage_usages : "has_usage"
+    product_storage_attributes }o--|| storage_tastes : "has_taste"
+
+    orders ||--o{ order_items : "contains"
+    orders ||--o{ order_status_histories : "tracks"
+
+    inquiries }o--o| members : "sent_by"
 ```
