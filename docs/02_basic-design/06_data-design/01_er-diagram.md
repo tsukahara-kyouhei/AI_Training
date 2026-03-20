@@ -220,9 +220,10 @@ erDiagram
         timestamptz updated_at
     }
     order_status_histories {
-        bigint history_id PK
+        bigint order_status_history_id PK
         bigint order_id FK
-        varchar order_status
+        varchar status
+        varchar changed_by_system
         timestamptz changed_at
     }
 
@@ -230,22 +231,28 @@ erDiagram
     announcements {
         bigint announcement_id PK
         varchar title
+        varchar summary
         text body
-        timestamptz publish_start_at
-        timestamptz publish_end_at
+        timestamptz published_start_at
+        timestamptz published_end_at
+        boolean is_active
         timestamptz created_at
         timestamptz updated_at
     }
     inquiries {
         bigint inquiry_id PK
-        varchar inquiry_type
-        varchar order_phase
+        bigint member_id FK
+        varchar company_name
+        varchar department_name
         varchar last_name
         varchar first_name
         varchar email
+        varchar phone
+        varchar inquiry_type
+        varchar order_phase
         varchar product_name
         varchar product_code
-        text message
+        varchar message
         timestamptz created_at
         timestamptz updated_at
     }
@@ -253,25 +260,27 @@ erDiagram
     %% バッチ
     tax_rates {
         bigint tax_rate_id PK
-        numeric rate
-        date effective_from
-        date effective_to
+        numeric tax_rate_percent
+        timestamptz effective_start_at
+        timestamptz effective_end_at
+        boolean is_active
         timestamptz created_at
         timestamptz updated_at
     }
     popular_product_rankings {
         date ranking_date PK
-        integer rank PK
+        smallint rank PK
         bigint product_id FK
-        integer sales_count
+        integer sold_quantity_1m
         timestamptz created_at
         timestamptz updated_at
     }
     recommended_related_products {
-        bigint product_id PK
-        bigint related_product_id PK
-        numeric similarity_score
-        integer rank
+        date recommendation_date PK
+        bigint source_product_id PK
+        smallint rank PK
+        bigint recommended_product_id FK
+        numeric score
         timestamptz created_at
         timestamptz updated_at
     }
@@ -280,6 +289,7 @@ erDiagram
     members ||--o{ member_additional_addresses : "1対多"
     members ||--o{ member_favorites : "1対多"
     members ||--o{ orders : "1対多"
+    members ||--o{ inquiries : "1対多"
     members ||--o| shopping_cart : "1対1"
     shopping_cart ||--o{ cart_lines : "1対多"
     cart_lines }o--|| product_variants : "多対1"

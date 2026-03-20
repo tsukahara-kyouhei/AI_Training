@@ -81,7 +81,8 @@
 
 | # | 列名 | 型 | NULL | 制約 | 日本語名 |
 |---|---|---|---|---|---|
-| 1 | history_id | BIGINT | NOT NULL | PK, GENERATED ALWAYS AS IDENTITY | 履歴ID |
+| 1 | order_status_history_id | BIGINT | NOT NULL | PK, GENERATED ALWAYS AS IDENTITY | 履歴ID |
 | 2 | order_id | BIGINT | NOT NULL | FK → orders.order_id | 注文ID |
-| 3 | order_status | VARCHAR(20) | NOT NULL | - | 注文ステータス |
-| 4 | changed_at | TIMESTAMPTZ | NOT NULL | DEFAULT CURRENT_TIMESTAMP | 変更日時 |
+| 3 | status | VARCHAR(20) | NOT NULL | CHECK: received/awaiting_payment/processing/completed/cancelled | ステータス |
+| 4 | changed_by_system | VARCHAR(40) | NOT NULL | - | 変更実行システム名 |
+| 5 | changed_at | TIMESTAMPTZ | NOT NULL | DEFAULT CURRENT_TIMESTAMP | 変更日時 |
