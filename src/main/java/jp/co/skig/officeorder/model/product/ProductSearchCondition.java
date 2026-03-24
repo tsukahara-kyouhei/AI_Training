@@ -12,6 +12,7 @@ public record ProductSearchCondition(
         boolean inStockOnly,
         List<PriceBand> priceBands,
         List<Long> colorIds,
+        List<Integer> tasteIds,             // キーワード検索画面向けカテゴリ横断テイストID一覧
         ProductCategoryFilter categoryFilter,
         ProductSort sort,
         int page,

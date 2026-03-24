@@ -257,6 +257,38 @@
         )
     </sql>
 
+    <sql id="SearchTasteFilter">
+        AND (
+            EXISTS (
+                SELECT 1
+                FROM product_desk_attributes xda
+                WHERE xda.product_id = p.product_id
+                  AND xda.taste_id IN
+                <foreach collection="tasteIds" item="tid" open="(" close=")" separator=",">
+                    #{tid}
+                </foreach>
+            )
+            OR EXISTS (
+                SELECT 1
+                FROM product_chair_attributes xca
+                WHERE xca.product_id = p.product_id
+                  AND xca.taste_id IN
+                <foreach collection="tasteIds" item="tid" open="(" close=")" separator=",">
+                    #{tid}
+                </foreach>
+            )
+            OR EXISTS (
+                SELECT 1
+                FROM product_storage_attributes xsa
+                WHERE xsa.product_id = p.product_id
+                  AND xsa.taste_id IN
+                <foreach collection="tasteIds" item="tid" open="(" close=")" separator=",">
+                    #{tid}
+                </foreach>
+            )
+        )
+    </sql>
+
     <sql id="BaseProductWhere">
         p.sale_start_at &lt;= #{now}
         AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
@@ -268,12 +300,17 @@
         </if>
         <if test="keywordLike != null and keywordLike != ''">
             AND (
-            p.product_name ILIKE #{keywordLike}
+            p.product_name      ILIKE #{keywordLike}
+            OR p.variation_name ILIKE #{keywordLike}
+            OR p.description    ILIKE #{keywordLike}
             OR EXISTS (
             SELECT 1
             FROM product_variants pvk
             WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
+            AND (
+                pvk.product_code = #{keywordExact}
+                OR pvk.product_code ILIKE #{keywordPrefix}
+            )
             )
             )
         </if>
@@ -293,6 +330,9 @@
         </if>
         <if test="hasStorageFilter">
             <include refid="StorageAttributeFilter"/>
+        </if>
+        <if test="hasSearchTasteFilter">
+            <include refid="SearchTasteFilter"/>
         </if>
     </sql>
 
@@ -529,6 +569,3 @@
     </select>
 
 </mapper>
-
-
-

@@ -56,7 +56,8 @@ public class ProductFilterOptionService {
                 productFilterOptionRepository.findActiveChairMaterialOptions(),
                 productFilterOptionRepository.findActiveChairTasteOptions(),
                 productFilterOptionRepository.findActiveStorageUsageOptions(),
-                productFilterOptionRepository.findActiveStorageTasteOptions()
+                productFilterOptionRepository.findActiveStorageTasteOptions(),
+                productFilterOptionRepository.findActiveDeskTasteOptions()  // searchTasteOptions として desk_tastes を使用
         );
     }
 
@@ -418,6 +419,19 @@ public class ProductFilterOptionService {
                 .map(CategoryFilterOption::id)
                 .distinct()
                 .toList();
+    }
+
+    /**
+     * キーワード検索画面向けテイストIDをホワイトリスト正規化する。
+     *
+     * @param rawTasteIds 画面から渡された生値
+     * @param optionsBundle 使用する候補群
+     * @return 正規化済みテイストID一覧
+     */
+    public List<Integer> normalizeSearchTasteIds(List<Integer> rawTasteIds,
+                                                 ProductFilterOptionsBundle optionsBundle) {
+        List<Integer> allowedTasteIds = extractOptionIds(optionsBundle.searchTasteOptions());
+        return normalizeIntegerOptions(rawTasteIds, allowedTasteIds);
     }
 
     /**

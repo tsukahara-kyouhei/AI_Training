@@ -13,7 +13,8 @@ public record ProductFilterOptionsBundle(
         List<CategoryFilterOption> chairMaterialOptions,
         List<CategoryFilterOption> chairTasteOptions,
         List<CategoryFilterOption> storageUsageOptions,
-        List<CategoryFilterOption> storageTasteOptions
+        List<CategoryFilterOption> storageTasteOptions,
+        List<CategoryFilterOption> searchTasteOptions   // キーワード検索画面向けテイスト選択肢
 ) {
 
     public ProductFilterOptionsBundle {
@@ -25,6 +26,7 @@ public record ProductFilterOptionsBundle(
         chairTasteOptions = immutableOrEmpty(chairTasteOptions);
         storageUsageOptions = immutableOrEmpty(storageUsageOptions);
         storageTasteOptions = immutableOrEmpty(storageTasteOptions);
+        searchTasteOptions = immutableOrEmpty(searchTasteOptions);
     }
 
     private static <T> List<T> immutableOrEmpty(List<T> values) {

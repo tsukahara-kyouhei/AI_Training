@@ -122,6 +122,7 @@ public class ProductService {
                 inStockOnly,
                 priceBandIds,
                 colorIds,
+                List.of(),
                 sort,
                 page,
                 size,
@@ -160,6 +161,7 @@ public class ProductService {
                 inStockOnly,
                 priceBandIds,
                 colorIds,
+                List.of(),
                 sort,
                 page,
                 size,
@@ -200,6 +202,7 @@ public class ProductService {
                 inStockOnly,
                 priceBandIds,
                 colorIds,
+                List.of(),
                 sort,
                 page,
                 size,
@@ -217,6 +220,7 @@ public class ProductService {
      * @param inStockOnly 在庫ありのみ条件
      * @param priceBandIds 価格帯ID一覧
      * @param colorIds 色ID一覧
+     * @param tasteIds カテゴリ横断テイストID一覧（キーワード検索専用）
      * @param sort 並び順
      * @param page ページ番号
      * @param size 表示件数
@@ -230,6 +234,7 @@ public class ProductService {
                                                  boolean inStockOnly,
                                                  List<Integer> priceBandIds,
                                                  List<Long> colorIds,
+                                                 List<Integer> tasteIds,
                                                  String sort,
                                                  int page,
                                                  int size,
@@ -251,12 +256,16 @@ public class ProductService {
         List<Long> uniqueColorIds = colorIds == null
                 ? List.of()
                 : colorIds.stream().filter(id -> id != null).distinct().toList();
+        List<Integer> uniqueTasteIds = tasteIds == null
+                ? List.of()
+                : tasteIds.stream().filter(id -> id != null).distinct().toList();
         return normalize(new ProductSearchCondition(
                 categoryId,
                 keyword == null ? null : keyword.trim(),
                 inStockOnly,
                 bands,
                 uniqueColorIds,
+                uniqueTasteIds,
                 categoryFilter == null ? ProductCategoryFilter.empty() : categoryFilter.normalize(),
                 ProductSort.fromValue(sort, defaultSort),
                 page,
@@ -280,6 +289,7 @@ public class ProductService {
                 condition.inStockOnly(),
                 condition.priceBands() == null ? List.of() : condition.priceBands(),
                 condition.colorIds() == null ? List.of() : condition.colorIds(),
+                condition.tasteIds() == null ? List.of() : condition.tasteIds(),
                 condition.categoryFilter() == null ? ProductCategoryFilter.empty() : condition.categoryFilter().normalize(),
                 condition.sort() == null ? ProductSort.RECOMMENDED : condition.sort(),
                 page,

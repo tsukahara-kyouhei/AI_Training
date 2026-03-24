@@ -8,6 +8,7 @@
 \ir schema/spring-batch-metadata.sql
 \ir schema/content.sql
 \ir schema/batch.sql
+\ir schema/products_search_idx.sql
 
 \ir seed/masters.sql
 \ir seed/products.sql

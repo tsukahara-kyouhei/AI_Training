@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import jp.co.skig.officeorder.common.AppTimeProvider;
+import jp.co.skig.officeorder.common.KeywordNormalizer;
 import jp.co.skig.officeorder.common.MoneyFormatter;
 import jp.co.skig.officeorder.mapper.row.ProductColorCodeMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductDetailMapperRow;
@@ -174,6 +175,7 @@ public class ProductRepository {
                 false,
                 List.of(),
                 List.of(),
+                List.of(),
                 ProductCategoryFilter.empty(),
                 ProductSort.NEWEST,
                 1,
@@ -316,6 +318,8 @@ public class ProductRepository {
 
         params.put("categoryId", normalizedCategoryId);
         params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordExact", toKeywordExact(condition.keyword()));
+        params.put("keywordPrefix", toKeywordPrefix(condition.keyword()));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -326,6 +330,10 @@ public class ProductRepository {
         params.put("hasChairFilter", hasChairFilter);
         params.put("hasStorageFilter", hasStorageFilter);
         params.put("now", appTimeProvider.nowOffsetDateTime());
+
+        List<Integer> tasteIds = condition.tasteIds() == null ? List.of() : condition.tasteIds();
+        params.put("tasteIds", tasteIds);
+        params.put("hasSearchTasteFilter", !tasteIds.isEmpty());
 
         params.put("deskTopShapeIds", deskTopShapeIds);
         params.put("deskTasteIds", deskTasteIds);
@@ -375,16 +383,44 @@ public class ProductRepository {
     }
 
     /**
+     * キーワードを正規化して返す。null または正規化後に空になる場合は null を返す。
+     */
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null || keyword.isBlank()) return null;
+        String normalized = KeywordNormalizer.normalize(keyword.trim());
+        return normalized.isBlank() ? null : normalized;
+    }
+
+    /**
      * キーワード検索用のLIKE文字列を生成する。
      *
      * @param keyword キーワード
      * @return LIKE検索文字列
      */
     private String toKeywordLike(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            return null;
-        }
-        return "%" + keyword.trim() + "%";
+        String k = normalizeKeyword(keyword);
+        return k == null ? null : "%" + k + "%";
+    }
+
+    /**
+     * 完全一致用正規化済みキーワードを返す。
+     *
+     * @param keyword キーワード
+     * @return 正規化済み文字列（null 許容）
+     */
+    private String toKeywordExact(String keyword) {
+        return normalizeKeyword(keyword);
+    }
+
+    /**
+     * 前方一致用LIKE文字列を返す。
+     *
+     * @param keyword キーワード
+     * @return 正規化済み文字列（keyword%、null 許容）
+     */
+    private String toKeywordPrefix(String keyword) {
+        String k = normalizeKeyword(keyword);
+        return k == null ? null : k + "%";
     }
 
     /**
@@ -445,6 +481,7 @@ public class ProductRepository {
                     null,
                     null,
                     false,
+                    List.of(),
                     List.of(),
                     List.of(),
                     ProductCategoryFilter.empty(),
