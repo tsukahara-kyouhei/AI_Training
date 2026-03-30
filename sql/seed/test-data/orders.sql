@@ -301,3 +301,19 @@ SELECT
     o.order_datetime + INTERVAL '6 hour'
 FROM orders o
 WHERE o.order_status = 'cancelled';
+
+-- BUG-001 fix: order_number_counters を当日シードの最大連番で初期化する。
+-- orders テーブルに CURRENT_DATE 付きの order_number を挿入した場合、
+-- counters が空のままだと次回採番が 1 から始まり UNIQUE 制約違反を起こすため、
+-- シード件数に関わらず実際の最大連番を反映させる。
+INSERT INTO order_number_counters (order_date, last_sequence, created_at, updated_at)
+SELECT
+    CURRENT_DATE,
+    MAX(CAST(SUBSTRING(order_number FROM '[0-9]+$') AS INTEGER)),
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM orders
+WHERE order_number LIKE 'ORD' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '-%'
+ON CONFLICT (order_date) DO UPDATE
+    SET last_sequence = GREATEST(order_number_counters.last_sequence, EXCLUDED.last_sequence),
+        updated_at    = CURRENT_TIMESTAMP;
