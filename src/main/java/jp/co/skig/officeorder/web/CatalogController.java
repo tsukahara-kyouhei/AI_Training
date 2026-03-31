@@ -115,10 +115,13 @@ public class CatalogController {
                                 @RequestParam(name = "inStockOnly", defaultValue = "false") boolean inStockOnly,
                                 @RequestParam(name = "priceBand", required = false) List<Integer> rawPriceBandIds,
                                 @RequestParam(name = "color", required = false) List<String> rawColorKeys,
+                                @RequestParam(name = "taste", required = false) List<String> rawTasteNames,
                                 @RequestParam(name = "sort", required = false) String sort,
                                 @RequestParam(name = "page", defaultValue = "1") int page,
                                 @RequestParam(name = "size", defaultValue = "15") int size,
                                 Model model) {
+        List<String> tasteOptions = productFilterOptionService.loadUnifiedSearchTasteOptions();
+        List<String> tasteNames = productFilterOptionService.normalizeSearchTasteNames(rawTasteNames, tasteOptions);
         ProductFilterOptionsBundle optionsBundle = productFilterOptionService.loadOptionsBundle();
         ProductSearchCondition condition = productListSearchService.buildCondition(
                 null,
@@ -130,11 +133,14 @@ public class CatalogController {
                 page,
                 size,
                 ProductSort.RECOMMENDED,
-                optionsBundle
+                optionsBundle,
+                tasteNames
         );
         ProductListSearchResult result = productListSearchService.searchWithPageCorrection(condition);
         applyProductListModel(model, result.condition(), result.productPage(), optionsBundle);
         model.addAttribute("keyword", result.condition().keyword() == null ? "" : result.condition().keyword());
+        model.addAttribute("searchTasteOptions", tasteOptions);
+        model.addAttribute("selectedTasteNames", tasteNames);
         return "pages/product-list-search-results";
     }
 
@@ -149,7 +155,7 @@ public class CatalogController {
                         @RequestParam(name = "deskWidthBand", required = false) List<Integer> rawDeskWidthBandIds,
                         @RequestParam(name = "deskDepthBand", required = false) List<Integer> rawDeskDepthBandIds,
                         @RequestParam(name = "deskHeightBand", required = false) List<Integer> rawDeskHeightBandIds,
-                        @RequestParam(name = "deskTaste", required = false) List<Integer> rawDeskTasteIds,
+                        @RequestParam(name = "taste", required = false) List<Integer> rawTasteIds,
                         @RequestParam(name = "sort", required = false) String sort,
                         @RequestParam(name = "page", defaultValue = "1") int page,
                         @RequestParam(name = "size", defaultValue = "15") int size,
@@ -160,7 +166,7 @@ public class CatalogController {
                 rawDeskWidthBandIds,
                 rawDeskDepthBandIds,
                 rawDeskHeightBandIds,
-                rawDeskTasteIds,
+                rawTasteIds,
                 optionsBundle
         );
         ProductSearchCondition condition = productListSearchService.buildCondition(
@@ -182,9 +188,9 @@ public class CatalogController {
         model.addAttribute("deskWidthBandIds", deskFilter.deskWidthBandIds());
         model.addAttribute("deskDepthBandIds", deskFilter.deskDepthBandIds());
         model.addAttribute("deskHeightBandIds", deskFilter.deskHeightBandIds());
-        model.addAttribute("deskTasteIds", deskFilter.deskTasteIds());
+        model.addAttribute("tasteIds", deskFilter.tasteIds());
         model.addAttribute("deskTopShapeOptions", optionsBundle.deskTopShapeOptions());
-        model.addAttribute("deskTasteOptions", optionsBundle.deskTasteOptions());
+        model.addAttribute("tasteOptions", optionsBundle.tasteOptions());
         return "pages/product-list-category-desk";
     }
 
@@ -197,7 +203,7 @@ public class CatalogController {
                          @RequestParam(name = "color", required = false) List<String> rawColorKeys,
                          @RequestParam(name = "chairFunction", required = false) List<Integer> rawChairFunctionIds,
                          @RequestParam(name = "chairMaterial", required = false) List<Integer> rawChairMaterialIds,
-                         @RequestParam(name = "chairTaste", required = false) List<Integer> rawChairTasteIds,
+                         @RequestParam(name = "taste", required = false) List<Integer> rawTasteIds,
                          @RequestParam(name = "sort", required = false) String sort,
                          @RequestParam(name = "page", defaultValue = "1") int page,
                          @RequestParam(name = "size", defaultValue = "15") int size,
@@ -206,7 +212,7 @@ public class CatalogController {
         ProductCategoryFilter chairFilter = productFilterOptionService.buildChairFilter(
                 rawChairFunctionIds,
                 rawChairMaterialIds,
-                rawChairTasteIds,
+                rawTasteIds,
                 optionsBundle
         );
         ProductSearchCondition condition = productListSearchService.buildCondition(
@@ -226,10 +232,10 @@ public class CatalogController {
         applyProductListModel(model, result.condition(), result.productPage(), optionsBundle);
         model.addAttribute("chairFunctionIds", chairFilter.chairFunctionIds());
         model.addAttribute("chairMaterialIds", chairFilter.chairMaterialIds());
-        model.addAttribute("chairTasteIds", chairFilter.chairTasteIds());
+        model.addAttribute("tasteIds", chairFilter.tasteIds());
         model.addAttribute("chairFunctionOptions", optionsBundle.chairFunctionOptions());
         model.addAttribute("chairMaterialOptions", optionsBundle.chairMaterialOptions());
-        model.addAttribute("chairTasteOptions", optionsBundle.chairTasteOptions());
+        model.addAttribute("tasteOptions", optionsBundle.tasteOptions());
         return "pages/product-list-category-chair";
     }
 
@@ -241,7 +247,7 @@ public class CatalogController {
                            @RequestParam(name = "priceBand", required = false) List<Integer> rawPriceBandIds,
                            @RequestParam(name = "color", required = false) List<String> rawColorKeys,
                            @RequestParam(name = "storageUsage", required = false) List<Integer> rawStorageUsageIds,
-                           @RequestParam(name = "storageTaste", required = false) List<Integer> rawStorageTasteIds,
+                           @RequestParam(name = "taste", required = false) List<Integer> rawTasteIds,
                            @RequestParam(name = "sort", required = false) String sort,
                            @RequestParam(name = "page", defaultValue = "1") int page,
                            @RequestParam(name = "size", defaultValue = "15") int size,
@@ -249,7 +255,7 @@ public class CatalogController {
         ProductFilterOptionsBundle optionsBundle = productFilterOptionService.loadOptionsBundle();
         ProductCategoryFilter storageFilter = productFilterOptionService.buildStorageFilter(
                 rawStorageUsageIds,
-                rawStorageTasteIds,
+                rawTasteIds,
                 optionsBundle
         );
         ProductSearchCondition condition = productListSearchService.buildCondition(
@@ -268,9 +274,9 @@ public class CatalogController {
         ProductListSearchResult result = productListSearchService.searchWithPageCorrection(condition);
         applyProductListModel(model, result.condition(), result.productPage(), optionsBundle);
         model.addAttribute("storageUsageIds", storageFilter.storageUsageIds());
-        model.addAttribute("storageTasteIds", storageFilter.storageTasteIds());
+        model.addAttribute("tasteIds", storageFilter.tasteIds());
         model.addAttribute("storageUsageOptions", optionsBundle.storageUsageOptions());
-        model.addAttribute("storageTasteOptions", optionsBundle.storageTasteOptions());
+        model.addAttribute("tasteOptions", optionsBundle.tasteOptions());
         return "pages/product-list-category-storage";
     }
 

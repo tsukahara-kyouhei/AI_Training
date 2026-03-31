@@ -16,7 +16,8 @@ public record ProductSearchCondition(
         ProductSort sort,
         int page,
         int size,
-        OffsetDateTime saleStartFrom
+        OffsetDateTime saleStartFrom,
+        List<String> tasteNames
 ) {
 }
 

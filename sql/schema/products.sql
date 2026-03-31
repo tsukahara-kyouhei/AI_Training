@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS product_desk_attributes (
     CONSTRAINT fk_product_desk_attributes_top_shape FOREIGN KEY (top_shape_id)
         REFERENCES desk_top_shapes (top_shape_id) ON DELETE RESTRICT,
     CONSTRAINT fk_product_desk_attributes_taste FOREIGN KEY (taste_id)
-        REFERENCES desk_tastes (taste_id) ON DELETE RESTRICT
+        REFERENCES tastes (taste_id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_product_desk_attributes_top_shape ON product_desk_attributes (top_shape_id);
 CREATE INDEX IF NOT EXISTS idx_product_desk_attributes_taste ON product_desk_attributes (taste_id);
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS product_chair_attributes (
     CONSTRAINT fk_product_chair_attributes_material FOREIGN KEY (material_id)
         REFERENCES chair_materials (material_id) ON DELETE RESTRICT,
     CONSTRAINT fk_product_chair_attributes_taste FOREIGN KEY (taste_id)
-        REFERENCES chair_tastes (taste_id) ON DELETE RESTRICT
+        REFERENCES tastes (taste_id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_product_chair_attributes_function ON product_chair_attributes (function_id);
 CREATE INDEX IF NOT EXISTS idx_product_chair_attributes_material ON product_chair_attributes (material_id);
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS product_storage_attributes (
     CONSTRAINT fk_product_storage_attributes_usage FOREIGN KEY (usage_id)
         REFERENCES storage_usages (usage_id) ON DELETE RESTRICT,
     CONSTRAINT fk_product_storage_attributes_taste FOREIGN KEY (taste_id)
-        REFERENCES storage_tastes (taste_id) ON DELETE RESTRICT
+        REFERENCES tastes (taste_id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_product_storage_attributes_usage ON product_storage_attributes (usage_id);
 CREATE INDEX IF NOT EXISTS idx_product_storage_attributes_taste ON product_storage_attributes (taste_id);
@@ -184,3 +184,26 @@ COMMENT ON COLUMN product_storage_attributes.usage_id IS '用途ID';
 COMMENT ON COLUMN product_storage_attributes.taste_id IS 'テイストID';
 COMMENT ON COLUMN product_storage_attributes.created_at IS '作成日時';
 COMMENT ON COLUMN product_storage_attributes.updated_at IS '更新日時';
+
+-- FEAT-001: 半角→全角正規化関数（数字・英字）
+-- 半角カタカナはアプリケーション層（TextNormalizer）で変換済みの値が渡されるため、ここでは変換不要。
+CREATE OR REPLACE FUNCTION normalize_fullwidth(input text) RETURNS text AS $$
+DECLARE
+  result text := input;
+BEGIN
+  -- 半角数字 → 全角 (0-9 → ０-９)
+  result := translate(result,
+    '0123456789',
+    '０１２３４５６７８９');
+  -- 半角英字大文字 → 全角 (A-Z → Ａ-Ｚ)
+  result := translate(result,
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ');
+  -- 半角英字小文字 → 全角 (a-z → ａ-ｚ)
+  result := translate(result,
+    'abcdefghijklmnopqrstuvwxyz',
+    'ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ');
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+

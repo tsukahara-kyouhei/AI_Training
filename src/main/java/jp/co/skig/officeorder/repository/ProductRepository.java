@@ -178,7 +178,8 @@ public class ProductRepository {
                 ProductSort.NEWEST,
                 1,
                 limit,
-                appTimeProvider.nowOffsetDateTime().minusMonths(6)
+                appTimeProvider.nowOffsetDateTime().minusMonths(6),
+                null
         );
         return search(condition).items();
     }
@@ -290,32 +291,39 @@ public class ProductRepository {
         List<Long> colorIds = condition.colorIds() == null ? List.of() : condition.colorIds();
         List<RangeValue> priceRanges = toPriceRanges(condition.priceBands());
         List<Integer> deskTopShapeIds = filter.deskTopShapeIds();
-        List<Integer> deskTasteIds = filter.deskTasteIds();
+        List<Integer> tasteIds = filter.tasteIds();
         List<RangeValue> deskWidthRanges = toRanges(filter.deskWidthBandIds(), DESK_WIDTH_RANGES);
         List<RangeValue> deskDepthRanges = toRanges(filter.deskDepthBandIds(), DESK_DEPTH_RANGES);
         List<RangeValue> deskHeightRanges = toRanges(filter.deskHeightBandIds(), DESK_HEIGHT_RANGES);
         List<Integer> chairFunctionIds = filter.chairFunctionIds();
         List<Integer> chairMaterialIds = filter.chairMaterialIds();
-        List<Integer> chairTasteIds = filter.chairTasteIds();
         List<Integer> storageUsageIds = filter.storageUsageIds();
-        List<Integer> storageTasteIds = filter.storageTasteIds();
 
         boolean hasVariantFilter = condition.inStockOnly()
                 || !colorIds.isEmpty()
                 || !priceRanges.isEmpty();
         boolean hasDeskFilter = category == ProductCategory.DESK && (!deskTopShapeIds.isEmpty()
-                || !deskTasteIds.isEmpty()
+                || !tasteIds.isEmpty()
                 || !deskWidthRanges.isEmpty()
                 || !deskDepthRanges.isEmpty()
                 || !deskHeightRanges.isEmpty());
         boolean hasChairFilter = category == ProductCategory.CHAIR && (!chairFunctionIds.isEmpty()
                 || !chairMaterialIds.isEmpty()
-                || !chairTasteIds.isEmpty());
+                || !tasteIds.isEmpty());
         boolean hasStorageFilter = category == ProductCategory.STORAGE && (!storageUsageIds.isEmpty()
-                || !storageTasteIds.isEmpty());
+                || !tasteIds.isEmpty());
 
         params.put("categoryId", normalizedCategoryId);
-        params.put("keywordLike", toKeywordLike(condition.keyword()));
+        String keyword = condition.keyword();
+        if (keyword != null) {
+            params.put("keywordLike",   "%" + keyword + "%");
+            params.put("keywordExact",  keyword);
+            params.put("keywordPrefix", keyword + "%");
+        } else {
+            params.put("keywordLike",   null);
+            params.put("keywordExact",  null);
+            params.put("keywordPrefix", null);
+        }
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -328,15 +336,18 @@ public class ProductRepository {
         params.put("now", appTimeProvider.nowOffsetDateTime());
 
         params.put("deskTopShapeIds", deskTopShapeIds);
-        params.put("deskTasteIds", deskTasteIds);
+        params.put("tasteIds", tasteIds);
         params.put("deskWidthRanges", deskWidthRanges);
         params.put("deskDepthRanges", deskDepthRanges);
         params.put("deskHeightRanges", deskHeightRanges);
         params.put("chairFunctionIds", chairFunctionIds);
         params.put("chairMaterialIds", chairMaterialIds);
-        params.put("chairTasteIds", chairTasteIds);
         params.put("storageUsageIds", storageUsageIds);
-        params.put("storageTasteIds", storageTasteIds);
+
+        List<String> tasteNames = condition.tasteNames();
+        boolean hasSearchTasteFilter = tasteNames != null && !tasteNames.isEmpty();
+        params.put("searchTasteNames",     hasSearchTasteFilter ? tasteNames : List.of());
+        params.put("hasSearchTasteFilter", hasSearchTasteFilter);
         return params;
     }
 
@@ -372,19 +383,6 @@ public class ProductRepository {
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
-    }
-
-    /**
-     * キーワード検索用のLIKE文字列を生成する。
-     *
-     * @param keyword キーワード
-     * @return LIKE検索文字列
-     */
-    private String toKeywordLike(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            return null;
-        }
-        return "%" + keyword.trim() + "%";
     }
 
     /**
@@ -451,6 +449,7 @@ public class ProductRepository {
                     ProductSort.NEWEST,
                     1,
                     limit + 1,
+                    null,
                     null
             );
             return search(fallbackCondition).items().stream()

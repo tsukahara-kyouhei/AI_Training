@@ -1,5 +1,5 @@
 param(
-    [string]$Host = "localhost",
+    [string]$DbHost = "localhost",
     [int]$Port = 5432,
     [string]$Database = "office_order",
     [string]$Username = "office_order",
@@ -20,7 +20,7 @@ function Invoke-PsqlFile {
 
     & psql `
         -v ON_ERROR_STOP=1 `
-        -h $Host `
+        -h $DbHost `
         -p $Port `
         -U $Username `
         -d $Database `

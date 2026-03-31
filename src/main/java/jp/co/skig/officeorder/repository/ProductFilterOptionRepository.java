@@ -57,12 +57,12 @@ public class ProductFilterOptionRepository {
     }
 
     /**
-     * 有効なデスクテイスト候補を取得する。
+     * 有効なテイスト候補を取得する（全カテゴリ共通）。
      *
      * @return テイスト候補
      */
-    public List<CategoryFilterOption> findActiveDeskTasteOptions() {
-        return productMapper.selectActiveDeskTasteOptions().stream()
+    public List<CategoryFilterOption> findActiveTasteOptions() {
+        return productMapper.selectActiveTasteOptions().stream()
                 .map(this::toCategoryFilterOption)
                 .filter(option -> option != null)
                 .toList();
@@ -93,18 +93,6 @@ public class ProductFilterOptionRepository {
     }
 
     /**
-     * 有効なチェアテイスト候補を取得する。
-     *
-     * @return テイスト候補
-     */
-    public List<CategoryFilterOption> findActiveChairTasteOptions() {
-        return productMapper.selectActiveChairTasteOptions().stream()
-                .map(this::toCategoryFilterOption)
-                .filter(option -> option != null)
-                .toList();
-    }
-
-    /**
      * 有効な収納家具用途候補を取得する。
      *
      * @return 用途候補
@@ -117,14 +105,14 @@ public class ProductFilterOptionRepository {
     }
 
     /**
-     * 有効な収納家具テイスト候補を取得する。
+     * 検索結果画面用の統合テイスト選択肢を取得する。
      *
-     * @return テイスト候補
+     * @return テイスト display_name のリスト
      */
-    public List<CategoryFilterOption> findActiveStorageTasteOptions() {
-        return productMapper.selectActiveStorageTasteOptions().stream()
-                .map(this::toCategoryFilterOption)
-                .filter(option -> option != null)
+    public List<String> findUnifiedSearchTasteOptions() {
+        return productMapper.selectUnifiedSearchTasteOptions()
+                .stream()
+                .map(ProductFilterOptionMapperRow::displayName)
                 .toList();
     }
 

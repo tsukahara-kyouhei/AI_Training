@@ -261,7 +261,8 @@ public class ProductService {
                 ProductSort.fromValue(sort, defaultSort),
                 page,
                 size,
-                saleStartFrom
+                saleStartFrom,
+                null
         ));
     }
 
@@ -284,7 +285,8 @@ public class ProductService {
                 condition.sort() == null ? ProductSort.RECOMMENDED : condition.sort(),
                 page,
                 size,
-                condition.saleStartFrom()
+                condition.saleStartFrom(),
+                condition.tasteNames()
         );
     }
 

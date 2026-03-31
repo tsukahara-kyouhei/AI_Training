@@ -7,12 +7,12 @@ VALUES
   ('その他', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO desk_tastes (display_name, sort_order, is_active)
+INSERT INTO tastes (display_name, sort_order, is_active)
 VALUES
   ('ベーシック', 1, TRUE),
   ('カジュアル', 2, TRUE),
-  ('シンプル', 3, TRUE),
-  ('モダン', 4, TRUE),
+  ('シンプル',   3, TRUE),
+  ('モダン',     4, TRUE),
   ('ナチュラル', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
@@ -33,15 +33,6 @@ VALUES
   ('木製', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO chair_tastes (display_name, sort_order, is_active)
-VALUES
-  ('ベーシック', 1, TRUE),
-  ('カジュアル', 2, TRUE),
-  ('シンプル', 3, TRUE),
-  ('モダン', 4, TRUE),
-  ('ナチュラル', 5, TRUE)
-ON CONFLICT DO NOTHING;
-
 INSERT INTO storage_usages (display_name, sort_order, is_active)
 VALUES
   ('小物収納', 1, TRUE),
@@ -50,15 +41,6 @@ VALUES
   ('扉付き', 4, TRUE),
   ('鍵付き', 5, TRUE),
   ('引出し付き', 6, TRUE)
-ON CONFLICT DO NOTHING;
-
-INSERT INTO storage_tastes (display_name, sort_order, is_active)
-VALUES
-  ('ベーシック', 1, TRUE),
-  ('カジュアル', 2, TRUE),
-  ('シンプル', 3, TRUE),
-  ('モダン', 4, TRUE),
-  ('ナチュラル', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO colors (color_name, color_code, swatch_type, sort_order, is_active)

@@ -6,6 +6,7 @@ import jp.co.skig.officeorder.model.product.ProductListPage;
 import jp.co.skig.officeorder.model.product.ProductListSearchResult;
 import jp.co.skig.officeorder.model.product.ProductSearchCondition;
 import jp.co.skig.officeorder.model.product.ProductSort;
+import jp.co.skig.officeorder.util.TextNormalizer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -159,6 +160,64 @@ public class ProductListSearchService {
     }
 
     /**
+     * 検索結果画面向けの検索条件を組み立てる（キーワード正規化・テイスト絞り込み対応）。
+     *
+     * @param categoryId カテゴリID
+     * @param rawKeyword 生のキーワード（全角正規化前）
+     * @param inStockOnly 在庫ありのみ条件
+     * @param rawPriceBandIds 価格帯の生入力値
+     * @param rawColorKeys カラーの生入力値
+     * @param sort 並び順
+     * @param page ページ番号
+     * @param size 表示件数
+     * @param defaultSort デフォルト並び順
+     * @param optionsBundle 使用する絞り込み候補群
+     * @param tasteNames ホワイトリスト照合済みのテイスト名リスト
+     * @return 正規化済み検索条件
+     */
+    public ProductSearchCondition buildCondition(String categoryId,
+                                                 String rawKeyword,
+                                                 boolean inStockOnly,
+                                                 List<Integer> rawPriceBandIds,
+                                                 List<String> rawColorKeys,
+                                                 String sort,
+                                                 int page,
+                                                 int size,
+                                                 ProductSort defaultSort,
+                                                 ProductFilterOptionsBundle optionsBundle,
+                                                 List<String> tasteNames) {
+        String normalizedKeyword = normalizeSearchKeyword(rawKeyword);
+        ProductSearchCondition base = buildCondition(
+                categoryId, normalizedKeyword, inStockOnly,
+                rawPriceBandIds, rawColorKeys, sort, page, size, defaultSort, optionsBundle
+        );
+        return new ProductSearchCondition(
+                base.categoryId(),
+                base.keyword(),
+                base.inStockOnly(),
+                base.priceBands(),
+                base.colorIds(),
+                base.categoryFilter(),
+                base.sort(),
+                base.page(),
+                base.size(),
+                base.saleStartFrom(),
+                tasteNames != null ? tasteNames : List.of()
+        );
+    }
+
+    /**
+     * 検索キーワードを全角へ正規化する（半角数字・英字・カタカナ → 全角）。
+     * null または空白のみの場合は null を返す。
+     */
+    private String normalizeSearchKeyword(String rawKeyword) {
+        if (rawKeyword == null || rawKeyword.isBlank()) {
+            return null;
+        }
+        return TextNormalizer.toFullWidth(rawKeyword.strip());
+    }
+
+    /**
      * 検索結果を取得し、ページ超過時は最終ページへ補正して再検索する。
      *
      * <p>絞り込み変更や件数変動で存在しないページ番号が指定されても、
@@ -181,7 +240,8 @@ public class ProductListSearchService {
                     condition.sort(),
                     totalPages,
                     condition.size(),
-                    condition.saleStartFrom()
+                    condition.saleStartFrom(),
+                    condition.tasteNames()
             );
             return new ProductListSearchResult(corrected, productService.search(corrected));
         }

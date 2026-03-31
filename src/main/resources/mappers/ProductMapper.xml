@@ -151,9 +151,9 @@
                 #{value}
             </foreach>
         </if>
-        <if test="deskTasteIds != null and deskTasteIds.size() &gt; 0">
+        <if test="tasteIds != null and tasteIds.size() &gt; 0">
             AND da.taste_id IN
-            <foreach collection="deskTasteIds" item="value" open="(" close=")" separator=",">
+            <foreach collection="tasteIds" item="value" open="(" close=")" separator=",">
                 #{value}
             </foreach>
         </if>
@@ -228,9 +228,9 @@
                 #{value}
             </foreach>
         </if>
-        <if test="chairTasteIds != null and chairTasteIds.size() &gt; 0">
+        <if test="tasteIds != null and tasteIds.size() &gt; 0">
             AND ca.taste_id IN
-            <foreach collection="chairTasteIds" item="value" open="(" close=")" separator=",">
+            <foreach collection="tasteIds" item="value" open="(" close=")" separator=",">
                 #{value}
             </foreach>
         </if>
@@ -248,13 +248,50 @@
                 #{value}
             </foreach>
         </if>
-        <if test="storageTasteIds != null and storageTasteIds.size() &gt; 0">
+        <if test="tasteIds != null and tasteIds.size() &gt; 0">
             AND sa.taste_id IN
-            <foreach collection="storageTasteIds" item="value" open="(" close=")" separator=",">
+            <foreach collection="tasteIds" item="value" open="(" close=")" separator=",">
                 #{value}
             </foreach>
         </if>
         )
+    </sql>
+
+    <sql id="SearchTasteFilter">
+        <if test="hasSearchTasteFilter">
+            AND (
+              EXISTS (
+                SELECT 1
+                FROM product_desk_attributes da
+                JOIN tastes t ON da.taste_id = t.taste_id
+                WHERE da.product_id = p.product_id
+                  AND t.display_name IN
+                  <foreach collection="searchTasteNames" item="name" open="(" separator="," close=")">
+                    #{name}
+                  </foreach>
+              )
+              OR EXISTS (
+                SELECT 1
+                FROM product_chair_attributes ca
+                JOIN tastes t ON ca.taste_id = t.taste_id
+                WHERE ca.product_id = p.product_id
+                  AND t.display_name IN
+                  <foreach collection="searchTasteNames" item="name" open="(" separator="," close=")">
+                    #{name}
+                  </foreach>
+              )
+              OR EXISTS (
+                SELECT 1
+                FROM product_storage_attributes sa
+                JOIN tastes t ON sa.taste_id = t.taste_id
+                WHERE sa.product_id = p.product_id
+                  AND t.display_name IN
+                  <foreach collection="searchTasteNames" item="name" open="(" separator="," close=")">
+                    #{name}
+                  </foreach>
+              )
+            )
+        </if>
     </sql>
 
     <sql id="BaseProductWhere">
@@ -268,12 +305,18 @@
         </if>
         <if test="keywordLike != null and keywordLike != ''">
             AND (
-            p.product_name ILIKE #{keywordLike}
+            normalize_fullwidth(p.product_name) ILIKE #{keywordLike}
+            OR (p.variation_name IS NOT NULL
+                AND normalize_fullwidth(p.variation_name) ILIKE #{keywordLike})
+            OR normalize_fullwidth(p.description) ILIKE #{keywordLike}
             OR EXISTS (
             SELECT 1
             FROM product_variants pvk
             WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
+            AND (
+              normalize_fullwidth(pvk.product_code) = #{keywordExact}
+              OR normalize_fullwidth(pvk.product_code) ILIKE #{keywordPrefix}
+            )
             )
             )
         </if>
@@ -294,6 +337,7 @@
         <if test="hasStorageFilter">
             <include refid="StorageAttributeFilter"/>
         </if>
+        <include refid="SearchTasteFilter"/>
     </sql>
 
     <select id="countProducts" parameterType="map" resultType="long">
@@ -464,11 +508,11 @@
         ORDER BY sort_order ASC, top_shape_id ASC
     </select>
 
-    <select id="selectActiveDeskTasteOptions" resultMap="ProductFilterOptionRowMap">
+    <select id="selectActiveTasteOptions" resultMap="ProductFilterOptionRowMap">
         SELECT
         taste_id AS option_id,
         display_name
-        FROM desk_tastes
+        FROM tastes
         WHERE is_active = TRUE
         ORDER BY sort_order ASC, taste_id ASC
     </select>
@@ -491,15 +535,6 @@
         ORDER BY sort_order ASC, material_id ASC
     </select>
 
-    <select id="selectActiveChairTasteOptions" resultMap="ProductFilterOptionRowMap">
-        SELECT
-        taste_id AS option_id,
-        display_name
-        FROM chair_tastes
-        WHERE is_active = TRUE
-        ORDER BY sort_order ASC, taste_id ASC
-    </select>
-
     <select id="selectActiveStorageUsageOptions" resultMap="ProductFilterOptionRowMap">
         SELECT
         usage_id AS option_id,
@@ -507,15 +542,6 @@
         FROM storage_usages
         WHERE is_active = TRUE
         ORDER BY sort_order ASC, usage_id ASC
-    </select>
-
-    <select id="selectActiveStorageTasteOptions" resultMap="ProductFilterOptionRowMap">
-        SELECT
-        taste_id AS option_id,
-        display_name
-        FROM storage_tastes
-        WHERE is_active = TRUE
-        ORDER BY sort_order ASC, taste_id ASC
     </select>
 
     <select id="selectCurrentTaxRatePercent" resultType="java.math.BigDecimal">
@@ -526,6 +552,15 @@
         AND (effective_end_at IS NULL OR effective_end_at &gt; #{now})
         ORDER BY effective_start_at DESC
         LIMIT 1
+    </select>
+
+    <select id="selectUnifiedSearchTasteOptions" resultMap="ProductFilterOptionRowMap">
+        SELECT
+        NULL AS option_id,
+        display_name
+        FROM tastes
+        WHERE is_active = TRUE
+        ORDER BY sort_order ASC, taste_id ASC
     </select>
 
 </mapper>
