@@ -112,6 +112,7 @@ public class CatalogController {
      */
     @GetMapping("/products/search")
     public String searchResults(@RequestParam(name = "q", required = false) String keyword,
+                                @RequestParam(name = "taste", required = false) List<String> rawTasteNames,
                                 @RequestParam(name = "inStockOnly", defaultValue = "false") boolean inStockOnly,
                                 @RequestParam(name = "priceBand", required = false) List<Integer> rawPriceBandIds,
                                 @RequestParam(name = "color", required = false) List<String> rawColorKeys,
@@ -120,12 +121,18 @@ public class CatalogController {
                                 @RequestParam(name = "size", defaultValue = "15") int size,
                                 Model model) {
         ProductFilterOptionsBundle optionsBundle = productFilterOptionService.loadOptionsBundle();
+        List<String> selectedTasteNames = productFilterOptionService.normalizeSearchTasteNames(rawTasteNames, optionsBundle);
+        ProductCategoryFilter searchTasteFilter = productFilterOptionService.buildSearchTasteFilter(
+            rawTasteNames,
+            optionsBundle
+        );
         ProductSearchCondition condition = productListSearchService.buildCondition(
                 null,
                 keyword,
                 inStockOnly,
                 rawPriceBandIds,
                 rawColorKeys,
+            searchTasteFilter,
                 sort,
                 page,
                 size,
@@ -135,6 +142,8 @@ public class CatalogController {
         ProductListSearchResult result = productListSearchService.searchWithPageCorrection(condition);
         applyProductListModel(model, result.condition(), result.productPage(), optionsBundle);
         model.addAttribute("keyword", result.condition().keyword() == null ? "" : result.condition().keyword());
+        model.addAttribute("tasteOptions", productFilterOptionService.buildSearchTasteOptions(optionsBundle));
+        model.addAttribute("selectedTasteNames", selectedTasteNames);
         return "pages/product-list-search-results";
     }
 

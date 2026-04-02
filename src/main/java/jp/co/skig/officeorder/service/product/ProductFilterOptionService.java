@@ -316,6 +316,76 @@ public class ProductFilterOptionService {
     }
 
     /**
+     * 検索結果画面向けにカテゴリ横断のテイスト候補一覧を返す。
+     *
+     * @param optionsBundle 使用する候補群
+     * @return 重複排除済みテイスト名一覧
+     */
+    public List<String> buildSearchTasteOptions(ProductFilterOptionsBundle optionsBundle) {
+        ProductFilterOptionsBundle resolvedBundle = optionsBundle == null
+                ? loadOptionsBundle()
+                : optionsBundle;
+        Map<String, Boolean> mergedLabels = new LinkedHashMap<>();
+        collectTasteLabels(mergedLabels, resolvedBundle.deskTasteOptions());
+        collectTasteLabels(mergedLabels, resolvedBundle.chairTasteOptions());
+        collectTasteLabels(mergedLabels, resolvedBundle.storageTasteOptions());
+        return List.copyOf(mergedLabels.keySet());
+    }
+
+    /**
+     * 検索結果画面の生テイスト名を候補に沿って正規化する。
+     *
+     * @param rawTasteNames 生テイスト名一覧
+     * @param optionsBundle 使用する候補群
+     * @return 正規化済みテイスト名一覧
+     */
+    public List<String> normalizeSearchTasteNames(List<String> rawTasteNames,
+                                                  ProductFilterOptionsBundle optionsBundle) {
+        if (rawTasteNames == null || rawTasteNames.isEmpty()) {
+            return List.of();
+        }
+        Set<String> allowedTasteNames = buildSearchTasteOptions(optionsBundle).stream()
+                .collect(Collectors.toSet());
+        return rawTasteNames.stream()
+                .filter(value -> value != null)
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .filter(allowedTasteNames::contains)
+                .distinct()
+                .toList();
+    }
+
+    /**
+     * 検索結果画面向けのテイスト条件をカテゴリ横断で構築する。
+     *
+     * @param rawTasteNames 生テイスト名一覧
+     * @param optionsBundle 使用する候補群
+     * @return テイスト条件のみを保持したカテゴリ条件
+     */
+    public ProductCategoryFilter buildSearchTasteFilter(List<String> rawTasteNames,
+                                                        ProductFilterOptionsBundle optionsBundle) {
+        ProductFilterOptionsBundle resolvedBundle = optionsBundle == null
+                ? loadOptionsBundle()
+                : optionsBundle;
+        List<String> selectedTasteNames = normalizeSearchTasteNames(rawTasteNames, resolvedBundle);
+        if (selectedTasteNames.isEmpty()) {
+            return ProductCategoryFilter.empty();
+        }
+        return new ProductCategoryFilter(
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                resolveTasteIds(selectedTasteNames, resolvedBundle.deskTasteOptions()),
+                List.of(),
+                List.of(),
+                resolveTasteIds(selectedTasteNames, resolvedBundle.chairTasteOptions()),
+                List.of(),
+                resolveTasteIds(selectedTasteNames, resolvedBundle.storageTasteOptions())
+        );
+    }
+
+    /**
      * カラー候補一覧を返す。
      *
      * @return カラー候補
@@ -416,6 +486,36 @@ public class ProductFilterOptionService {
         }
         return options.stream()
                 .map(CategoryFilterOption::id)
+                .distinct()
+                .toList();
+    }
+
+    private void collectTasteLabels(Map<String, Boolean> labels, List<CategoryFilterOption> options) {
+        if (options == null || options.isEmpty()) {
+            return;
+        }
+        for (CategoryFilterOption option : options) {
+            if (option == null || option.label() == null) {
+                continue;
+            }
+            String label = option.label().trim();
+            if (!label.isEmpty()) {
+                labels.putIfAbsent(label, true);
+            }
+        }
+    }
+
+    private List<Integer> resolveTasteIds(List<String> selectedTasteNames,
+                                          List<CategoryFilterOption> options) {
+        if (selectedTasteNames == null || selectedTasteNames.isEmpty() || options == null || options.isEmpty()) {
+            return List.of();
+        }
+        Set<String> selected = selectedTasteNames.stream().collect(Collectors.toSet());
+        return options.stream()
+                .filter(option -> option != null && option.label() != null)
+                .filter(option -> selected.contains(option.label().trim()))
+                .map(CategoryFilterOption::id)
+                .filter(id -> id != null)
                 .distinct()
                 .toList();
     }

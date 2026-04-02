@@ -257,6 +257,46 @@
         )
     </sql>
 
+    <sql id="SearchTasteFilter">
+        AND (
+        <if test="deskTasteIds != null and deskTasteIds.size() &gt; 0">
+            EXISTS (
+            SELECT 1
+            FROM product_desk_attributes da
+            WHERE da.product_id = p.product_id
+            AND da.taste_id IN
+            <foreach collection="deskTasteIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+            )
+        </if>
+        <if test="chairTasteIds != null and chairTasteIds.size() &gt; 0">
+            <if test="deskTasteIds != null and deskTasteIds.size() &gt; 0">OR</if>
+            EXISTS (
+            SELECT 1
+            FROM product_chair_attributes ca
+            WHERE ca.product_id = p.product_id
+            AND ca.taste_id IN
+            <foreach collection="chairTasteIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+            )
+        </if>
+        <if test="storageTasteIds != null and storageTasteIds.size() &gt; 0">
+            <if test="(deskTasteIds != null and deskTasteIds.size() &gt; 0) or (chairTasteIds != null and chairTasteIds.size() &gt; 0)">OR</if>
+            EXISTS (
+            SELECT 1
+            FROM product_storage_attributes sa
+            WHERE sa.product_id = p.product_id
+            AND sa.taste_id IN
+            <foreach collection="storageTasteIds" item="value" open="(" close=")" separator=",">
+                #{value}
+            </foreach>
+            )
+        </if>
+        )
+    </sql>
+
     <sql id="BaseProductWhere">
         p.sale_start_at &lt;= #{now}
         AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
@@ -266,16 +306,23 @@
         <if test="categoryId != null and categoryId != ''">
             AND p.category_id = #{categoryId}
         </if>
-        <if test="keywordLike != null and keywordLike != ''">
-            AND (
-            p.product_name ILIKE #{keywordLike}
-            OR EXISTS (
-            SELECT 1
-            FROM product_variants pvk
-            WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
-            )
-            )
+        <if test="keywordWords != null and keywordWords.size() &gt; 0">
+            <foreach collection="keywordWords" item="word">
+                AND (
+                p.product_name ILIKE CONCAT('%', #{word}, '%')
+                OR p.variation_name ILIKE CONCAT('%', #{word}, '%')
+                OR p.description ILIKE CONCAT('%', #{word}, '%')
+                OR EXISTS (
+                SELECT 1
+                FROM product_variants pvk
+                WHERE pvk.product_id = p.product_id
+                AND (
+                pvk.product_code = #{word}
+                OR pvk.product_code ILIKE CONCAT(#{word}, '%')
+                )
+                )
+                )
+            </foreach>
         </if>
         <if test="hasVariantFilter">
             AND EXISTS (
@@ -293,6 +340,9 @@
         </if>
         <if test="hasStorageFilter">
             <include refid="StorageAttributeFilter"/>
+        </if>
+        <if test="hasSearchTasteFilter">
+            <include refid="SearchTasteFilter"/>
         </if>
     </sql>
 

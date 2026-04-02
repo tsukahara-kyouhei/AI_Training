@@ -2,6 +2,7 @@ package jp.co.skig.officeorder.repository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.Normalizer;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -299,6 +300,7 @@ public class ProductRepository {
         List<Integer> chairTasteIds = filter.chairTasteIds();
         List<Integer> storageUsageIds = filter.storageUsageIds();
         List<Integer> storageTasteIds = filter.storageTasteIds();
+        List<String> keywordWords = normalizeAndSplitKeywordWords(condition.keyword());
 
         boolean hasVariantFilter = condition.inStockOnly()
                 || !colorIds.isEmpty()
@@ -313,9 +315,12 @@ public class ProductRepository {
                 || !chairTasteIds.isEmpty());
         boolean hasStorageFilter = category == ProductCategory.STORAGE && (!storageUsageIds.isEmpty()
                 || !storageTasteIds.isEmpty());
+        boolean hasSearchTasteFilter = !deskTasteIds.isEmpty()
+                || !chairTasteIds.isEmpty()
+                || !storageTasteIds.isEmpty();
 
         params.put("categoryId", normalizedCategoryId);
-        params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordWords", keywordWords);
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -325,6 +330,7 @@ public class ProductRepository {
         params.put("hasDeskFilter", hasDeskFilter);
         params.put("hasChairFilter", hasChairFilter);
         params.put("hasStorageFilter", hasStorageFilter);
+        params.put("hasSearchTasteFilter", hasSearchTasteFilter);
         params.put("now", appTimeProvider.nowOffsetDateTime());
 
         params.put("deskTopShapeIds", deskTopShapeIds);
@@ -374,17 +380,28 @@ public class ProductRepository {
                 .toList();
     }
 
-    /**
-     * キーワード検索用のLIKE文字列を生成する。
-     *
-     * @param keyword キーワード
-     * @return LIKE検索文字列
-     */
-    private String toKeywordLike(String keyword) {
+    private List<String> normalizeAndSplitKeywordWords(String keyword) {
         if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+        String normalizedKeyword = keyword.replace('\u3000', ' ').trim();
+        if (normalizedKeyword.isBlank()) {
+            return List.of();
+        }
+        return List.of(normalizedKeyword.split("\\s+"))
+                .stream()
+                .map(this::normalizeKeywordToken)
+                .filter(token -> token != null && !token.isBlank())
+                .distinct()
+                .limit(5)
+                .toList();
+    }
+
+    private String normalizeKeywordToken(String token) {
+        if (token == null || token.isBlank()) {
             return null;
         }
-        return "%" + keyword.trim() + "%";
+        return Normalizer.normalize(token.trim(), Normalizer.Form.NFKC);
     }
 
     /**
