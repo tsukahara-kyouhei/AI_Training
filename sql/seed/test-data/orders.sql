@@ -301,3 +301,9 @@ SELECT
     o.order_datetime + INTERVAL '6 hour'
 FROM orders o
 WHERE o.order_status = 'cancelled';
+
+-- 注文番号採番カウンターを更新する（テストデータ100件分）
+-- シード実行当日に注文確定すると order_number が衝突する問題を防ぐ
+INSERT INTO order_number_counters (order_date, last_sequence)
+VALUES (CURRENT_DATE, 100)
+ON CONFLICT (order_date) DO UPDATE SET last_sequence = GREATEST(order_number_counters.last_sequence, 100);
