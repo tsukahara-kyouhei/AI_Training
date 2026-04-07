@@ -140,6 +140,12 @@
         </if>
     </sql>
 
+    <!-- 全角→半角 正規化: translate() の変換元文字列 -->
+    <sql id="NormalizeFrom">ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝｰ</sql>
+
+    <!-- 全角→半角 正規化: translate() の変換先文字列 -->
+    <sql id="NormalizeTo">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワンー</sql>
+
     <sql id="DeskAttributeFilter">
         AND EXISTS (
         SELECT 1
@@ -268,12 +274,14 @@
         </if>
         <if test="keywordLike != null and keywordLike != ''">
             AND (
-            p.product_name ILIKE #{keywordLike}
+            translate(p.product_name, '<include refid="NormalizeFrom"/>', '<include refid="NormalizeTo"/>') ILIKE #{keywordLike} ESCAPE '\'
+            OR translate(p.description, '<include refid="NormalizeFrom"/>', '<include refid="NormalizeTo"/>') ILIKE #{keywordLike} ESCAPE '\'
+            OR (p.variation_name IS NOT NULL AND translate(p.variation_name, '<include refid="NormalizeFrom"/>', '<include refid="NormalizeTo"/>') ILIKE #{keywordLike} ESCAPE '\')
             OR EXISTS (
             SELECT 1
             FROM product_variants pvk
             WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
+            AND translate(pvk.product_code, '<include refid="NormalizeFrom"/>', '<include refid="NormalizeTo"/>') ILIKE #{keywordPrefix} ESCAPE '\'
             )
             )
         </if>
@@ -293,6 +301,36 @@
         </if>
         <if test="hasStorageFilter">
             <include refid="StorageAttributeFilter"/>
+        </if>
+        <if test="hasTasteFilter">
+            AND (
+            <trim prefixOverrides="OR">
+                <if test="deskTasteIds != null and !deskTasteIds.isEmpty()">
+                    OR EXISTS (
+                    SELECT 1 FROM product_desk_attributes da
+                    WHERE da.product_id = p.product_id
+                    AND da.taste_id IN
+                    <foreach collection="deskTasteIds" item="id" open="(" close=")" separator=",">#{id}</foreach>
+                    )
+                </if>
+                <if test="chairTasteIds != null and !chairTasteIds.isEmpty()">
+                    OR EXISTS (
+                    SELECT 1 FROM product_chair_attributes ca
+                    WHERE ca.product_id = p.product_id
+                    AND ca.taste_id IN
+                    <foreach collection="chairTasteIds" item="id" open="(" close=")" separator=",">#{id}</foreach>
+                    )
+                </if>
+                <if test="storageTasteIds != null and !storageTasteIds.isEmpty()">
+                    OR EXISTS (
+                    SELECT 1 FROM product_storage_attributes sa
+                    WHERE sa.product_id = p.product_id
+                    AND sa.taste_id IN
+                    <foreach collection="storageTasteIds" item="id" open="(" close=")" separator=",">#{id}</foreach>
+                    )
+                </if>
+            </trim>
+            )
         </if>
     </sql>
 

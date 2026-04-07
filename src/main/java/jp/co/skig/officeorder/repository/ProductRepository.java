@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import jp.co.skig.officeorder.common.AppTimeProvider;
 import jp.co.skig.officeorder.common.MoneyFormatter;
+import jp.co.skig.officeorder.common.NormalizationUtils;
 import jp.co.skig.officeorder.mapper.row.ProductColorCodeMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductDetailMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductListMapperRow;
@@ -313,9 +314,14 @@ public class ProductRepository {
                 || !chairTasteIds.isEmpty());
         boolean hasStorageFilter = category == ProductCategory.STORAGE && (!storageUsageIds.isEmpty()
                 || !storageTasteIds.isEmpty());
+        boolean hasTasteFilter = (category == null)
+                && (!deskTasteIds.isEmpty()
+                    || !chairTasteIds.isEmpty()
+                    || !storageTasteIds.isEmpty());
 
         params.put("categoryId", normalizedCategoryId);
         params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordPrefix", toKeywordPrefix(condition.keyword()));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -325,6 +331,7 @@ public class ProductRepository {
         params.put("hasDeskFilter", hasDeskFilter);
         params.put("hasChairFilter", hasChairFilter);
         params.put("hasStorageFilter", hasStorageFilter);
+        params.put("hasTasteFilter", hasTasteFilter);
         params.put("now", appTimeProvider.nowOffsetDateTime());
 
         params.put("deskTopShapeIds", deskTopShapeIds);
@@ -375,7 +382,9 @@ public class ProductRepository {
     }
 
     /**
-     * キーワード検索用のLIKE文字列を生成する。
+     * キーワード検索用のLIKE文字列を生成する（部分一致）。
+     *
+     * <p>正規化 → エスケープ → '%' + escaped + '%' の順で処理する。
      *
      * @param keyword キーワード
      * @return LIKE検索文字列
@@ -384,7 +393,37 @@ public class ProductRepository {
         if (keyword == null || keyword.isBlank()) {
             return null;
         }
-        return "%" + keyword.trim() + "%";
+        String escaped = escapeLike(NormalizationUtils.normalize(keyword.trim()));
+        return "%" + escaped + "%";
+    }
+
+    /**
+     * キーワード検索用のLIKE文字列を生成する（前方一致）。
+     *
+     * <p>商品コード検索で使用。正規化 → エスケープ → escaped + '%' の順で処理する。
+     *
+     * @param keyword キーワード
+     * @return 前方一致LIKE検索文字列
+     */
+    private String toKeywordPrefix(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        String escaped = escapeLike(NormalizationUtils.normalize(keyword.trim()));
+        return escaped + "%";
+    }
+
+    /**
+     * LIKE/ILIKEのワイルドカード特殊文字をエスケープする。
+     *
+     * @param value エスケープ対象文字列
+     * @return エスケープ済み文字列
+     */
+    private String escapeLike(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 
     /**

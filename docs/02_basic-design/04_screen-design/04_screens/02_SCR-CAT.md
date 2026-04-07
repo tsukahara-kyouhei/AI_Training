@@ -42,6 +42,12 @@
 | `pageSize` | `int` | 1ページあたり件数 |
 | `currentPage` | `int` | 現在ページ |
 | `totalPages` | `int` | 総ページ数 |
+| `deskTasteOptions` | `List<CategoryFilterOption>` | デスクテイスト選択肢（検索結果ページのみ） |
+| `chairTasteOptions` | `List<CategoryFilterOption>` | チェアテイスト選択肢（検索結果ページのみ） |
+| `storageTasteOptions` | `List<CategoryFilterOption>` | 収納テイスト選択肢（検索結果ページのみ） |
+| `selectedDeskTasteIds` | `List<Integer>` | 選択済みデスクテイストID（検索結果ページのみ） |
+| `selectedChairTasteIds` | `List<Integer>` | 選択済みチェアテイストID（検索結果ページのみ） |
+| `selectedStorageTasteIds` | `List<Integer>` | 選択済み収納テイストID（検索結果ページのみ） |
 
 ---
 
@@ -71,6 +77,22 @@
 | `storageUsage` | 用途 |
 | `storageTaste` | テイスト |
 
+### 検索結果
+
+キーワード検索結果ページ（`/products/search`）では、カテゴリ横断でテイスト絞込みを提供する。
+
+| パラメータ | 説明 |
+|---|---|
+| `deskTaste` | デスクのテイスト |
+| `chairTaste` | チェアのテイスト |
+| `storageTaste` | 収納家具のテイスト |
+
+- 3カテゴリのテイストを `<details>` / `<summary>` によるアコーディオン（折りたたみ）形式で表示
+- 各テイストはチェックボックスで複数選択可
+- 初期状態: 折りたたみ（closed）
+- テイストが1つでも選択されると、該当テイスト属性を持つ商品のみに絞り込まれる
+- モバイル表示時も同じアコーディオン形式をレスポンシブで表示する（フィルターパネル自体の表示/非表示は既存のモバイルメニュー制御に従う）
+
 ---
 
 ## 5. フォーム
@@ -86,3 +108,6 @@
 | 表示件数 | `size` | int | セレクトボックス |
 | ページ | `page` | int | ページネーション |
 | 検索キーワード | `q` | String | 検索結果ページのみ（hidden） |
+| デスクテイスト | `deskTaste` | String[] | 検索結果ページのみ（複数選択チェックボックス） |
+| チェアテイスト | `chairTaste` | String[] | 検索結果ページのみ（複数選択チェックボックス） |
+| 収納テイスト | `storageTaste` | String[] | 検索結果ページのみ（複数選択チェックボックス） |

@@ -22,7 +22,7 @@
 | メソッド | URL | 認証 | 概要 | テンプレート |
 |---|---|---|---|---|
 | GET | `/products/new-arrivals` | public | 新着商品一覧 | `product-list-new-arrivals.html` |
-| GET | `/products/search` | public | キーワード検索結果 | `product-list-search-results.html` |
+| GET | `/products/search` | public | キーワード検索結果。商品名・商品コード・バリエーション名・説明文で部分一致検索（商品コードは前方一致）。全角半角・大文字小文字正規化。リクエストパラメータ: `q`（キーワード）、`deskTaste` / `chairTaste` / `storageTaste`（テイスト絞込み、複数選択可） | `product-list-search-results.html` |
 | GET | `/categories/desks` | public | デスク一覧 | `product-list-category-desk.html` |
 | GET | `/categories/chairs` | public | チェア一覧 | `product-list-category-chair.html` |
 | GET | `/categories/storages` | public | 収納家具一覧 | `product-list-category-storage.html` |

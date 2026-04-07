@@ -115,17 +115,30 @@ public class CatalogController {
                                 @RequestParam(name = "inStockOnly", defaultValue = "false") boolean inStockOnly,
                                 @RequestParam(name = "priceBand", required = false) List<Integer> rawPriceBandIds,
                                 @RequestParam(name = "color", required = false) List<String> rawColorKeys,
+                                @RequestParam(name = "deskTaste", required = false) List<Integer> rawDeskTasteIds,
+                                @RequestParam(name = "chairTaste", required = false) List<Integer> rawChairTasteIds,
+                                @RequestParam(name = "storageTaste", required = false) List<Integer> rawStorageTasteIds,
                                 @RequestParam(name = "sort", required = false) String sort,
                                 @RequestParam(name = "page", defaultValue = "1") int page,
                                 @RequestParam(name = "size", defaultValue = "15") int size,
                                 Model model) {
+        String trimmedKeyword = keyword != null && keyword.length() > 100
+                ? keyword.substring(0, 100)
+                : keyword;
         ProductFilterOptionsBundle optionsBundle = productFilterOptionService.loadOptionsBundle();
+        ProductCategoryFilter searchFilter = productFilterOptionService.buildSearchFilter(
+                rawDeskTasteIds,
+                rawChairTasteIds,
+                rawStorageTasteIds,
+                optionsBundle
+        );
         ProductSearchCondition condition = productListSearchService.buildCondition(
                 null,
-                keyword,
+                trimmedKeyword,
                 inStockOnly,
                 rawPriceBandIds,
                 rawColorKeys,
+                searchFilter,
                 sort,
                 page,
                 size,
@@ -135,6 +148,12 @@ public class CatalogController {
         ProductListSearchResult result = productListSearchService.searchWithPageCorrection(condition);
         applyProductListModel(model, result.condition(), result.productPage(), optionsBundle);
         model.addAttribute("keyword", result.condition().keyword() == null ? "" : result.condition().keyword());
+        model.addAttribute("deskTasteIds", searchFilter.deskTasteIds());
+        model.addAttribute("chairTasteIds", searchFilter.chairTasteIds());
+        model.addAttribute("storageTasteIds", searchFilter.storageTasteIds());
+        model.addAttribute("deskTasteOptions", optionsBundle.deskTasteOptions());
+        model.addAttribute("chairTasteOptions", optionsBundle.chairTasteOptions());
+        model.addAttribute("storageTasteOptions", optionsBundle.storageTasteOptions());
         return "pages/product-list-search-results";
     }
 

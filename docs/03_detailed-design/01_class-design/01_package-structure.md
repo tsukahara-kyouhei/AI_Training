@@ -97,6 +97,7 @@ jp.co.skig.officeorder
 │   └── LogMaskingUtils          # パスワード等マスキング
 │
 └── common/                      # 共通ユーティリティ
+    └── NormalizationUtils        # 全角半角正規化（全角英数カナ→半角変換）
 ```
 
 ## 2. 層ごとの依存関係

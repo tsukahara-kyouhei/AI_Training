@@ -15,7 +15,8 @@ XML: `src/main/resources/mappers/ProductMapper.xml`
 
 | パラメータキー | 型 | 説明 |
 |---|---|---|
-| `keyword` | String | 商品名・説明文のLIKE検索 |
+| `keywordLike` | String | 商品名・説明文・バリエーション名の部分一致ILIKE検索（`'%keyword%'` 形式）。`translate()` で全角→半角正規化して比較 |
+| `keywordPrefix` | String | 商品コードの前方一致ILIKE検索（`'keyword%'` 形式）。EXISTS副問合せで `product_variants.product_code` を検索。`translate()` で正規化 |
 | `categoryId` | String | カテゴリID（desk/chair/storage） |
 | `inStockOnly` | boolean | 在庫あり絞り込み |
 | `colorIds` | List | カラーID `IN` |
@@ -26,7 +27,72 @@ XML: `src/main/resources/mappers/ProductMapper.xml`
 | `chairFunctionIds` | List | チェア機能ID（chair専用） |
 | `chairMaterialIds` | List | チェア素材ID |
 | `storageTasteIds` | List | 収納棚テイストID（storage専用） |
+| `hasTasteFilter` | boolean | テイストフィルター有無フラグ（検索結果画面でカテゴリ横断テイスト絞込み時に使用） |
 | `limit` / `offset` | int | ページング |
+
+**キーワード検索WHERE条件（変更後）:**
+
+```xml
+<if test="keywordLike != null and keywordLike != ''">
+    AND (
+        translate(p.product_name,
+            <include refid="NormalizeFrom"/>, <include refid="NormalizeTo"/>
+        ) ILIKE #{keywordLike} ESCAPE '\'
+        OR translate(p.description,
+            <include refid="NormalizeFrom"/>, <include refid="NormalizeTo"/>
+        ) ILIKE #{keywordLike} ESCAPE '\'
+        OR (p.variation_name IS NOT NULL
+            AND translate(p.variation_name,
+                <include refid="NormalizeFrom"/>, <include refid="NormalizeTo"/>
+            ) ILIKE #{keywordLike} ESCAPE '\')
+        OR EXISTS (
+            SELECT 1 FROM product_variants pvk
+            WHERE pvk.product_id = p.product_id
+            AND translate(pvk.product_code,
+                <include refid="NormalizeFrom"/>, <include refid="NormalizeTo"/>
+            ) ILIKE #{keywordPrefix} ESCAPE '\'
+        )
+    )
+</if>
+```
+
+- `NormalizeFrom` / `NormalizeTo`: `<sql>` fragment で定義する変換テーブル文字列リテラル。英数字は全角→半角、カタカナ清音＋長音は半角→全角の双方向変換を1つの `translate()` で実施（例: `<sql id="NormalizeFrom">'ＡＢＣ...Ｚａｂｃ...ｚ０１２...９ｱｲｳ...ﾝｰ'</sql>`）
+- 4条件はOR結合。`variation_name` は NULL の場合スキップ
+- 商品コードは前方一致（`keywordPrefix`）、それ以外は部分一致（`keywordLike`）
+- 大文字小文字の同一視は `ILIKE` で対応
+- 各 ILIKE 句に `ESCAPE '\'` を付与し、特殊文字（`%` `_` `\`）のエスケープに対応
+
+**テイストフィルターWHERE条件（検索結果画面用、新規追加）:**
+
+```xml
+<if test="hasTasteFilter">
+    AND
+    <trim prefix="(" suffix=")" prefixOverrides="OR">
+        <if test="deskTasteIds != null and !deskTasteIds.isEmpty()">
+            OR EXISTS (SELECT 1 FROM product_desk_attributes da
+                    WHERE da.product_id = p.product_id
+                    AND da.taste_id IN
+                    <foreach item="id" collection="deskTasteIds" open="(" separator="," close=")">#{id}</foreach>)
+        </if>
+        <if test="chairTasteIds != null and !chairTasteIds.isEmpty()">
+            OR EXISTS (SELECT 1 FROM product_chair_attributes ca
+                       WHERE ca.product_id = p.product_id
+                       AND ca.taste_id IN
+                       <foreach item="id" collection="chairTasteIds" open="(" separator="," close=")">#{id}</foreach>)
+        </if>
+        <if test="storageTasteIds != null and !storageTasteIds.isEmpty()">
+            OR EXISTS (SELECT 1 FROM product_storage_attributes sa
+                       WHERE sa.product_id = p.product_id
+                       AND sa.taste_id IN
+                       <foreach item="id" collection="storageTasteIds" open="(" separator="," close=")">#{id}</foreach>)
+        </if>
+    </trim>
+</if>
+```
+
+- `<trim prefixOverrides="OR">` により、最初に出現する `OR` を除去し、先頭の `OR EXISTS` が構文エラーにならない
+- 未選択カテゴリのテイストはOR条件に含めない
+- テイストが1つでも選択されている場合、該当テイスト属性を持つ商品のみに絞り込まれる
 
 **取得カラム（ProductListMapperRow）:**
 `product_id`, `product_name`, `min_price`（バリアント最安値）, `max_stock`（最大在庫）, `product_code`

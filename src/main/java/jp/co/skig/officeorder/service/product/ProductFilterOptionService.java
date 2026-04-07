@@ -203,6 +203,36 @@ public class ProductFilterOptionService {
     }
 
     /**
+     * 検索結果向けのテイスト絞り込み条件を組み立てる。
+     *
+     * @param rawDeskTasteIds デスクテイストの生入力値
+     * @param rawChairTasteIds チェアテイストの生入力値
+     * @param rawStorageTasteIds 収納テイストの生入力値
+     * @param optionsBundle 使用する候補群
+     * @return テイストのみセットされた正規化済みカテゴリ条件
+     */
+    public ProductCategoryFilter buildSearchFilter(List<Integer> rawDeskTasteIds,
+                                                   List<Integer> rawChairTasteIds,
+                                                   List<Integer> rawStorageTasteIds,
+                                                   ProductFilterOptionsBundle optionsBundle) {
+        List<Integer> allowedDeskTasteIds = extractOptionIds(optionsBundle.deskTasteOptions());
+        List<Integer> allowedChairTasteIds = extractOptionIds(optionsBundle.chairTasteOptions());
+        List<Integer> allowedStorageTasteIds = extractOptionIds(optionsBundle.storageTasteOptions());
+        return new ProductCategoryFilter(
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                normalizeIntegerOptions(rawDeskTasteIds, allowedDeskTasteIds),
+                List.of(),
+                List.of(),
+                normalizeIntegerOptions(rawChairTasteIds, allowedChairTasteIds),
+                List.of(),
+                normalizeIntegerOptions(rawStorageTasteIds, allowedStorageTasteIds)
+        );
+    }
+
+    /**
      * 価格帯IDを有効なレンジだけに絞り込む。
      *
      * @param rawPriceBandIds 画面から渡された価格帯ID
