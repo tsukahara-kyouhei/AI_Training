@@ -129,6 +129,17 @@ public class ProductFilterOptionRepository {
     }
 
     /**
+     * 検索結果画面用のテイスト統合候補一覧を取得する。
+     *
+     * <p>3カテゴリのテイストマスタを UNION し、重複排除・ソート済みの名称一覧を返す。
+     *
+     * @return テイスト名称一覧
+     */
+    public List<String> findActiveSearchTasteOptions() {
+        return productMapper.selectActiveSearchTasteOptions();
+    }
+
+    /**
      * カラー候補行を表示用モデルへ変換する。
      *
      * @param row カラー候補行

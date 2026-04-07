@@ -56,7 +56,8 @@ public class ProductFilterOptionService {
                 productFilterOptionRepository.findActiveChairMaterialOptions(),
                 productFilterOptionRepository.findActiveChairTasteOptions(),
                 productFilterOptionRepository.findActiveStorageUsageOptions(),
-                productFilterOptionRepository.findActiveStorageTasteOptions()
+                productFilterOptionRepository.findActiveStorageTasteOptions(),
+                productFilterOptionRepository.findActiveSearchTasteOptions()
         );
     }
 
@@ -112,6 +113,7 @@ public class ProductFilterOptionService {
                 List.of(),
                 List.of(),
                 List.of(),
+                List.of(),
                 List.of()
         );
     }
@@ -159,6 +161,7 @@ public class ProductFilterOptionService {
                 normalizeIntegerOptions(rawChairMaterialIds, allowedChairMaterialIds),
                 normalizeIntegerOptions(rawChairTasteIds, allowedChairTasteIds),
                 List.of(),
+                List.of(),
                 List.of()
         );
     }
@@ -198,7 +201,8 @@ public class ProductFilterOptionService {
                 List.of(),
                 List.of(),
                 normalizeIntegerOptions(rawStorageUsageIds, allowedStorageUsageIds),
-                normalizeIntegerOptions(rawStorageTasteIds, allowedStorageTasteIds)
+                normalizeIntegerOptions(rawStorageTasteIds, allowedStorageTasteIds),
+                List.of()
         );
     }
 
@@ -385,6 +389,48 @@ public class ProductFilterOptionService {
      */
     public List<CategoryFilterOption> storageTasteOptions() {
         return loadOptionsBundle().storageTasteOptions();
+    }
+
+    /**
+     * 検索結果画面向けのカテゴリ固有絞り込み条件を組み立てる。
+     *
+     * @param rawTasteNames 画面から渡されたテイスト名称の生入力値
+     * @return 正規化済みカテゴリ条件
+     */
+    public ProductCategoryFilter buildSearchCategoryFilter(List<String> rawTasteNames) {
+        return buildSearchCategoryFilter(rawTasteNames, loadOptionsBundle());
+    }
+
+    /**
+     * 候補群を指定して検索結果画面向けのカテゴリ固有絞り込み条件を組み立てる。
+     *
+     * @param rawTasteNames 画面から渡されたテイスト名称の生入力値
+     * @param optionsBundle 使用する候補群
+     * @return 正規化済みカテゴリ条件
+     */
+    public ProductCategoryFilter buildSearchCategoryFilter(List<String> rawTasteNames,
+                                                           ProductFilterOptionsBundle optionsBundle) {
+        if (rawTasteNames == null || rawTasteNames.isEmpty()) {
+            return ProductCategoryFilter.empty();
+        }
+        Set<String> allowedNames = new java.util.HashSet<>(optionsBundle.searchTasteOptions());
+        List<String> validNames = rawTasteNames.stream()
+                .filter(name -> name != null && allowedNames.contains(name))
+                .distinct()
+                .toList();
+        return new ProductCategoryFilter(
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                validNames
+        );
     }
 
     /**

@@ -268,13 +268,24 @@
         </if>
         <if test="keywordLike != null and keywordLike != ''">
             AND (
-            p.product_name ILIKE #{keywordLike}
-            OR EXISTS (
-            SELECT 1
-            FROM product_variants pvk
-            WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
-            )
+                p.product_name    ILIKE #{keywordLike}
+                OR p.variation_name ILIKE #{keywordLike}
+                OR p.description    ILIKE #{keywordLike}
+                OR EXISTS (
+                    SELECT 1
+                    FROM product_variants pvk
+                    WHERE pvk.product_id = p.product_id
+                    AND (
+                        <choose>
+                            <when test="productCodeMatchMode == 'exact'">
+                                LOWER(pvk.product_code) = #{productCodeExact}
+                            </when>
+                            <otherwise>
+                                LOWER(pvk.product_code) LIKE #{productCodePrefix}
+                            </otherwise>
+                        </choose>
+                    )
+                )
             )
         </if>
         <if test="hasVariantFilter">
@@ -293,6 +304,9 @@
         </if>
         <if test="hasStorageFilter">
             <include refid="StorageAttributeFilter"/>
+        </if>
+        <if test="hasSearchTasteFilter">
+            <include refid="SearchTasteFilter"/>
         </if>
     </sql>
 
@@ -517,6 +531,53 @@
         WHERE is_active = TRUE
         ORDER BY sort_order ASC, taste_id ASC
     </select>
+
+    <select id="selectActiveSearchTasteOptions" resultType="string">
+        SELECT DISTINCT display_name
+        FROM (
+            SELECT display_name FROM desk_tastes    WHERE is_active = TRUE
+            UNION ALL
+            SELECT display_name FROM chair_tastes   WHERE is_active = TRUE
+            UNION ALL
+            SELECT display_name FROM storage_tastes WHERE is_active = TRUE
+        ) t
+        ORDER BY display_name
+    </select>
+
+    <sql id="SearchTasteFilter">
+        AND (
+            EXISTS (
+                SELECT 1
+                FROM product_desk_attributes da
+                JOIN desk_tastes dt ON dt.taste_id = da.taste_id
+                WHERE da.product_id = p.product_id
+                AND dt.display_name IN
+                <foreach collection="searchTasteNames" item="name" open="(" close=")" separator=",">
+                    #{name}
+                </foreach>
+            )
+            OR EXISTS (
+                SELECT 1
+                FROM product_chair_attributes ca
+                JOIN chair_tastes ct ON ct.taste_id = ca.taste_id
+                WHERE ca.product_id = p.product_id
+                AND ct.display_name IN
+                <foreach collection="searchTasteNames" item="name" open="(" close=")" separator=",">
+                    #{name}
+                </foreach>
+            )
+            OR EXISTS (
+                SELECT 1
+                FROM product_storage_attributes sa
+                JOIN storage_tastes st ON st.taste_id = sa.taste_id
+                WHERE sa.product_id = p.product_id
+                AND st.display_name IN
+                <foreach collection="searchTasteNames" item="name" open="(" close=")" separator=",">
+                    #{name}
+                </foreach>
+            )
+        )
+    </sql>
 
     <select id="selectCurrentTaxRatePercent" resultType="java.math.BigDecimal">
         SELECT tax_rate_percent

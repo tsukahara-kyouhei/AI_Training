@@ -15,7 +15,8 @@ public record ProductCategoryFilter(
         List<Integer> chairMaterialIds,
         List<Integer> chairTasteIds,
         List<Integer> storageUsageIds,
-        List<Integer> storageTasteIds
+        List<Integer> storageTasteIds,
+        List<String> searchTasteNames
 ) {
 
     /**
@@ -23,6 +24,7 @@ public record ProductCategoryFilter(
      */
     public static ProductCategoryFilter empty() {
         return new ProductCategoryFilter(
+                List.of(),
                 List.of(),
                 List.of(),
                 List.of(),
@@ -50,7 +52,8 @@ public record ProductCategoryFilter(
                 normalizeList(chairMaterialIds),
                 normalizeList(chairTasteIds),
                 normalizeList(storageUsageIds),
-                normalizeList(storageTasteIds)
+                normalizeList(storageTasteIds),
+                normalizeStringList(searchTasteNames)
         );
     }
 
@@ -67,7 +70,8 @@ public record ProductCategoryFilter(
                 && chairMaterialIds.isEmpty()
                 && chairTasteIds.isEmpty()
                 && storageUsageIds.isEmpty()
-                && storageTasteIds.isEmpty();
+                && storageTasteIds.isEmpty()
+                && searchTasteNames.isEmpty();
     }
 
     private static List<Integer> normalizeList(List<Integer> values) {
@@ -76,6 +80,16 @@ public record ProductCategoryFilter(
         }
         return values.stream()
                 .filter(v -> v != null)
+                .distinct()
+                .toList();
+    }
+
+    private static List<String> normalizeStringList(List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return List.of();
+        }
+        return values.stream()
+                .filter(v -> v != null && !v.isEmpty())
                 .distinct()
                 .toList();
     }

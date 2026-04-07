@@ -6,6 +6,7 @@ import jp.co.skig.officeorder.model.product.ProductListPage;
 import jp.co.skig.officeorder.model.product.ProductListSearchResult;
 import jp.co.skig.officeorder.model.product.ProductSearchCondition;
 import jp.co.skig.officeorder.model.product.ProductSort;
+import jp.co.skig.officeorder.util.KeywordNormalizer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -138,6 +139,9 @@ public class ProductListSearchService {
                                                  int size,
                                                  ProductSort defaultSort,
                                                  ProductFilterOptionsBundle optionsBundle) {
+        String normalizedKeyword = KeywordNormalizer.normalize(
+                keyword == null ? null : keyword.trim()
+        );
         List<Integer> selectedPriceBandIds = productFilterOptionService.normalizePriceBandIds(rawPriceBandIds);
         ProductFilterOptionsBundle resolvedBundle = optionsBundle == null
                 ? productFilterOptionService.loadOptionsBundle()
@@ -146,7 +150,7 @@ public class ProductListSearchService {
         List<Long> colorIds = productFilterOptionService.resolveColorIds(selectedColorKeys, resolvedBundle);
         return productService.buildCondition(
                 categoryId,
-                keyword,
+                normalizedKeyword,
                 inStockOnly,
                 selectedPriceBandIds,
                 colorIds,

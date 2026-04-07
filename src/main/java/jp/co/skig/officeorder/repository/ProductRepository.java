@@ -98,8 +98,15 @@ public class ProductRepository {
      * @return 一覧ページ情報
      */
     public ProductListPage search(ProductSearchCondition condition) {
-        Map<String, Object> params = buildSearchParams(condition);
+        Map<String, Object> params = buildSearchParams(condition, "exact");
         long totalCount = Optional.ofNullable(productMapper.countProducts(params)).orElse(0L);
+
+        String keyword = condition.keyword();
+        if (totalCount == 0 && keyword != null && !keyword.isBlank()) {
+            params = buildSearchParams(condition, "prefix");
+            totalCount = Optional.ofNullable(productMapper.countProducts(params)).orElse(0L);
+        }
+
         if (totalCount == 0) {
             return new ProductListPage(List.of(), 0, condition.page(), condition.size());
         }
@@ -279,7 +286,8 @@ public class ProductRepository {
      * @param condition 検索条件
      * @return SQLパラメータ
      */
-    private Map<String, Object> buildSearchParams(ProductSearchCondition condition) {
+    private Map<String, Object> buildSearchParams(ProductSearchCondition condition,
+                                                   String productCodeMatchMode) {
         Map<String, Object> params = new HashMap<>();
         ProductCategoryFilter filter = condition.categoryFilter() == null
                 ? ProductCategoryFilter.empty()
@@ -315,7 +323,15 @@ public class ProductRepository {
                 || !storageTasteIds.isEmpty());
 
         params.put("categoryId", normalizedCategoryId);
-        params.put("keywordLike", toKeywordLike(condition.keyword()));
+        String normalizedKeyword = (condition.keyword() == null || condition.keyword().isBlank())
+                ? null : condition.keyword().trim();
+        params.put("keywordLike", normalizedKeyword != null ? "%" + normalizedKeyword + "%" : null);
+        params.put("productCodeMatchMode", productCodeMatchMode);
+        params.put("productCodeExact", normalizedKeyword);
+        params.put("productCodePrefix", normalizedKeyword != null ? normalizedKeyword + "%" : null);
+        List<String> searchTasteNames = filter.searchTasteNames();
+        params.put("searchTasteNames", searchTasteNames);
+        params.put("hasSearchTasteFilter", !searchTasteNames.isEmpty());
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -375,19 +391,7 @@ public class ProductRepository {
     }
 
     /**
-     * キーワード検索用のLIKE文字列を生成する。
-     *
-     * @param keyword キーワード
-     * @return LIKE検索文字列
-     */
-    private String toKeywordLike(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            return null;
-        }
-        return "%" + keyword.trim() + "%";
-    }
 
-    /**
      * 一覧カード表示用のカラーコードを商品単位で取得する。
      *
      * @param productIds 商品ID一覧
