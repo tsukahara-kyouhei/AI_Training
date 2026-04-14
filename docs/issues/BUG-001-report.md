@@ -6,6 +6,8 @@
 | 報告日 | 2026/4/14 |
 | 対象機能 | 注文確定（POST /checkout/confirm） |
 | 重大度 | High（ローカル環境で初期構築当日に注文操作が完全に不可能） |
+| 対応状態 | 修正方針確定（未対応） |
+| 採用修正方針 | 案C — `order_datetime` の日付を注文番号プレフィックスに利用 |
 
 ---
 
@@ -169,15 +171,89 @@ ON CONFLICT (order_date)
 
 ---
 
-## 6. 修正方針（案）
+## 6. 修正方針
 
-ログおよびDB状態確認で本仮説が確定した後、以下いずれかの方針で `sql/seed/test-data/orders.sql` を修正する。
+### 6.1 方針比較
 
-| 案 | 内容 | メリット | デメリット |
-|----|------|----------|------------|
-| **A（推奨）** | 注文番号のプレフィックスを過去固定日付（例: `'20250101'`）に変更 | シンプルで確実 | 注文日時との整合性がとれなくなる |
-| **B** | シードの末尾で `order_number_counters` に当日分レコードを挿入する | テーブルの整合性が取れる | シードの実行日依存が残る |
-| **C** | 注文番号のプレフィックスに `(NOW() - INTERVAL '1 day')::date` を使用 | 前日付で発行されるため衝突しない | 翌日に再実行すると再度衝突する可能性あり |
+| 案 | 変更対象 | 変更量 | メリット | デメリット |
+|----|----------|--------|----------|------------|
+| A | `orders.sql` 1行変更 | 小 | 変更が最小限 | `order_number` 日付と `order_datetime` が乖離。全件同一日付プレフィックスで現実感がない |
+| B | `orders.sql` 末尾にINSERT追加 | 小 | `order_number_counters` との整合性が保たれる | `CURRENT_DATE` 依存が残り `order_number` と `order_datetime` の不整合も未解消 |
+| **C ★採用** | `orders.sql` CTE追加＋3箇所修正 | 中 | `order_number` 日付と `order_datetime` が一致。`CURRENT_DATE` 依存を完全排除。複数日付データで日付範囲検索の動作確認が容易 | SQL変更量が最も多い |
+
+---
+
+### 6.2 採用方針（案C）の選定理由
+
+本障害の本質は「シードデータが `CURRENT_DATE` に依存しており、実行日によって動作が変わる」ことにある。案Aは最小変更だが `order_number` と `order_datetime` の不整合という別の問題を生む。案Bは `order_number_counters` の整合性を確保するが、全注文が実行当日付けになるという不自然さは残る。
+
+案Cは `CURRENT_DATE` 依存を根本から排除し、注文番号と注文日時の一貫性を保った現実的なテストデータを生成する。変更はシードSQL1ファイル(`sql/seed/test-data/orders.sql`)内のみにとどまり、アプリケーション側のコード変更は一切不要である。
+
+---
+
+### 6.3 修正内容（`sql/seed/test-data/orders.sql`）
+
+以下の4箇所を変更する。
+
+#### 変更1: `prepared` CTE — `order_datetime` の最小値を1日前に保証
+
+`days => ((s.n - 1) % 7)` は n=1,8,15... のとき `days => 0`（当日）になるため、`+1` を加えて最小でも1日前になるよう修正する。
+
+```diff
+- WHEN s.n <= 55 THEN NOW() - MAKE_INTERVAL(days => ((s.n - 1) % 7), hours => (s.n % 6), mins => (s.n % 50))
++ WHEN s.n <= 55 THEN NOW() - MAKE_INTERVAL(days => ((s.n - 1) % 7) + 1, hours => (s.n % 6), mins => (s.n % 50))
+```
+
+#### 変更2: `with_order_number` CTE を追加
+
+`prepared` CTE の閉じカッコ `)` の直後（`INSERT INTO orders` の直前）に追加する。
+
+```diff
+  )
++ with_order_number AS (
++     SELECT
++         p.*,
++         'ORD' || TO_CHAR(p.order_datetime, 'YYYYMMDD') || '-' ||
++             LPAD(
++                 ROW_NUMBER() OVER (
++                     PARTITION BY p.order_datetime::date
++                     ORDER BY p.n
++                 )::TEXT,
++             6, '0'
++         ) AS order_number
++     FROM prepared p
++ )
+  INSERT INTO orders (
+```
+
+`PARTITION BY order_datetime::date ORDER BY p.n` により、同一日の注文は `n` の昇順で `000001` から連番採番される。
+
+#### 変更3: INSERT SELECT の `order_number` 列
+
+```diff
+  SELECT
+-     'ORD' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(p.n::TEXT, 6, '0'),
++     p.order_number,
+      p.order_datetime,
+```
+
+#### 変更4: INSERT SELECT の `FROM` 句
+
+```diff
+- FROM prepared p;
++ FROM with_order_number p;
+```
+
+#### 変更後の動作イメージ
+
+| n | order_datetime（例） | order_number（変更後） |
+|---|----------------------|------------------------|
+| 1 | 2026-04-13（1日前） | ORD20260413-000001 |
+| 2 | 2026-04-13（1日前） | ORD20260413-000002 |
+| 8 | 2026-04-07（7日前） | ORD20260407-000001 |
+| 56 | 2026-03-22（23日前相当） | ORD20260322-000001 |
+
+`order_number_counters` テーブルは空のまま正しい状態となり、アプリが当日初めて注文を採番すると `ORD{today}-000001` から始まるため、過去日付のシードデータとは絶対に衝突しない。
 
 ---
 
