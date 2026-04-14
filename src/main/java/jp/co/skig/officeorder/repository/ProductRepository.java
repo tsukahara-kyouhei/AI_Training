@@ -2,6 +2,7 @@ package jp.co.skig.officeorder.repository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.Normalizer;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -314,8 +315,14 @@ public class ProductRepository {
         boolean hasStorageFilter = category == ProductCategory.STORAGE && (!storageUsageIds.isEmpty()
                 || !storageTasteIds.isEmpty());
 
+        String normalizedKeyword = normalizeKeyword(condition.keyword());
+
+        boolean hasSearchTasteFilter = condition.categoryId() == null
+                && (!deskTasteIds.isEmpty() || !chairTasteIds.isEmpty() || !storageTasteIds.isEmpty());
+
         params.put("categoryId", normalizedCategoryId);
-        params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordLike",   toKeywordLike(normalizedKeyword));
+        params.put("keywordPrefix", toKeywordPrefix(normalizedKeyword));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -325,6 +332,7 @@ public class ProductRepository {
         params.put("hasDeskFilter", hasDeskFilter);
         params.put("hasChairFilter", hasChairFilter);
         params.put("hasStorageFilter", hasStorageFilter);
+        params.put("hasSearchTasteFilter", hasSearchTasteFilter);
         params.put("now", appTimeProvider.nowOffsetDateTime());
 
         params.put("deskTopShapeIds", deskTopShapeIds);
@@ -377,14 +385,44 @@ public class ProductRepository {
     /**
      * キーワード検索用のLIKE文字列を生成する。
      *
-     * @param keyword キーワード
-     * @return LIKE検索文字列
+     * @param normalizedKeyword NFKC正規化済みキーワード
+     * @return LIKE検索文字列（中間一致）
      */
-    private String toKeywordLike(String keyword) {
+    private String toKeywordLike(String normalizedKeyword) {
+        if (normalizedKeyword == null) {
+            return null;
+        }
+        return "%" + normalizedKeyword + "%";
+    }
+
+    /**
+     * 商品コード用の前方一致LIKE文字列を生成する。
+     *
+     * @param normalizedKeyword NFKC正規化済みキーワード
+     * @return LIKE検索文字列（前方一致）
+     */
+    private String toKeywordPrefix(String normalizedKeyword) {
+        if (normalizedKeyword == null) {
+            return null;
+        }
+        return normalizedKeyword + "%";
+    }
+
+    /**
+     * 入力キーワードをNFKC正規化する。
+     *
+     * <p>全角英数字・記号を半角に、半角カタカナを全角に統一する。
+     * nullまたは空白のみの場合はnullを返す。
+     *
+     * @param keyword 生の入力キーワード
+     * @return 正規化済みキーワード
+     */
+    String normalizeKeyword(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return null;
         }
-        return "%" + keyword.trim() + "%";
+        String normalized = Normalizer.normalize(keyword.trim(), Normalizer.Form.NFKC);
+        return normalized.isEmpty() ? null : normalized;
     }
 
     /**

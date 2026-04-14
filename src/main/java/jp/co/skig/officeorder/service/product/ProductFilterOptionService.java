@@ -1,6 +1,9 @@
 package jp.co.skig.officeorder.service.product;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -418,6 +421,70 @@ public class ProductFilterOptionService {
                 .map(CategoryFilterOption::id)
                 .distinct()
                 .toList();
+    }
+
+    /**
+     * 全カテゴリ（デスク・チェア・収納）のテイスト display_name を
+     * 重複除去した順序保持リストで返す。
+     * desk → chair → storage の順で処理し、初出現時の順序を優先する。
+     *
+     * @param bundle 事前取得済みのフィルターオプション一式
+     * @return テイスト表示名の重複除去リスト
+     */
+    public List<String> allTasteDisplayNames(ProductFilterOptionsBundle bundle) {
+        LinkedHashSet<String> seen = new LinkedHashSet<>();
+        for (CategoryFilterOption opt : bundle.deskTasteOptions()) {
+            seen.add(opt.label());
+        }
+        for (CategoryFilterOption opt : bundle.chairTasteOptions()) {
+            seen.add(opt.label());
+        }
+        for (CategoryFilterOption opt : bundle.storageTasteOptions()) {
+            seen.add(opt.label());
+        }
+        return new ArrayList<>(seen);
+    }
+
+    /**
+     * 選択されたテイスト表示名リストを、各カテゴリの taste_id リストに変換し
+     * ProductCategoryFilter として返す。
+     * taste フィールド以外（天板形状・サイズ等）はすべて空リストとする。
+     *
+     * @param displayNames URL パラメーター "taste" の値リスト
+     * @param bundle       事前取得済みのフィルターオプション一式
+     * @return 解決済み ProductCategoryFilter
+     */
+    public ProductCategoryFilter resolveTasteFilter(
+            List<String> displayNames,
+            ProductFilterOptionsBundle bundle) {
+        if (displayNames == null || displayNames.isEmpty()) {
+            return ProductCategoryFilter.empty();
+        }
+        Set<String> nameSet = new HashSet<>(displayNames);
+        List<Integer> deskTasteIds = bundle.deskTasteOptions().stream()
+                .filter(opt -> nameSet.contains(opt.label()))
+                .map(CategoryFilterOption::id)
+                .toList();
+        List<Integer> chairTasteIds = bundle.chairTasteOptions().stream()
+                .filter(opt -> nameSet.contains(opt.label()))
+                .map(CategoryFilterOption::id)
+                .toList();
+        List<Integer> storageTasteIds = bundle.storageTasteOptions().stream()
+                .filter(opt -> nameSet.contains(opt.label()))
+                .map(CategoryFilterOption::id)
+                .toList();
+        return new ProductCategoryFilter(
+                List.of(),        // deskTopShapeIds
+                List.of(),        // deskWidthBandIds
+                List.of(),        // deskDepthBandIds
+                List.of(),        // deskHeightBandIds
+                deskTasteIds,     // deskTasteIds
+                List.of(),        // chairFunctionIds
+                List.of(),        // chairMaterialIds
+                chairTasteIds,    // chairTasteIds
+                List.of(),        // storageUsageIds
+                storageTasteIds   // storageTasteIds
+        );
     }
 
     /**

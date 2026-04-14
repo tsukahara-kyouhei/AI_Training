@@ -44,6 +44,7 @@ public class ProductListSearchService {
      * @param inStockOnly 在庫ありのみ条件
      * @param rawPriceBandIds 価格帯の生入力値
      * @param rawColorKeys カラーの生入力値
+     * @param rawTasteNames テイスト表示名の生入力値
      * @param sort 並び順
      * @param page ページ番号
      * @param size 表示件数
@@ -56,23 +57,30 @@ public class ProductListSearchService {
                                                  boolean inStockOnly,
                                                  List<Integer> rawPriceBandIds,
                                                  List<String> rawColorKeys,
+                                                 List<String> rawTasteNames,
                                                  String sort,
                                                  int page,
                                                  int size,
                                                  ProductSort defaultSort,
                                                  ProductFilterOptionsBundle optionsBundle) {
-        return buildCondition(
+        List<Integer> selectedPriceBandIds = productFilterOptionService.normalizePriceBandIds(rawPriceBandIds);
+        ProductFilterOptionsBundle resolvedBundle = optionsBundle == null
+                ? productFilterOptionService.loadOptionsBundle()
+                : optionsBundle;
+        List<String> selectedColorKeys = productFilterOptionService.normalizeColorKeys(rawColorKeys, resolvedBundle);
+        List<Long> colorIds = productFilterOptionService.resolveColorIds(selectedColorKeys, resolvedBundle);
+        ProductCategoryFilter tasteFilter = productFilterOptionService.resolveTasteFilter(rawTasteNames, resolvedBundle);
+        return productService.buildCondition(
                 categoryId,
                 keyword,
                 inStockOnly,
-                rawPriceBandIds,
-                rawColorKeys,
-                ProductCategoryFilter.empty(),
+                selectedPriceBandIds,
+                colorIds,
                 sort,
                 page,
                 size,
                 defaultSort,
-                optionsBundle
+                tasteFilter
         );
     }
 
