@@ -17,7 +17,7 @@ prepared AS (
     SELECT
         s.n,
         CASE
-            WHEN s.n <= 55 THEN NOW() - MAKE_INTERVAL(days => ((s.n - 1) % 7), hours => (s.n % 6), mins => (s.n % 50))
+            WHEN s.n <= 55 THEN NOW() - MAKE_INTERVAL(days => ((s.n - 1) % 7) + 1, hours => (s.n % 6), mins => (s.n % 50))
             ELSE NOW() - MAKE_INTERVAL(days => (8 + ((s.n - 56) % 23)), hours => (s.n % 6), mins => (s.n % 40))
         END AS order_datetime,
         CASE
@@ -40,6 +40,19 @@ prepared AS (
     FROM generate_series(1, 100) AS s(n)
     LEFT JOIN active_members am
       ON am.rn = ((s.n - 1) % (SELECT COUNT(*) FROM active_members)) + 1
+),
+with_order_number AS (
+    SELECT
+        p.*,
+        'ORD' || TO_CHAR(p.order_datetime, 'YYYYMMDD') || '-' ||
+            LPAD(
+                ROW_NUMBER() OVER (
+                    PARTITION BY p.order_datetime::date
+                    ORDER BY p.n
+                )::TEXT,
+            6, '0'
+        ) AS order_number
+    FROM prepared p
 )
 INSERT INTO orders (
     order_number,
@@ -77,7 +90,7 @@ INSERT INTO orders (
     updated_at
 )
 SELECT
-    'ORD' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(p.n::TEXT, 6, '0'),
+    p.order_number,
     p.order_datetime,
     p.final_status,
     p.customer_type,
@@ -133,7 +146,7 @@ SELECT
     NULL,
     p.order_datetime,
     p.order_datetime
-FROM prepared p;
+FROM with_order_number p;
 
 WITH variant_count AS (
     SELECT COUNT(*) AS cnt FROM product_variants

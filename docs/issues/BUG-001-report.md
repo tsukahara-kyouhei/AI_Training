@@ -6,8 +6,9 @@
 | 報告日 | 2026/4/14 |
 | 対象機能 | 注文確定（POST /checkout/confirm） |
 | 重大度 | High（ローカル環境で初期構築当日に注文操作が完全に不可能） |
-| 対応状態 | 修正方針確定（未対応） |
+| 対応状態 | 対応完了 |
 | 採用修正方針 | 案C — `order_datetime` の日付を注文番号プレフィックスに利用 |
+| 対応日 | 2026/4/14 |
 
 ---
 
@@ -257,6 +258,33 @@ ON CONFLICT (order_date)
 
 ---
 
+## 8. 対応記録
+
+### 8.1 実施内容
+
+| 対象 | 変更内容 |
+|------|---------|
+| `sql/seed/test-data/orders.sql` | 4箇所修正（Case C 実施済み） |
+| `src/test/java/.../service/order/OrderServiceGenerateOrderNumberTest.java` | 新規作成（5テストケース、全通過） |
+
+### 8.2 テスト結果
+
+```
+Tests run: 37, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS
+```
+
+追加テスト `OrderServiceGenerateOrderNumberTest`（5件）:
+
+| テストケース | 検証内容 |
+|------------|--------|
+| 連番1 → `ORD20260310-000001` | フォーマット正常生成 |
+| 連番42 → `ORD20260310-000042` | 6桁ゼロ埋め |
+| 連番999999 → `ORD20260310-999999` | 上限値の正常処理 |
+| 連番1000000 → `IllegalStateException` | 上限超過の例外スロー |
+| Clock差し替え → `ORD20250115-000001` | Clock依存（CURRENT_DATE非依存）の確認 |
+
+---
+
 ## 7. 参照ファイル
 
 | ファイル | 役割 |
@@ -266,3 +294,4 @@ ON CONFLICT (order_date)
 | [scripts/init-local-postgres.ps1](../../scripts/init-local-postgres.ps1) | 初期構築スクリプト |
 | [src/main/java/jp/co/skig/officeorder/service/order/OrderService.java](../../src/main/java/jp/co/skig/officeorder/service/order/OrderService.java) | `generateOrderNumber()` / `placeOrder()` |
 | [src/main/resources/mappers/OrderMapper.xml](../../src/main/resources/mappers/OrderMapper.xml) | `nextOrderSequence` SQL |
+| [src/test/java/jp/co/skig/officeorder/service/order/OrderServiceGenerateOrderNumberTest.java](../../src/test/java/jp/co/skig/officeorder/service/order/OrderServiceGenerateOrderNumberTest.java) | 注文番号採番ロジックの単体テスト（BUG-001 対応で追加） |
