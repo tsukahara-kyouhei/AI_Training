@@ -259,7 +259,12 @@
         )
         VALUES (
         #{orderDate},
-        1,
+        COALESCE(
+            (SELECT MAX(CAST(SUBSTRING(order_number FROM 13) AS INTEGER))
+             FROM orders
+             WHERE order_number LIKE 'ORD' || TO_CHAR(#{orderDate}, 'YYYYMMDD') || '-%'),
+            0
+        ) + 1,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
         )
