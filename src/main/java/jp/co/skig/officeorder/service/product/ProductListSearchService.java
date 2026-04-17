@@ -72,7 +72,51 @@ public class ProductListSearchService {
                 page,
                 size,
                 defaultSort,
-                optionsBundle
+                optionsBundle,
+                null
+        );
+    }
+
+    /**
+     * 共通一覧向け検索条件を組み立てる（テイスト条件あり）。
+     *
+     * @param categoryId カテゴリID
+     * @param keyword キーワード
+     * @param inStockOnly 在庫ありのみ条件
+     * @param rawPriceBandIds 価格帯の生入力値
+     * @param rawColorKeys カラーの生入力値
+     * @param sort 並び順
+     * @param page ページ番号
+     * @param size 表示件数
+     * @param defaultSort デフォルト並び順
+     * @param optionsBundle 使用する絞り込み候補群
+     * @param rawTasteDisplayNames テイスト表示名の生入力値
+     * @return 正規化済み検索条件
+     */
+    public ProductSearchCondition buildCondition(String categoryId,
+                                                 String keyword,
+                                                 boolean inStockOnly,
+                                                 List<Integer> rawPriceBandIds,
+                                                 List<String> rawColorKeys,
+                                                 String sort,
+                                                 int page,
+                                                 int size,
+                                                 ProductSort defaultSort,
+                                                 ProductFilterOptionsBundle optionsBundle,
+                                                 List<String> rawTasteDisplayNames) {
+        return buildCondition(
+                categoryId,
+                keyword,
+                inStockOnly,
+                rawPriceBandIds,
+                rawColorKeys,
+                ProductCategoryFilter.empty(),
+                sort,
+                page,
+                size,
+                defaultSort,
+                optionsBundle,
+                rawTasteDisplayNames
         );
     }
 
@@ -138,12 +182,60 @@ public class ProductListSearchService {
                                                  int size,
                                                  ProductSort defaultSort,
                                                  ProductFilterOptionsBundle optionsBundle) {
+        return buildCondition(
+                categoryId,
+                keyword,
+                inStockOnly,
+                rawPriceBandIds,
+                rawColorKeys,
+                categoryFilter,
+                sort,
+                page,
+                size,
+                defaultSort,
+                optionsBundle,
+                null
+        );
+    }
+
+    /**
+     * カテゴリ固有条件とテイスト条件を含む検索条件を組み立てる。
+     *
+     * @param categoryId カテゴリーID
+     * @param keyword キーワード
+     * @param inStockOnly 在庫ありのみ条件
+     * @param rawPriceBandIds 価格帯の生入力値
+     * @param rawColorKeys カラーの生入力値
+     * @param categoryFilter カテゴリ固有条件
+     * @param sort 並び順
+     * @param page ページ番号
+     * @param size 表示件数
+     * @param defaultSort デフォルト並び順
+     * @param optionsBundle 使用する絞り込み候補群
+     * @param rawTasteDisplayNames テイスト表示名の生入力値
+     * @return 正規化済み検索条件
+     */
+    public ProductSearchCondition buildCondition(String categoryId,
+                                                 String keyword,
+                                                 boolean inStockOnly,
+                                                 List<Integer> rawPriceBandIds,
+                                                 List<String> rawColorKeys,
+                                                 ProductCategoryFilter categoryFilter,
+                                                 String sort,
+                                                 int page,
+                                                 int size,
+                                                 ProductSort defaultSort,
+                                                 ProductFilterOptionsBundle optionsBundle,
+                                                 List<String> rawTasteDisplayNames) {
         List<Integer> selectedPriceBandIds = productFilterOptionService.normalizePriceBandIds(rawPriceBandIds);
         ProductFilterOptionsBundle resolvedBundle = optionsBundle == null
                 ? productFilterOptionService.loadOptionsBundle()
                 : optionsBundle;
         List<String> selectedColorKeys = productFilterOptionService.normalizeColorKeys(rawColorKeys, resolvedBundle);
         List<Long> colorIds = productFilterOptionService.resolveColorIds(selectedColorKeys, resolvedBundle);
+        List<String> allowedTasteDisplayNames = productFilterOptionService.loadUnifiedTasteDisplayNames();
+        List<String> selectedTasteDisplayNames = productFilterOptionService.normalizeTasteDisplayNames(
+                rawTasteDisplayNames, allowedTasteDisplayNames);
         return productService.buildCondition(
                 categoryId,
                 keyword,
@@ -154,7 +246,9 @@ public class ProductListSearchService {
                 page,
                 size,
                 defaultSort,
-                categoryFilter
+                categoryFilter,
+                null,
+                selectedTasteDisplayNames
         );
     }
 
@@ -181,7 +275,8 @@ public class ProductListSearchService {
                     condition.sort(),
                     totalPages,
                     condition.size(),
-                    condition.saleStartFrom()
+                    condition.saleStartFrom(),
+                    condition.tasteDisplayNames()
             );
             return new ProductListSearchResult(corrected, productService.search(corrected));
         }

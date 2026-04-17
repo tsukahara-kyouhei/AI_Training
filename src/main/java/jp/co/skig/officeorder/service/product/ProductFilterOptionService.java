@@ -1,5 +1,6 @@
 package jp.co.skig.officeorder.service.product;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -400,6 +401,38 @@ public class ProductFilterOptionService {
         }
         return rawValues.stream()
                 .filter(v -> v != null && allowedValues.contains(v))
+                .distinct()
+                .toList();
+    }
+
+    /**
+     * カテゴリ横断で統合されたテイスト表示名一覧を取得する。
+     *
+     * @return 重複排除・ソート済みのテイスト表示名一覧
+     */
+    public List<String> loadUnifiedTasteDisplayNames() {
+        return productFilterOptionRepository.findUnifiedTasteDisplayNames();
+    }
+
+    /**
+     * テイスト表示名リストをホワイトリストで正規化する。
+     *
+     * <p>URL パラメータ経由の生値から、許可リストに存在するものだけを抽出する。
+     * 不正値の混入・重複を除去する。
+     *
+     * @param rawTasteDisplayNames コントローラが受け取った生のテイスト名リスト
+     * @param allowedDisplayNames  DB から取得した有効なテイスト名一覧
+     * @return 正規化済みテイスト名リスト（重複なし）
+     */
+    public List<String> normalizeTasteDisplayNames(
+            List<String> rawTasteDisplayNames,
+            List<String> allowedDisplayNames) {
+        if (rawTasteDisplayNames == null || rawTasteDisplayNames.isEmpty()) {
+            return List.of();
+        }
+        Set<String> allowedSet = new HashSet<>(allowedDisplayNames);
+        return rawTasteDisplayNames.stream()
+                .filter(name -> name != null && allowedSet.contains(name))
                 .distinct()
                 .toList();
     }

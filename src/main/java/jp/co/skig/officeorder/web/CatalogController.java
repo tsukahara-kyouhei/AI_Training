@@ -115,11 +115,13 @@ public class CatalogController {
                                 @RequestParam(name = "inStockOnly", defaultValue = "false") boolean inStockOnly,
                                 @RequestParam(name = "priceBand", required = false) List<Integer> rawPriceBandIds,
                                 @RequestParam(name = "color", required = false) List<String> rawColorKeys,
+                                @RequestParam(name = "taste", required = false) List<String> rawTasteDisplayNames,
                                 @RequestParam(name = "sort", required = false) String sort,
                                 @RequestParam(name = "page", defaultValue = "1") int page,
                                 @RequestParam(name = "size", defaultValue = "15") int size,
                                 Model model) {
         ProductFilterOptionsBundle optionsBundle = productFilterOptionService.loadOptionsBundle();
+        List<String> tasteFilterOptions = productFilterOptionService.loadUnifiedTasteDisplayNames();
         ProductSearchCondition condition = productListSearchService.buildCondition(
                 null,
                 keyword,
@@ -130,11 +132,14 @@ public class CatalogController {
                 page,
                 size,
                 ProductSort.RECOMMENDED,
-                optionsBundle
+                optionsBundle,
+                rawTasteDisplayNames
         );
         ProductListSearchResult result = productListSearchService.searchWithPageCorrection(condition);
         applyProductListModel(model, result.condition(), result.productPage(), optionsBundle);
         model.addAttribute("keyword", result.condition().keyword() == null ? "" : result.condition().keyword());
+        model.addAttribute("tasteFilterOptions", tasteFilterOptions);
+        model.addAttribute("selectedTasteDisplayNames", result.condition().tasteDisplayNames());
         return "pages/product-list-search-results";
     }
 

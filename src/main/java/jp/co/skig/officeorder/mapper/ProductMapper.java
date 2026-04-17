@@ -112,6 +112,13 @@ public interface ProductMapper {
     List<ProductFilterOptionMapperRow> selectActiveStorageTasteOptions();
 
     /**
+     * カテゴリ横断で統合されたテイスト表示名一覧を取得する。
+     *
+     * <p>desk_tastes / chair_tastes / storage_tastes を UNION して重複排除・ソート済みで返す。
+     */
+    List<String> selectUnifiedTasteDisplayNames();
+
+    /**
      * 指定時点で有効な消費税率を取得する。
      */
     BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);

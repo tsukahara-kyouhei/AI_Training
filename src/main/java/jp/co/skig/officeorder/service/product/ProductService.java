@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import jp.co.skig.officeorder.common.AppTimeProvider;
+import jp.co.skig.officeorder.common.NormalizationUtils;
 import jp.co.skig.officeorder.model.product.ProductCategoryFilter;
 import jp.co.skig.officeorder.model.product.PriceBand;
 import jp.co.skig.officeorder.model.product.ProductCardView;
@@ -165,6 +166,7 @@ public class ProductService {
                 size,
                 defaultSort,
                 ProductCategoryFilter.empty(),
+                null,
                 null
         );
     }
@@ -205,6 +207,7 @@ public class ProductService {
                 size,
                 defaultSort,
                 categoryFilter,
+                null,
                 null
         );
     }
@@ -236,6 +239,51 @@ public class ProductService {
                                                  ProductSort defaultSort,
                                                  ProductCategoryFilter categoryFilter,
                                                  OffsetDateTime saleStartFrom) {
+        return buildCondition(
+                categoryId,
+                keyword,
+                inStockOnly,
+                priceBandIds,
+                colorIds,
+                sort,
+                page,
+                size,
+                defaultSort,
+                categoryFilter,
+                saleStartFrom,
+                null
+        );
+    }
+
+    /**
+     * 全条件を受け取り、一覧検索用の条件オブジェクトを構築する（テイスト条件あり）。
+     *
+     * @param categoryId カテゴリーID
+     * @param keyword キーワード
+     * @param inStockOnly 在庫ありのみ条件
+     * @param priceBandIds 価格帯ID一覧
+     * @param colorIds 色ID一覧
+     * @param sort 並び順
+     * @param page ページ番号
+     * @param size 表示件数
+     * @param defaultSort デフォルト並び順
+     * @param categoryFilter カテゴリ固有条件
+     * @param saleStartFrom 販売開始日時の下限
+     * @param tasteDisplayNames テイスト表示名一覧
+     * @return 正規化済み検索条件
+     */
+    public ProductSearchCondition buildCondition(String categoryId,
+                                                 String keyword,
+                                                 boolean inStockOnly,
+                                                 List<Integer> priceBandIds,
+                                                 List<Long> colorIds,
+                                                 String sort,
+                                                 int page,
+                                                 int size,
+                                                 ProductSort defaultSort,
+                                                 ProductCategoryFilter categoryFilter,
+                                                 OffsetDateTime saleStartFrom,
+                                                 List<String> tasteDisplayNames) {
         List<PriceBand> bands = new ArrayList<>();
         if (priceBandIds != null) {
             for (Integer id : priceBandIds) {
@@ -251,9 +299,10 @@ public class ProductService {
         List<Long> uniqueColorIds = colorIds == null
                 ? List.of()
                 : colorIds.stream().filter(id -> id != null).distinct().toList();
+        List<String> uniqueTasteDisplayNames = tasteDisplayNames == null ? List.of() : tasteDisplayNames;
         return normalize(new ProductSearchCondition(
                 categoryId,
-                keyword == null ? null : keyword.trim(),
+                keyword == null ? null : NormalizationUtils.normalizeForSearch(keyword.trim()),
                 inStockOnly,
                 bands,
                 uniqueColorIds,
@@ -261,7 +310,8 @@ public class ProductService {
                 ProductSort.fromValue(sort, defaultSort),
                 page,
                 size,
-                saleStartFrom
+                saleStartFrom,
+                uniqueTasteDisplayNames
         ));
     }
 
@@ -284,7 +334,8 @@ public class ProductService {
                 condition.sort() == null ? ProductSort.RECOMMENDED : condition.sort(),
                 page,
                 size,
-                condition.saleStartFrom()
+                condition.saleStartFrom(),
+                condition.tasteDisplayNames() == null ? List.of() : condition.tasteDisplayNames()
         );
     }
 

@@ -1,6 +1,7 @@
 # FEAT-001 商品検索機能強化 実装計画 TODO リスト
 
 作成日: 2026-04-18  
+最終更新: 2026-04-18（実装完了）  
 対象要件: `docs/issues/FEAT-001-requirements.md`  
 設計書: `docs/design/FEAT-001-basic-design.md` / `docs/design/FEAT-001-detail-design.md` / `docs/design/FEAT-001-test-design.md`
 
@@ -19,7 +20,7 @@
 
 ### 1-1. `NormalizationUtils` の新規作成
 
-- [ ] **`src/main/java/jp/co/skig/officeorder/common/NormalizationUtils.java`** を新規作成
+- [x] **`src/main/java/jp/co/skig/officeorder/common/NormalizationUtils.java`** を新規作成
   - `final class`、コンストラクタ private（インスタンス化不可）
   - `public static String normalizeForSearch(String text)` を実装
     - `null` / 空文字はそのまま返す
@@ -35,14 +36,14 @@
 
 ### 1-2. `KeywordSearchParam` record の新規作成
 
-- [ ] **`src/main/java/jp/co/skig/officeorder/mapper/row/KeywordSearchParam.java`** を新規作成
+- [x] **`src/main/java/jp/co/skig/officeorder/mapper/row/KeywordSearchParam.java`** を新規作成
   - `public record KeywordSearchParam(String keywordLike, String codeLike) {}`
   - `keywordLike`: `"%{token}%"` 形式（部分一致）
   - `codeLike`: `"{token}%"` 形式（前方一致）
 
 ### 1-3. `ProductSearchCondition` record へのフィールド追加
 
-- [ ] *`src/main/java/jp/co/skig/officeorder/model/product/ProductSearchCondition.java`* を変更
+- [x] *`src/main/java/jp/co/skig/officeorder/model/product/ProductSearchCondition.java`* を変更
   - `saleStartFrom` の後に `List<String> tasteDisplayNames` フィールドを追加
   - `import java.util.List;` は既存のため追加不要
   - 変更後の record コンポーネント順序（詳細設計書 §4-1 参照）:
@@ -61,7 +62,7 @@
 
 ### 2-1. `ProductMapper` インターフェースへのメソッド追加
 
-- [ ] *`src/main/java/jp/co/skig/officeorder/mapper/ProductMapper.java`* を変更
+- [x] *`src/main/java/jp/co/skig/officeorder/mapper/ProductMapper.java`* を変更
   - 以下のメソッドを追加:
     ```java
     List<String> selectUnifiedTasteDisplayNames();
@@ -70,7 +71,7 @@
 
 ### 2-2. `ProductMapper.xml` の変更
 
-- [ ] *`src/main/resources/mappers/ProductMapper.xml`* を変更
+- [x] *`src/main/resources/mappers/ProductMapper.xml`* を変更
 
   **変更①: `BaseProductWhere` のキーワード条件を修正**
   - 変更前: `keywordLike` パラメータによる単一の ILIKE 条件（`product_name` + `product_code` の部分一致 OR）
@@ -156,7 +157,7 @@
 
 ### 3-1. `ProductRepository` の変更
 
-- [ ] *`src/main/java/jp/co/skig/officeorder/repository/ProductRepository.java`* を変更
+- [x] *`src/main/java/jp/co/skig/officeorder/repository/ProductRepository.java`* を変更
 
   **変更①: `import` の追加**
   - `import jp.co.skig.officeorder.mapper.row.KeywordSearchParam;` を追加
@@ -193,7 +194,7 @@
 
 ### 3-2. `ProductFilterOptionRepository` へのメソッド追加
 
-- [ ] *`src/main/java/jp/co/skig/officeorder/repository/ProductFilterOptionRepository.java`* を変更
+- [x] *`src/main/java/jp/co/skig/officeorder/repository/ProductFilterOptionRepository.java`* を変更
   - 以下のメソッドを追加:
     ```java
     /**
@@ -212,7 +213,7 @@
 
 ### 4-1. `ProductService` の変更
 
-- [ ] *`src/main/java/jp/co/skig/officeorder/service/product/ProductService.java`* を変更
+- [x] *`src/main/java/jp/co/skig/officeorder/service/product/ProductService.java`* を変更
 
   **変更①: `NormalizationUtils` の import 追加**
   - `import jp.co.skig.officeorder.common.NormalizationUtils;` を追加
@@ -243,7 +244,7 @@
 
 ### 4-2. `ProductListSearchService` の変更
 
-- [ ] *`src/main/java/jp/co/skig/officeorder/service/product/ProductListSearchService.java`* を変更
+- [x] *`src/main/java/jp/co/skig/officeorder/service/product/ProductListSearchService.java`* を変更
 
   **変更①: `buildCondition()` への引数追加**
   - カテゴリ固有条件あり版の `buildCondition()` に以下を追加:
@@ -271,7 +272,7 @@
 
 ### 4-3. `ProductFilterOptionService` へのメソッド追加
 
-- [ ] *`src/main/java/jp/co/skig/officeorder/service/product/ProductFilterOptionService.java`* を変更
+- [x] *`src/main/java/jp/co/skig/officeorder/service/product/ProductFilterOptionService.java`* を変更
 
   **変更①: `import` の追加**
   - `import java.util.HashSet;` を追加
@@ -321,7 +322,7 @@
 
 ### 5-1. `CatalogController` の変更
 
-- [ ] *`src/main/java/jp/co/skig/officeorder/web/CatalogController.java`* を変更
+- [x] *`src/main/java/jp/co/skig/officeorder/web/CatalogController.java`* を変更
 
   **変更①: `searchResults()` への `taste` パラメータ追加**
   - メソッドシグネチャに以下を追加:
@@ -354,7 +355,7 @@
 
 ### 6-1. `product-list-search-results.html` の変更
 
-- [ ] *`src/main/resources/templates/pages/product-list-search-results.html`* を変更
+- [x] *`src/main/resources/templates/pages/product-list-search-results.html`* を変更
 
   **変更①: サイドバーフォームへのテイストフィルタ追加**
   - カラーフィルタブロック（`<div class="field">` カラー）の後に追加:
@@ -409,7 +410,7 @@
 
 ### 7-1. `NormalizationUtilsTest` の新規作成
 
-- [ ] **`src/test/java/jp/co/skig/officeorder/common/NormalizationUtilsTest.java`** を新規作成
+- [x] **`src/test/java/jp/co/skig/officeorder/common/NormalizationUtilsTest.java`** を新規作成
   - テスト設計書 §2-1 の全ケース（NU-01〜NU-25）を実装
   - 主要なテストケース:
 
@@ -428,7 +429,7 @@
 
 ### 7-2. `ProductRepositoryKeywordBuildTest` の新規作成
 
-- [ ] **`src/test/java/jp/co/skig/officeorder/repository/ProductRepositoryKeywordBuildTest.java`** を新規作成
+- [x] **`src/test/java/jp/co/skig/officeorder/repository/ProductRepositoryKeywordBuildTest.java`** を新規作成
   - テスト設計書 §2-2 の全ケース（BK-01〜BK-08）を実装
   - `buildKeywords()` は private のため、`buildSearchParams()` の出力（`params.get("keywords")`）を検証するブラックボックステストとして実装
   - `@SpringBootTest` または `@ExtendWith(MockitoExtension.class)` でモックを使用して `ProductMapper` / `AppTimeProvider` を差し替え
@@ -444,7 +445,7 @@
 
 ### 7-3. `ProductFilterOptionServiceTest` の新規作成
 
-- [ ] **`src/test/java/jp/co/skig/officeorder/service/product/ProductFilterOptionServiceTest.java`** を新規作成
+- [x] **`src/test/java/jp/co/skig/officeorder/service/product/ProductFilterOptionServiceTest.java`** を新規作成
   - テスト設計書 §2-3 の全ケース（NT-01〜NT-07）を実装
   - `@ExtendWith(MockitoExtension.class)` でモックを使用
 

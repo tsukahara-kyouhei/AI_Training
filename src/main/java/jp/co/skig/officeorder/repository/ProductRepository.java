@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import jp.co.skig.officeorder.common.AppTimeProvider;
 import jp.co.skig.officeorder.common.MoneyFormatter;
+import jp.co.skig.officeorder.mapper.row.KeywordSearchParam;
 import jp.co.skig.officeorder.mapper.row.ProductColorCodeMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductDetailMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductListMapperRow;
@@ -178,7 +179,8 @@ public class ProductRepository {
                 ProductSort.NEWEST,
                 1,
                 limit,
-                appTimeProvider.nowOffsetDateTime().minusMonths(6)
+                appTimeProvider.nowOffsetDateTime().minusMonths(6),
+                List.of()
         );
         return search(condition).items();
     }
@@ -314,8 +316,13 @@ public class ProductRepository {
         boolean hasStorageFilter = category == ProductCategory.STORAGE && (!storageUsageIds.isEmpty()
                 || !storageTasteIds.isEmpty());
 
+        List<String> tasteDisplayNames = condition.tasteDisplayNames() == null
+                ? List.of() : condition.tasteDisplayNames();
+
         params.put("categoryId", normalizedCategoryId);
-        params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywords", buildKeywords(condition.keyword()));
+        params.put("tasteDisplayNames", tasteDisplayNames);
+        params.put("hasTasteFilter", !tasteDisplayNames.isEmpty());
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -375,16 +382,19 @@ public class ProductRepository {
     }
 
     /**
-     * キーワード検索用のLIKE文字列を生成する。
+     * 正規化済みキーワードをトークン分割し、キーワード検索パラメータリストを生成する。
      *
-     * @param keyword キーワード
-     * @return LIKE検索文字列
+     * @param normalizedKeyword 正規化済みキーワード
+     * @return キーワード検索パラメータリスト
      */
-    private String toKeywordLike(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            return null;
+    private List<KeywordSearchParam> buildKeywords(String normalizedKeyword) {
+        if (normalizedKeyword == null || normalizedKeyword.isBlank()) {
+            return List.of();
         }
-        return "%" + keyword.trim() + "%";
+        return java.util.Arrays.stream(normalizedKeyword.split("[ \u3000]+"))
+                .filter(s -> !s.isBlank())
+                .map(token -> new KeywordSearchParam("%" + token + "%", token + "%"))
+                .toList();
     }
 
     /**
@@ -451,7 +461,8 @@ public class ProductRepository {
                     ProductSort.NEWEST,
                     1,
                     limit + 1,
-                    null
+                    null,
+                    List.of()
             );
             return search(fallbackCondition).items().stream()
                     .filter(item -> item.productId() != sourceProductId)

@@ -266,15 +266,53 @@
         <if test="categoryId != null and categoryId != ''">
             AND p.category_id = #{categoryId}
         </if>
-        <if test="keywordLike != null and keywordLike != ''">
+        <if test="keywords != null and keywords.size() > 0">
+            AND
+            <foreach collection="keywords" item="kw" separator=" AND ">
+                (
+                    p.product_name ILIKE #{kw.keywordLike}
+                    OR (p.variation_name IS NOT NULL AND p.variation_name ILIKE #{kw.keywordLike})
+                    OR p.description ILIKE #{kw.keywordLike}
+                    OR EXISTS (
+                        SELECT 1 FROM product_variants pvk
+                        WHERE pvk.product_id = p.product_id
+                          AND pvk.product_code ILIKE #{kw.codeLike}
+                    )
+                )
+            </foreach>
+        </if>
+        <if test="hasTasteFilter == true">
             AND (
-            p.product_name ILIKE #{keywordLike}
-            OR EXISTS (
-            SELECT 1
-            FROM product_variants pvk
-            WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
-            )
+                EXISTS (
+                    SELECT 1
+                    FROM product_desk_attributes da
+                    JOIN desk_tastes dt ON da.taste_id = dt.taste_id
+                    WHERE da.product_id = p.product_id
+                      AND dt.display_name IN
+                    <foreach collection="tasteDisplayNames" item="name" open="(" close=")" separator=",">
+                        #{name}
+                    </foreach>
+                )
+                OR EXISTS (
+                    SELECT 1
+                    FROM product_chair_attributes ca
+                    JOIN chair_tastes ct ON ca.taste_id = ct.taste_id
+                    WHERE ca.product_id = p.product_id
+                      AND ct.display_name IN
+                    <foreach collection="tasteDisplayNames" item="name" open="(" close=")" separator=",">
+                        #{name}
+                    </foreach>
+                )
+                OR EXISTS (
+                    SELECT 1
+                    FROM product_storage_attributes sa
+                    JOIN storage_tastes st ON sa.taste_id = st.taste_id
+                    WHERE sa.product_id = p.product_id
+                      AND st.display_name IN
+                    <foreach collection="tasteDisplayNames" item="name" open="(" close=")" separator=",">
+                        #{name}
+                    </foreach>
+                )
             )
         </if>
         <if test="hasVariantFilter">
@@ -526,6 +564,19 @@
         AND (effective_end_at IS NULL OR effective_end_at &gt; #{now})
         ORDER BY effective_start_at DESC
         LIMIT 1
+    </select>
+
+    <select id="selectUnifiedTasteDisplayNames" resultType="string">
+        SELECT display_name
+        FROM (
+            SELECT display_name, sort_order FROM desk_tastes    WHERE is_active = TRUE
+            UNION ALL
+            SELECT display_name, sort_order FROM chair_tastes   WHERE is_active = TRUE
+            UNION ALL
+            SELECT display_name, sort_order FROM storage_tastes WHERE is_active = TRUE
+        ) combined
+        GROUP BY display_name
+        ORDER BY MIN(sort_order) ASC, display_name ASC
     </select>
 
 </mapper>

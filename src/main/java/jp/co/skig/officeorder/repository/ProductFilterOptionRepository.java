@@ -129,6 +129,15 @@ public class ProductFilterOptionRepository {
     }
 
     /**
+     * カテゴリ横断で統合されたテイスト表示名一覧を取得する。
+     *
+     * @return 重複排除・ソート済みのテイスト表示名一覧
+     */
+    public List<String> findUnifiedTasteDisplayNames() {
+        return productMapper.selectUnifiedTasteDisplayNames();
+    }
+
+    /**
      * カラー候補行を表示用モデルへ変換する。
      *
      * @param row カラー候補行
