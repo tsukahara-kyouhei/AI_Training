@@ -301,3 +301,18 @@ SELECT
     o.order_datetime + INTERVAL '6 hour'
 FROM orders o
 WHERE o.order_status = 'cancelled';
+
+-- order_number_counters をシードデータに合わせて初期化する。
+-- orders テーブルの当日付き注文番号の件数を last_sequence に設定することで、
+-- アプリが採番を続きから行えるようにし UNIQUE 制約違反を防ぐ。
+INSERT INTO order_number_counters (order_date, last_sequence, created_at, updated_at)
+SELECT
+    CURRENT_DATE,
+    COUNT(*),
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM orders
+WHERE order_number LIKE 'ORD' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '%'
+ON CONFLICT (order_date) DO UPDATE
+    SET last_sequence = EXCLUDED.last_sequence,
+        updated_at    = CURRENT_TIMESTAMP;

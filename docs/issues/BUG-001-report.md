@@ -7,9 +7,11 @@
 | 障害ID | BUG-001 |
 | 発生日時 | 2026/3/10 9:12 |
 | 報告日 | 2026/4/18 |
+| 修正日 | 2026/4/18 |
 | 対象機能 | 注文確定（`POST /checkout/confirm`） |
 | 影響範囲 | ローカル開発環境（初期構築当日） |
 | 深刻度 | High（注文確定が完全に不可） |
+| ステータス | 修正済み |
 
 ---
 
@@ -155,6 +157,47 @@ ON CONFLICT (order_date) DO UPDATE
 ### 採用案
 
 **案 A を採用する。** 案 B は見た目のデータ整合性が崩れるため不採用。案 A はシード終了時に `order_number_counters` を正しい状態にするという、本来あるべき初期化として自然な修正である。
+
+---
+
+## 修正内容
+
+### 実施した変更
+
+#### 1. `sql/seed/test-data/orders.sql` — `order_number_counters` 初期化を追加
+
+ファイル末尾に下記を追加した。`orders` テーブル内の当日付き注文番号の件数を集計し、`order_number_counters` に `last_sequence` として挿入する。再実行時には `ON CONFLICT DO UPDATE` で上書き更新する。
+
+```sql
+INSERT INTO order_number_counters (order_date, last_sequence, created_at, updated_at)
+SELECT
+    CURRENT_DATE,
+    COUNT(*),
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM orders
+WHERE order_number LIKE 'ORD' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '%'
+ON CONFLICT (order_date) DO UPDATE
+    SET last_sequence = EXCLUDED.last_sequence,
+        updated_at    = CURRENT_TIMESTAMP;
+```
+
+#### 2. `src/test/java/.../service/order/OrderServiceGenerateOrderNumberTest.java` — 単体テストを新規追加
+
+`OrderService.generateOrderNumber()` の採番ロジック（注文番号フォーマット・日次連番上限チェック）を検証する単体テストを追加した。リフレクションで private メソッドを呼び出す方式（既存の `ProductRepositoryKeywordBuildTest` と同様）を採用。
+
+| テストケース ID | 検証内容 |
+|:---:|---------|
+| GN-01 | 連番 1 → `ORD20260310-000001`（先頭ゼロ埋め） |
+| GN-02 | 連番 100 → `ORD20260310-000100` |
+| GN-03 | 連番 999999（上限値）→ 採番成功 |
+| GN-04 | 連番 1000000（上限超過）→ `IllegalStateException` |
+
+全 4 テストが GREEN であることを確認済み。
+
+### アプリケーションコードへの変更なし
+
+`CartController` の catch 節（`IllegalArgumentException` のみ補足）については、本障害の根本原因は SQL シードの不整合であり、今回の修正方針の対象外のため変更しない。
 
 ---
 
