@@ -32,6 +32,7 @@ import jp.co.skig.officeorder.model.product.ProductSeriesLinkView;
 import jp.co.skig.officeorder.model.product.ProductSort;
 import jp.co.skig.officeorder.model.product.ProductVariantView;
 import jp.co.skig.officeorder.model.product.RankedProductCardView;
+import jp.co.skig.officeorder.service.product.SearchKeywordNormalizer;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -79,16 +80,22 @@ public class ProductRepository {
     private final ProductMapper productMapper;
     /** 時刻依存条件に使う共通時刻プロバイダ。 */
     private final AppTimeProvider appTimeProvider;
+    /** 検索キーワード正規化コンポーネント。 */
+    private final SearchKeywordNormalizer normalizer;
 
     /**
      * 商品リポジトリを生成する。
      *
      * @param productMapper 商品Mapper
      * @param appTimeProvider 共通時刻プロバイダ
+     * @param normalizer 検索キーワード正規化コンポーネント
      */
-    public ProductRepository(ProductMapper productMapper, AppTimeProvider appTimeProvider) {
+    public ProductRepository(ProductMapper productMapper,
+                             AppTimeProvider appTimeProvider,
+                             SearchKeywordNormalizer normalizer) {
         this.productMapper = productMapper;
         this.appTimeProvider = appTimeProvider;
+        this.normalizer = normalizer;
     }
 
     /**
@@ -172,6 +179,7 @@ public class ProductRepository {
                 null,
                 null,
                 false,
+                List.of(),
                 List.of(),
                 List.of(),
                 ProductCategoryFilter.empty(),
@@ -290,32 +298,36 @@ public class ProductRepository {
         List<Long> colorIds = condition.colorIds() == null ? List.of() : condition.colorIds();
         List<RangeValue> priceRanges = toPriceRanges(condition.priceBands());
         List<Integer> deskTopShapeIds = filter.deskTopShapeIds();
-        List<Integer> deskTasteIds = filter.deskTasteIds();
+        List<Long> tasteIds = filter.tasteIds();
+        List<Long> searchTasteIds = condition.tasteIds() == null ? List.of() : condition.tasteIds();
         List<RangeValue> deskWidthRanges = toRanges(filter.deskWidthBandIds(), DESK_WIDTH_RANGES);
         List<RangeValue> deskDepthRanges = toRanges(filter.deskDepthBandIds(), DESK_DEPTH_RANGES);
         List<RangeValue> deskHeightRanges = toRanges(filter.deskHeightBandIds(), DESK_HEIGHT_RANGES);
         List<Integer> chairFunctionIds = filter.chairFunctionIds();
         List<Integer> chairMaterialIds = filter.chairMaterialIds();
-        List<Integer> chairTasteIds = filter.chairTasteIds();
         List<Integer> storageUsageIds = filter.storageUsageIds();
-        List<Integer> storageTasteIds = filter.storageTasteIds();
 
         boolean hasVariantFilter = condition.inStockOnly()
                 || !colorIds.isEmpty()
                 || !priceRanges.isEmpty();
         boolean hasDeskFilter = category == ProductCategory.DESK && (!deskTopShapeIds.isEmpty()
-                || !deskTasteIds.isEmpty()
+                || !tasteIds.isEmpty()
                 || !deskWidthRanges.isEmpty()
                 || !deskDepthRanges.isEmpty()
                 || !deskHeightRanges.isEmpty());
         boolean hasChairFilter = category == ProductCategory.CHAIR && (!chairFunctionIds.isEmpty()
                 || !chairMaterialIds.isEmpty()
-                || !chairTasteIds.isEmpty());
+                || !tasteIds.isEmpty());
         boolean hasStorageFilter = category == ProductCategory.STORAGE && (!storageUsageIds.isEmpty()
-                || !storageTasteIds.isEmpty());
+                || !tasteIds.isEmpty());
+        boolean hasSearchTasteFilter = !searchTasteIds.isEmpty();
+
+        String normalizedKeyword = normalizer.normalize(condition.keyword());
 
         params.put("categoryId", normalizedCategoryId);
-        params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordLike",   normalizer.toLikePattern(normalizedKeyword));
+        params.put("keywordExact",  normalizedKeyword);
+        params.put("keywordPrefix", normalizer.toPrefixPattern(normalizedKeyword));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -325,18 +337,18 @@ public class ProductRepository {
         params.put("hasDeskFilter", hasDeskFilter);
         params.put("hasChairFilter", hasChairFilter);
         params.put("hasStorageFilter", hasStorageFilter);
+        params.put("hasSearchTasteFilter", hasSearchTasteFilter);
         params.put("now", appTimeProvider.nowOffsetDateTime());
 
         params.put("deskTopShapeIds", deskTopShapeIds);
-        params.put("deskTasteIds", deskTasteIds);
+        params.put("tasteIds", tasteIds);
+        params.put("searchTasteIds", searchTasteIds);
         params.put("deskWidthRanges", deskWidthRanges);
         params.put("deskDepthRanges", deskDepthRanges);
         params.put("deskHeightRanges", deskHeightRanges);
         params.put("chairFunctionIds", chairFunctionIds);
         params.put("chairMaterialIds", chairMaterialIds);
-        params.put("chairTasteIds", chairTasteIds);
         params.put("storageUsageIds", storageUsageIds);
-        params.put("storageTasteIds", storageTasteIds);
         return params;
     }
 
@@ -372,19 +384,6 @@ public class ProductRepository {
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
-    }
-
-    /**
-     * キーワード検索用のLIKE文字列を生成する。
-     *
-     * @param keyword キーワード
-     * @return LIKE検索文字列
-     */
-    private String toKeywordLike(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            return null;
-        }
-        return "%" + keyword.trim() + "%";
     }
 
     /**
@@ -445,6 +444,7 @@ public class ProductRepository {
                     null,
                     null,
                     false,
+                    List.of(),
                     List.of(),
                     List.of(),
                     ProductCategoryFilter.empty(),

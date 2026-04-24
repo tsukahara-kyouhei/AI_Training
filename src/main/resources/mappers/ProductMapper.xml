@@ -151,9 +151,9 @@
                 #{value}
             </foreach>
         </if>
-        <if test="deskTasteIds != null and deskTasteIds.size() &gt; 0">
+        <if test="tasteIds != null and tasteIds.size() &gt; 0">
             AND da.taste_id IN
-            <foreach collection="deskTasteIds" item="value" open="(" close=")" separator=",">
+            <foreach collection="tasteIds" item="value" open="(" close=")" separator=",">
                 #{value}
             </foreach>
         </if>
@@ -228,9 +228,9 @@
                 #{value}
             </foreach>
         </if>
-        <if test="chairTasteIds != null and chairTasteIds.size() &gt; 0">
+        <if test="tasteIds != null and tasteIds.size() &gt; 0">
             AND ca.taste_id IN
-            <foreach collection="chairTasteIds" item="value" open="(" close=")" separator=",">
+            <foreach collection="tasteIds" item="value" open="(" close=")" separator=",">
                 #{value}
             </foreach>
         </if>
@@ -248,12 +248,44 @@
                 #{value}
             </foreach>
         </if>
-        <if test="storageTasteIds != null and storageTasteIds.size() &gt; 0">
+        <if test="tasteIds != null and tasteIds.size() &gt; 0">
             AND sa.taste_id IN
-            <foreach collection="storageTasteIds" item="value" open="(" close=")" separator=",">
+            <foreach collection="tasteIds" item="value" open="(" close=")" separator=",">
                 #{value}
             </foreach>
         </if>
+        )
+    </sql>
+
+    <sql id="TasteFilter">
+        AND (
+            EXISTS (
+                SELECT 1
+                FROM product_desk_attributes da
+                WHERE da.product_id = p.product_id
+                AND da.taste_id IN
+                <foreach collection="searchTasteIds" item="v" open="(" close=")" separator=",">
+                    #{v}
+                </foreach>
+            )
+            OR EXISTS (
+                SELECT 1
+                FROM product_chair_attributes ca
+                WHERE ca.product_id = p.product_id
+                AND ca.taste_id IN
+                <foreach collection="searchTasteIds" item="v" open="(" close=")" separator=",">
+                    #{v}
+                </foreach>
+            )
+            OR EXISTS (
+                SELECT 1
+                FROM product_storage_attributes sa
+                WHERE sa.product_id = p.product_id
+                AND sa.taste_id IN
+                <foreach collection="searchTasteIds" item="v" open="(" close=")" separator=",">
+                    #{v}
+                </foreach>
+            )
         )
     </sql>
 
@@ -268,12 +300,26 @@
         </if>
         <if test="keywordLike != null and keywordLike != ''">
             AND (
-            p.product_name ILIKE #{keywordLike}
+            TRANSLATE(p.product_name,
+                'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９',
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+            ) ILIKE #{keywordLike}
+            OR TRANSLATE(p.variation_name,
+                'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９',
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+            ) ILIKE #{keywordLike}
+            OR TRANSLATE(p.description,
+                'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９',
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+            ) ILIKE #{keywordLike}
             OR EXISTS (
-            SELECT 1
-            FROM product_variants pvk
-            WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
+                SELECT 1
+                FROM product_variants pvk
+                WHERE pvk.product_id = p.product_id
+                AND (
+                    pvk.product_code = #{keywordExact}
+                    OR pvk.product_code ILIKE #{keywordPrefix}
+                )
             )
             )
         </if>
@@ -284,6 +330,9 @@
             WHERE pvf.product_id = p.product_id
             <include refid="VariantFilterPvf"/>
             )
+        </if>
+        <if test="hasSearchTasteFilter">
+            <include refid="TasteFilter"/>
         </if>
         <if test="hasDeskFilter">
             <include refid="DeskAttributeFilter"/>
@@ -464,11 +513,11 @@
         ORDER BY sort_order ASC, top_shape_id ASC
     </select>
 
-    <select id="selectActiveDeskTasteOptions" resultMap="ProductFilterOptionRowMap">
+    <select id="selectActiveTasteOptions" resultMap="ProductFilterOptionRowMap">
         SELECT
-        taste_id AS option_id,
+        taste_id    AS option_id,
         display_name
-        FROM desk_tastes
+        FROM tastes
         WHERE is_active = TRUE
         ORDER BY sort_order ASC, taste_id ASC
     </select>
@@ -491,15 +540,6 @@
         ORDER BY sort_order ASC, material_id ASC
     </select>
 
-    <select id="selectActiveChairTasteOptions" resultMap="ProductFilterOptionRowMap">
-        SELECT
-        taste_id AS option_id,
-        display_name
-        FROM chair_tastes
-        WHERE is_active = TRUE
-        ORDER BY sort_order ASC, taste_id ASC
-    </select>
-
     <select id="selectActiveStorageUsageOptions" resultMap="ProductFilterOptionRowMap">
         SELECT
         usage_id AS option_id,
@@ -507,15 +547,6 @@
         FROM storage_usages
         WHERE is_active = TRUE
         ORDER BY sort_order ASC, usage_id ASC
-    </select>
-
-    <select id="selectActiveStorageTasteOptions" resultMap="ProductFilterOptionRowMap">
-        SELECT
-        taste_id AS option_id,
-        display_name
-        FROM storage_tastes
-        WHERE is_active = TRUE
-        ORDER BY sort_order ASC, taste_id ASC
     </select>
 
     <select id="selectCurrentTaxRatePercent" resultType="java.math.BigDecimal">

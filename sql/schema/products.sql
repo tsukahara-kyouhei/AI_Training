@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS product_desk_attributes (
     CONSTRAINT fk_product_desk_attributes_top_shape FOREIGN KEY (top_shape_id)
         REFERENCES desk_top_shapes (top_shape_id) ON DELETE RESTRICT,
     CONSTRAINT fk_product_desk_attributes_taste FOREIGN KEY (taste_id)
-        REFERENCES desk_tastes (taste_id) ON DELETE RESTRICT
+        REFERENCES tastes (taste_id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_product_desk_attributes_top_shape ON product_desk_attributes (top_shape_id);
 CREATE INDEX IF NOT EXISTS idx_product_desk_attributes_taste ON product_desk_attributes (taste_id);
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS product_chair_attributes (
     CONSTRAINT fk_product_chair_attributes_material FOREIGN KEY (material_id)
         REFERENCES chair_materials (material_id) ON DELETE RESTRICT,
     CONSTRAINT fk_product_chair_attributes_taste FOREIGN KEY (taste_id)
-        REFERENCES chair_tastes (taste_id) ON DELETE RESTRICT
+        REFERENCES tastes (taste_id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_product_chair_attributes_function ON product_chair_attributes (function_id);
 CREATE INDEX IF NOT EXISTS idx_product_chair_attributes_material ON product_chair_attributes (material_id);
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS product_storage_attributes (
     CONSTRAINT fk_product_storage_attributes_usage FOREIGN KEY (usage_id)
         REFERENCES storage_usages (usage_id) ON DELETE RESTRICT,
     CONSTRAINT fk_product_storage_attributes_taste FOREIGN KEY (taste_id)
-        REFERENCES storage_tastes (taste_id) ON DELETE RESTRICT
+        REFERENCES tastes (taste_id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_product_storage_attributes_usage ON product_storage_attributes (usage_id);
 CREATE INDEX IF NOT EXISTS idx_product_storage_attributes_taste ON product_storage_attributes (taste_id);

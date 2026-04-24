@@ -12,6 +12,7 @@ public record ProductSearchCondition(
         boolean inStockOnly,
         List<PriceBand> priceBands,
         List<Long> colorIds,
+        List<Long> tasteIds,
         ProductCategoryFilter categoryFilter,
         ProductSort sort,
         int page,

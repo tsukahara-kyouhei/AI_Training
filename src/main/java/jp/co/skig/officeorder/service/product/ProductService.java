@@ -127,6 +127,7 @@ public class ProductService {
                 size,
                 ProductSort.NEWEST,
                 ProductCategoryFilter.empty(),
+                List.of(),
                 newArrivalSaleStartFrom()
         );
     }
@@ -165,6 +166,7 @@ public class ProductService {
                 size,
                 defaultSort,
                 ProductCategoryFilter.empty(),
+                List.of(),
                 null
         );
     }
@@ -205,6 +207,7 @@ public class ProductService {
                 size,
                 defaultSort,
                 categoryFilter,
+                List.of(),
                 null
         );
     }
@@ -222,6 +225,7 @@ public class ProductService {
      * @param size 表示件数
      * @param defaultSort デフォルト並び順
      * @param categoryFilter カテゴリ固有条件
+     * @param tasteIds 検索結果画面用テイストID一覧
      * @param saleStartFrom 販売開始日時の下限
      * @return 正規化済み検索条件
      */
@@ -235,6 +239,7 @@ public class ProductService {
                                                  int size,
                                                  ProductSort defaultSort,
                                                  ProductCategoryFilter categoryFilter,
+                                                 List<Long> tasteIds,
                                                  OffsetDateTime saleStartFrom) {
         List<PriceBand> bands = new ArrayList<>();
         if (priceBandIds != null) {
@@ -251,12 +256,14 @@ public class ProductService {
         List<Long> uniqueColorIds = colorIds == null
                 ? List.of()
                 : colorIds.stream().filter(id -> id != null).distinct().toList();
+        List<Long> normalizedTasteIds = tasteIds == null ? List.of() : tasteIds;
         return normalize(new ProductSearchCondition(
                 categoryId,
                 keyword == null ? null : keyword.trim(),
                 inStockOnly,
                 bands,
                 uniqueColorIds,
+                normalizedTasteIds,
                 categoryFilter == null ? ProductCategoryFilter.empty() : categoryFilter.normalize(),
                 ProductSort.fromValue(sort, defaultSort),
                 page,
@@ -280,6 +287,7 @@ public class ProductService {
                 condition.inStockOnly(),
                 condition.priceBands() == null ? List.of() : condition.priceBands(),
                 condition.colorIds() == null ? List.of() : condition.colorIds(),
+                condition.tasteIds() == null ? List.of() : condition.tasteIds(),
                 condition.categoryFilter() == null ? ProductCategoryFilter.empty() : condition.categoryFilter().normalize(),
                 condition.sort() == null ? ProductSort.RECOMMENDED : condition.sort(),
                 page,

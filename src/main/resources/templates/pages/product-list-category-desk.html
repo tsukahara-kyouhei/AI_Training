@@ -113,11 +113,11 @@
                                 <div class="field">
                                     <label>テイスト</label>
                                     <div class="checklist">
-                                        <label class="check-item" th:each="option : ${deskTasteOptions}">
+                                        <label class="check-item" th:each="option : ${tasteOptions}">
                                             <input type="checkbox"
-                                                   name="deskTaste"
+                                                   name="taste"
                                                    th:value="${option.id}"
-                                                   th:checked="${deskTasteIds != null and deskTasteIds.contains(option.id)}">
+                                                   th:checked="${tasteIds != null and tasteIds.contains(option.id)}">
                                             <span th:text="${option.label}">ベーシック</span>
                                         </label>
                                     </div>
@@ -146,7 +146,7 @@
                                 <input type="hidden" name="deskWidthBand" th:each="id : ${deskWidthBandIds}" th:value="${id}">
                                 <input type="hidden" name="deskDepthBand" th:each="id : ${deskDepthBandIds}" th:value="${id}">
                                 <input type="hidden" name="deskHeightBand" th:each="id : ${deskHeightBandIds}" th:value="${id}">
-                                <input type="hidden" name="deskTaste" th:each="id : ${deskTasteIds}" th:value="${id}">
+                                <input type="hidden" name="taste" th:each="id : ${tasteIds}" th:value="${id}">
                                 <input type="hidden" name="page" value="1">
                                 <label class="badge">並び順
                                     <select name="sort" aria-label="並び順" onchange="this.form.submit()">
@@ -183,12 +183,12 @@
                          th:with="windowStart=${currentPage > 2 ? currentPage - 1 : 2}, windowEnd=${currentPage < totalPages - 1 ? currentPage + 1 : totalPages - 1}">
                         <a class="btn btn--ghost"
                            th:if="${currentPage > 1}"
-                           th:href="@{/categories/desks(page=${currentPage - 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},deskTaste=${deskTasteIds})}">前へ</a>
+                           th:href="@{/categories/desks(page=${currentPage - 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},taste=${tasteIds})}">前へ</a>
                         <span class="btn btn--ghost" style="opacity:.55; cursor:not-allowed;" th:if="${currentPage <= 1}">前へ</span>
 
                         <a class="btn btn--ghost"
                            th:if="${currentPage != 1}"
-                           th:href="@{/categories/desks(page=1,size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},deskTaste=${deskTasteIds})}">1</a>
+                           th:href="@{/categories/desks(page=1,size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},taste=${tasteIds})}">1</a>
                         <span class="btn btn--ghost is-disabled" th:if="${currentPage == 1}">1</span>
 
                         <span class="muted" th:if="${windowStart > 2}">...</span>
@@ -197,7 +197,7 @@
                             <th:block th:each="p : ${#numbers.sequence(windowStart, windowEnd)}">
                                 <a class="btn btn--ghost"
                                    th:if="${p != currentPage}"
-                                   th:href="@{/categories/desks(page=${p},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},deskTaste=${deskTasteIds})}"
+                                   th:href="@{/categories/desks(page=${p},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},taste=${tasteIds})}"
                                    th:text="${p}">2</a>
                                 <span class="btn btn--ghost is-disabled" th:if="${p == currentPage}" th:text="${p}">2</span>
                             </th:block>
@@ -207,7 +207,7 @@
 
                         <a class="btn btn--ghost"
                            th:if="${totalPages > 1 and currentPage != totalPages}"
-                           th:href="@{/categories/desks(page=${totalPages},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},deskTaste=${deskTasteIds})}"
+                           th:href="@{/categories/desks(page=${totalPages},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},taste=${tasteIds})}"
                            th:text="${totalPages}">99</a>
                         <span class="btn btn--ghost is-disabled"
                               th:if="${totalPages > 1 and currentPage == totalPages}"
@@ -215,7 +215,7 @@
 
                         <a class="btn btn--ghost"
                            th:if="${currentPage < totalPages}"
-                           th:href="@{/categories/desks(page=${currentPage + 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},deskTaste=${deskTasteIds})}">次へ</a>
+                           th:href="@{/categories/desks(page=${currentPage + 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},deskTopShape=${deskTopShapeIds},deskWidthBand=${deskWidthBandIds},deskDepthBand=${deskDepthBandIds},deskHeightBand=${deskHeightBandIds},taste=${tasteIds})}">次へ</a>
                         <span class="btn btn--ghost" style="opacity:.55; cursor:not-allowed;" th:if="${currentPage >= totalPages}">次へ</span>
                     </nav>
                 </section>

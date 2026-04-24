@@ -68,6 +68,7 @@ public class ProductListSearchService {
                 rawPriceBandIds,
                 rawColorKeys,
                 ProductCategoryFilter.empty(),
+                List.of(),
                 sort,
                 page,
                 size,
@@ -120,6 +121,7 @@ public class ProductListSearchService {
      * @param rawPriceBandIds 価格帯の生入力値
      * @param rawColorKeys カラーの生入力値
      * @param categoryFilter カテゴリ固有条件
+     * @param tasteIds 検索結果画面用テイストID一覧
      * @param sort 並び順
      * @param page ページ番号
      * @param size 表示件数
@@ -133,6 +135,7 @@ public class ProductListSearchService {
                                                  List<Integer> rawPriceBandIds,
                                                  List<String> rawColorKeys,
                                                  ProductCategoryFilter categoryFilter,
+                                                 List<Long> tasteIds,
                                                  String sort,
                                                  int page,
                                                  int size,
@@ -154,7 +157,9 @@ public class ProductListSearchService {
                 page,
                 size,
                 defaultSort,
-                categoryFilter
+                categoryFilter,
+                tasteIds == null ? List.of() : tasteIds,
+                null
         );
     }
 
@@ -177,6 +182,7 @@ public class ProductListSearchService {
                     condition.inStockOnly(),
                     condition.priceBands(),
                     condition.colorIds(),
+                    condition.tasteIds(),
                     condition.categoryFilter(),
                     condition.sort(),
                     totalPages,

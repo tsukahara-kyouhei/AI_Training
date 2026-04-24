@@ -10,12 +10,10 @@ public record ProductCategoryFilter(
         List<Integer> deskWidthBandIds,
         List<Integer> deskDepthBandIds,
         List<Integer> deskHeightBandIds,
-        List<Integer> deskTasteIds,
         List<Integer> chairFunctionIds,
         List<Integer> chairMaterialIds,
-        List<Integer> chairTasteIds,
         List<Integer> storageUsageIds,
-        List<Integer> storageTasteIds
+        List<Long>    tasteIds
 ) {
 
     /**
@@ -23,8 +21,6 @@ public record ProductCategoryFilter(
      */
     public static ProductCategoryFilter empty() {
         return new ProductCategoryFilter(
-                List.of(),
-                List.of(),
                 List.of(),
                 List.of(),
                 List.of(),
@@ -45,12 +41,10 @@ public record ProductCategoryFilter(
                 normalizeList(deskWidthBandIds),
                 normalizeList(deskDepthBandIds),
                 normalizeList(deskHeightBandIds),
-                normalizeList(deskTasteIds),
                 normalizeList(chairFunctionIds),
                 normalizeList(chairMaterialIds),
-                normalizeList(chairTasteIds),
                 normalizeList(storageUsageIds),
-                normalizeList(storageTasteIds)
+                normalizeLongList(tasteIds)
         );
     }
 
@@ -62,15 +56,23 @@ public record ProductCategoryFilter(
                 && deskWidthBandIds.isEmpty()
                 && deskDepthBandIds.isEmpty()
                 && deskHeightBandIds.isEmpty()
-                && deskTasteIds.isEmpty()
                 && chairFunctionIds.isEmpty()
                 && chairMaterialIds.isEmpty()
-                && chairTasteIds.isEmpty()
                 && storageUsageIds.isEmpty()
-                && storageTasteIds.isEmpty();
+                && tasteIds.isEmpty();
     }
 
     private static List<Integer> normalizeList(List<Integer> values) {
+        if (values == null || values.isEmpty()) {
+            return List.of();
+        }
+        return values.stream()
+                .filter(v -> v != null)
+                .distinct()
+                .toList();
+    }
+
+    private static List<Long> normalizeLongList(List<Long> values) {
         if (values == null || values.isEmpty()) {
             return List.of();
         }

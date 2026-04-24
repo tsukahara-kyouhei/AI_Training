@@ -57,12 +57,12 @@ public class ProductFilterOptionRepository {
     }
 
     /**
-     * 有効なデスクテイスト候補を取得する。
+     * 有効なテイスト候補一覧を統合マスタから取得する。
      *
      * @return テイスト候補
      */
-    public List<CategoryFilterOption> findActiveDeskTasteOptions() {
-        return productMapper.selectActiveDeskTasteOptions().stream()
+    public List<CategoryFilterOption> findActiveTasteOptions() {
+        return productMapper.selectActiveTasteOptions().stream()
                 .map(this::toCategoryFilterOption)
                 .filter(option -> option != null)
                 .toList();
@@ -93,36 +93,12 @@ public class ProductFilterOptionRepository {
     }
 
     /**
-     * 有効なチェアテイスト候補を取得する。
-     *
-     * @return テイスト候補
-     */
-    public List<CategoryFilterOption> findActiveChairTasteOptions() {
-        return productMapper.selectActiveChairTasteOptions().stream()
-                .map(this::toCategoryFilterOption)
-                .filter(option -> option != null)
-                .toList();
-    }
-
-    /**
      * 有効な収納家具用途候補を取得する。
      *
      * @return 用途候補
      */
     public List<CategoryFilterOption> findActiveStorageUsageOptions() {
         return productMapper.selectActiveStorageUsageOptions().stream()
-                .map(this::toCategoryFilterOption)
-                .filter(option -> option != null)
-                .toList();
-    }
-
-    /**
-     * 有効な収納家具テイスト候補を取得する。
-     *
-     * @return テイスト候補
-     */
-    public List<CategoryFilterOption> findActiveStorageTasteOptions() {
-        return productMapper.selectActiveStorageTasteOptions().stream()
                 .map(this::toCategoryFilterOption)
                 .filter(option -> option != null)
                 .toList();

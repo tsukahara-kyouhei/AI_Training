@@ -82,9 +82,9 @@ public interface ProductMapper {
     List<ProductFilterOptionMapperRow> selectActiveDeskTopShapeOptions();
 
     /**
-     * デスク一覧のテイスト選択肢を取得する。
+     * テイスト統合マスタから有効なテイスト選択肢を取得する。
      */
-    List<ProductFilterOptionMapperRow> selectActiveDeskTasteOptions();
+    List<ProductFilterOptionMapperRow> selectActiveTasteOptions();
 
     /**
      * チェア一覧の機能選択肢を取得する。
@@ -97,19 +97,9 @@ public interface ProductMapper {
     List<ProductFilterOptionMapperRow> selectActiveChairMaterialOptions();
 
     /**
-     * チェア一覧のテイスト選択肢を取得する。
-     */
-    List<ProductFilterOptionMapperRow> selectActiveChairTasteOptions();
-
-    /**
      * 収納家具一覧の用途選択肢を取得する。
      */
     List<ProductFilterOptionMapperRow> selectActiveStorageUsageOptions();
-
-    /**
-     * 収納家具一覧のテイスト選択肢を取得する。
-     */
-    List<ProductFilterOptionMapperRow> selectActiveStorageTasteOptions();
 
     /**
      * 指定時点で有効な消費税率を取得する。
