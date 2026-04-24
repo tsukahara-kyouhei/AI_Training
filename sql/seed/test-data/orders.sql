@@ -77,7 +77,7 @@ INSERT INTO orders (
     updated_at
 )
 SELECT
-    'ORD' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(p.n::TEXT, 6, '0'),
+    'ORD' || TO_CHAR((p.order_datetime AT TIME ZONE 'Asia/Tokyo')::date, 'YYYYMMDD') || '-' || LPAD(p.n::TEXT, 6, '0'),
     p.order_datetime,
     p.final_status,
     p.customer_type,
@@ -301,3 +301,18 @@ SELECT
     o.order_datetime + INTERVAL '6 hour'
 FROM orders o
 WHERE o.order_status = 'cancelled';
+
+-- order_number_counters を orders の実データから自動計算（新規注文との衝突防止）
+-- 各日付ごとに最大連番を記録することで、同日の新規注文採番がシードデータと衝突しない
+INSERT INTO order_number_counters (order_date, last_sequence, created_at, updated_at)
+SELECT
+    (order_datetime AT TIME ZONE 'Asia/Tokyo')::date            AS order_date,
+    MAX(CAST(SUBSTRING(order_number FROM 13 FOR 6) AS INTEGER)) AS last_sequence,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM orders
+WHERE order_number ~ '^ORD[0-9]{8}-[0-9]{6}$'
+GROUP BY (order_datetime AT TIME ZONE 'Asia/Tokyo')::date
+ON CONFLICT (order_date) DO UPDATE
+    SET last_sequence = GREATEST(order_number_counters.last_sequence, EXCLUDED.last_sequence),
+        updated_at    = CURRENT_TIMESTAMP;
