@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.ReviewMapper">
+
+    <resultMap id="ReviewRowMap" type="jp.co.skig.officeorder.mapper.row.ReviewMapperRow">
+        <constructor>
+            <idArg column="review_id" javaType="_long"/>
+            <arg column="member_id" javaType="_long"/>
+            <arg column="product_id" javaType="_long"/>
+            <arg column="rating" javaType="_int"/>
+            <arg column="title" javaType="string"/>
+            <arg column="body" javaType="string"/>
+            <arg column="is_published" javaType="_boolean"/>
+            <arg column="is_blocked" javaType="_boolean"/>
+            <arg column="created_at" javaType="java.time.LocalDateTime"/>
+            <arg column="updated_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="ReviewSummaryRowMap" type="jp.co.skig.officeorder.mapper.row.ReviewSummaryMapperRow">
+        <constructor>
+            <idArg column="product_id" javaType="_long"/>
+            <arg column="review_count" javaType="_int"/>
+            <arg column="average_rating" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <select id="selectReviewSummary" resultMap="ReviewSummaryRowMap">
+        SELECT product_id,
+               COUNT(*)    AS review_count,
+               AVG(rating) AS average_rating
+        FROM reviews
+        WHERE product_id = #{productId}
+          AND is_published = TRUE
+        GROUP BY product_id
+    </select>
+
+    <select id="selectReviewsByProduct" resultMap="ReviewRowMap">
+        SELECT review_id, member_id, product_id, rating, title, body,
+               is_published, is_blocked, created_at, updated_at
+        FROM reviews
+        WHERE product_id = #{productId}
+          AND is_published = TRUE
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="selectByMemberAndProduct" resultMap="ReviewRowMap">
+        SELECT review_id, member_id, product_id, rating, title, body,
+               is_published, is_blocked, created_at, updated_at
+        FROM reviews
+        WHERE member_id = #{memberId}
+          AND product_id = #{productId}
+    </select>
+
+    <select id="selectById" resultMap="ReviewRowMap">
+        SELECT review_id, member_id, product_id, rating, title, body,
+               is_published, is_blocked, created_at, updated_at
+        FROM reviews
+        WHERE review_id = #{reviewId}
+    </select>
+
+    <select id="existsPurchase" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM orders o
+            JOIN order_items oi ON oi.order_id = o.order_id
+            JOIN product_variants pv ON pv.product_code = oi.product_code
+            WHERE o.member_id = #{memberId}
+              AND o.order_status != 'cancelled'
+              AND pv.product_id = #{productId}
+        )
+    </select>
+
+    <insert id="insertReview">
+        INSERT INTO reviews (member_id, product_id, rating, title, body, is_published, created_at, updated_at)
+        VALUES (#{memberId}, #{productId}, #{rating}, #{title}, #{body}, #{isPublished}, now(), now())
+    </insert>
+
+    <update id="updateReview">
+        UPDATE reviews
+        SET rating       = #{rating},
+            title        = #{title},
+            body         = #{body},
+            is_published = #{isPublished},
+            updated_at   = now()
+        WHERE review_id = #{reviewId}
+    </update>
+
+    <delete id="deleteReview">
+        DELETE FROM reviews
+        WHERE review_id = #{reviewId}
+    </delete>
+
+    <select id="selectReviewSummaries" resultMap="ReviewSummaryRowMap">
+        SELECT product_id,
+               COUNT(*)    AS review_count,
+               AVG(rating) AS average_rating
+        FROM reviews
+        WHERE is_published = TRUE
+          AND product_id IN
+        <foreach collection="productIds" item="productId" open="(" close=")" separator=",">
+            #{productId}
+        </foreach>
+        GROUP BY product_id
+    </select>
+
+    <select id="countPublishedByProduct" resultType="int">
+        SELECT COUNT(*)
+        FROM reviews
+        WHERE product_id = #{productId}
+          AND is_published = TRUE
+    </select>
+
+</mapper>

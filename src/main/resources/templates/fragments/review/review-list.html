@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="reviewList(reviews, hasMoreReviews, productId)">
+    <div class="review-list" data-review-list th:attr="data-product-id=${productId}">
+        <div class="review-item" th:each="review : ${reviews}">
+            <div class="review-item__header">
+                <span class="review-stars">
+                    <span class="review-stars__filled" th:each="i : ${#numbers.sequence(1, review.rating)}">&#9733;</span>
+                    <span class="review-stars__empty" th:each="i : ${#numbers.sequence(review.rating + 1, 5)}">&#9734;</span>
+                </span>
+                <span class="review-item__date" th:text="${#temporals.format(review.createdAt, 'yyyy-MM-dd')}">2026-04-10</span>
+            </div>
+            <p class="review-item__title" th:if="${review.title != null and !review.title.isEmpty()}" th:text="${review.title}">タイトル</p>
+            <p class="review-item__body" th:text="${review.body}">本文</p>
+        </div>
+    </div>
+    <div class="review-more" th:if="${hasMoreReviews}">
+        <button class="btn btn--outline" type="button" data-review-more
+                th:attr="data-product-id=${productId}">もっと見る</button>
+    </div>
+</div>
+</body>
+</html>

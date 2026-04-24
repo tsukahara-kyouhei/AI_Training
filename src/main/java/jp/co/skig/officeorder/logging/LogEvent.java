@@ -73,6 +73,11 @@ public enum LogEvent {
     SESSION_MEMBER_INVALIDATED("session_member_invalidated"),
     SESSION_CREATED("session_created"),
     SESSION_CLEARED("session_cleared"),
+    REVIEW_POSTED("review_posted"),
+    REVIEW_UPDATED("review_updated"),
+    REVIEW_DELETED("review_deleted"),
+    REVIEW_REDIRECT_LOGIN("review_redirect_login"),
+    REVIEW_ACTION_REJECTED("review_action_rejected"),
     UNHANDLED_EXCEPTION("unhandled_exception");
 
     private final String value;

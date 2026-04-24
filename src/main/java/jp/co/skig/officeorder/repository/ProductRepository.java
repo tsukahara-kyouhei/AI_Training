@@ -513,6 +513,8 @@ public class ProductRepository {
     private ProductCardView toCard(ProductListMapperRow row, List<String> colors) {
         boolean inStock = row.maxStock() > 0;
         String detailUrl = "/products/" + row.productId() + (inStock ? "" : "?stock=out");
+        int reviewCount = row.reviewCount() == null ? 0 : row.reviewCount();
+        BigDecimal averageRating = row.averageRating() == null ? BigDecimal.ZERO : row.averageRating();
         return new ProductCardView(
                 row.productId(),
                 row.productName(),
@@ -520,7 +522,9 @@ public class ProductRepository {
                 colors,
                 row.productCode(),
                 inStock,
-                detailUrl
+                detailUrl,
+                reviewCount,
+                averageRating
         );
     }
 
@@ -536,7 +540,9 @@ public class ProductRepository {
                 row.productName(),
                 row.minPrice(),
                 row.maxStock(),
-                row.productCode()
+                row.productCode(),
+                null,
+                null
         );
     }
 

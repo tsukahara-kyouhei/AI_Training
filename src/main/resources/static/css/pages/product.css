@@ -521,3 +521,46 @@
   background: rgba(239, 108, 0, 0.10);
 }
 
+/* ── レビューセクション ── */
+
+.review-section { margin-top: 32px; }
+
+.review-summary { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.review-summary__rating { font-weight: 700; font-size: 1.1rem; }
+.review-summary__count { color: #666; font-size: 0.9rem; }
+
+.review-stars { color: #f5a623; font-size: 1.1rem; letter-spacing: 1px; }
+.review-stars--sm { color: #f5a623; font-size: 0.85rem; letter-spacing: 0; }
+.review-stars__filled { color: #f5a623; }
+.review-stars__empty { color: #ccc; }
+
+.review-actions { margin-bottom: 16px; }
+
+.review-list { display: flex; flex-direction: column; gap: 16px; }
+.review-item { border-bottom: 1px solid #eee; padding-bottom: 14px; }
+.review-item__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.review-item__date { color: #999; font-size: 0.85rem; }
+.review-item__title { font-weight: 600; margin: 4px 0; }
+.review-item__body { margin: 4px 0 0; line-height: 1.6; white-space: pre-wrap; }
+
+.review-more { text-align: center; margin-top: 16px; }
+
+.review-form-section { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.review-form__heading { margin: 0 0 16px; font-size: 1.1rem; }
+.review-form__rating { margin-bottom: 12px; }
+.review-form__field { margin-bottom: 12px; }
+.review-form__field label { display: block; margin-bottom: 4px; font-weight: 500; }
+.review-form__counter { display: block; text-align: right; font-size: 0.8rem; color: #999; margin-top: 2px; }
+.review-form__actions { display: flex; gap: 8px; margin-top: 16px; }
+.review-form__delete { margin-top: 12px; }
+
+.star-select { display: inline-flex; gap: 2px; cursor: pointer; font-size: 1.5rem; }
+.star-select__star { color: #ccc; transition: color 0.15s; }
+.star-select__star.is-selected { color: #f5a623; }
+.star-select__star:hover { color: #f5a623; }
+
+.link-btn--danger { color: #d32f2f; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.9rem; padding: 0; }
+
+.product-review { font-size: 0.85rem; color: #666; margin: 2px 0 0; }
+
+

@@ -30,6 +30,14 @@
     <div class="card__pad">
         <p class="product-name" th:text="${product != null ? product.productName : '商品情報'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
         <p class="product-price"><span class="price" th:text="${product != null ? product.priceText : '0'}">12,800</span>円（税込）</p>
+        <p class="product-review" th:if="${product != null and product.reviewCount > 0}">
+            <span class="review-stars--sm">
+                <span class="review-stars__filled" th:each="i : ${#numbers.sequence(1, product.averageRating.intValue())}">&#9733;</span>
+                <span class="review-stars__empty" th:each="i : ${#numbers.sequence(product.averageRating.intValue() + 1, 5)}">&#9734;</span>
+            </span>
+            <span th:text="${#numbers.formatDecimal(product.averageRating, 1, 1)}">4.2</span>
+            <span th:text="'(' + ${product.reviewCount} + ')'">（12）</span>
+        </p>
         <div class="chips" aria-label="カラーラインナップ">
             <span class="chip"
                   th:each="colorCode : ${product != null ? product.colorCodes : T(java.util.List).of()}"

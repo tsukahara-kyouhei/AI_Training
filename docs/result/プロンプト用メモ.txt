@@ -1,0 +1,159 @@
+機能追加の要件定義を行いたい。下記の要件をもとに本課題の要件定義書として `docs/issues/FEAT-001-requirements_kai1.md` を作成してください。
+・検索結果画面の絞込条件の「テイスト」の取得元テーブルを1つに集約する。
+　・テーブル名「tastes」とし、今の「chair_tastes」、「desk_tastes」、「storage_tastes」の3テーブルの情報を集約する。
+・検索結果画面の絞込条件の「テイスト」は直接「tastes」テーブルを結合して検索するように変更する。
+
+
+`docs/issues/FEAT-001-requirements_kai1.md`の内容について、設計・実装を行うにあたって不足している内容がないかチェックしてください。
+不足している内容がある場合は、確認事項一覧を出力してください。
+
+
+要件定義書 `docs/issues/FEAT-001-requirements_kai1.md` をもとに、それを実現するために必要な設計を行ってください。
+必要な設計書を洗い出し、`docs/design` フォルダ内に新規に作成してください。
+
+要件定義書 `docs/issues/FEAT-001-requirements_kai1.md` と各設計書をもとに、コード実装と単体テストのための実装計画を作成してください。
+実装計画はTODOリストとして`docs/issues/FEAT-001-TODO_kai1.md`として作成してください。
+コードの構成や実装方法については、既存のソースコードを参考にしてください。
+
+
+要件定義書 `docs/issues/FEAT-001-requirements_kai1.md` と各設計書をもとに、
+実行計画 `docs/issues/FEAT-001-TODO_kai1.md` を更新しつつ実装を行ってください。
+
+
+
+
+障害が発生したため、下記障害票をもとに、実装の修正はせず、まず原因の推定をしてください。
+原因を特定するために必要な情報が足りない場合は、どのような情報が足りないかと、それを取得する手順を示してください。
+その結果を障害レポートとして `docs/issues/BUG-001-report.md` を作成してください。
+---
+発生日時
+・2026/3/10 9:12
+概要
+・注文確定時にシステムエラー
+再現手順
+  1.  会員ユーザー（member01@example.com）でログイン
+  2. カートに商品を2件(P0001-C01, P0001-C02)追加
+  3. カートから注目確認画面まで遷移（各入力項目はデフォルトのまま）
+  4. 「注文を確定する」ボタンを押下
+  5. システムエラー画面に遷移
+期待される動作
+・システムエラー画面に遷移せずに注文完了画面に遷移する
+補足
+・ローカル開発環境の初期構築直後に発生した。
+・他の人に確認したところ、私の前に初期構築を実施した人では再現しなかった。（モジュールなどの内容は同じなことを確認済み）
+・非会員ユーザーで発生するかは未確認。
+・商品が1件の場合に再現するかは未確認。
+
+
+本プロジェクトのデータべステーブルのER図 `docs/design/er-diagram.md` を作成してください。
+ER図はMarkdown内のMermaid記法で出力してください。
+
+本プロジェクトのCRUD図 `docs/design/crud-matrix.md` を作成してください。
+CRUD図はMarkdownの表形式で出力してください。
+
+
+
+
+指定された追加の情報を提示しますので、それをもとに原因の特定をして、
+障害レポート `docs/issues/BUG-001-report.md` を更新してください。
+---
+### Error querying database.  Cause: org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint "orders_order_number_key"
+  隧ｳ邏ｰ: Key (order_number)=(ORD20260416-000001) already exists.
+### The error may exist in file [C:\Users\user\Documents\繝上Φ繧ｺ繧ｪ繝ｳ隱ｲ鬘圭office-order\office-order\target\classes\mappers\OrderMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### SQL: INSERT INTO orders (         order_number,         order_datetime,         order_status,         customer_type,         personal_or_corporate,         member_id,         customer_last_name,         customer_first_name,         customer_last_name_kana,         customer_first_name_kana,         company_name,         department_name,         customer_email,         daytime_phone,         shipping_fax,         shipping_postal_code,         shipping_prefecture,         shipping_city,         shipping_address_line,         shipping_floor,         shipping_has_elevator,         payment_method,         payment_instruction,         shipping_method,         shipping_fee,         assembly_fee_total,         subtotal_amount,         tax_amount,         total_amount,         receipt_issued,         note,         created_at,         updated_at         )         VALUES (         ?,         ?,         'received',         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,         ?,                
+           NULL              ,         ?,         ?,         ?,         ?,         ?,         ?,         FALSE,         NULL,         CURRENT_TIMESTAMP,         CURRENT_TIMESTAMP         )         RETURNING order_id
+
+
+以下の方針で対応します。その方針で障害レポート `docs/issues/BUG-001-report.md` を更新してください。
+-注文番号の採番ロジックで既存の orders テーブルを参照してカウンタを補正する
+
+
+障害レポート `docs/issues/BUG-001-report.md` の修正方針をもとに実装を修正してください。
+単体テストコードが足りない場合は追加し、影響のある部分は修正してください。
+最後に障害レポートの内容を更新してください。
+
+
+
+単体テスト計画 `docs/plan/unit-test-plan.md` を作成してください。
+一般的に必要と思われる項目に加え、パフォーマンス観点の項目を含めてください。
+項目の内容については、私に質問しながら内容を決めてください。
+私に方針を質問する場合は、それぞれのメリット・デメリットを提示したうえで、本プロジェクトにおいて推奨する方針を理由とともに提示してください。
+
+
+単体テスト計画 `docs/plan/unit-test-plan.md` をもとに、テストケースを作成してください。
+対象は service パッケージにあるサービスクラス全体としてください。
+作成後、各テストクラスのケースが単体テストとして過不足無いかどうか確認してください。
+作成後、テストを実施して失敗が無いことを確認してください。
+
+
+
+機能追加の要件定義を行いたい。下記の要件をもとに本課題の要件定義書として `docs/issues/FEAT-003-requirements.md` を作成してください。
+目的
+・商品検討時の情報不足を減らし、購入意思決定を支援する。
+・購入後フィードバックを蓄積し、商品改善・訴求改善に活用する。
+対象範囲
+・商品詳細でのレビュー一覧表示。
+・ログイン会員のレビュー投稿/更新。
+・商品一覧/詳細での平均評価・件数表示。
+機能要件
+・投稿権限はログイン会員のみとする。
+・対象の会員が実際に購入した商品（購入履歴のある商品）のみ投稿可とする。
+・1会員1商品につき1レビュー（更新は可）とする。
+・必須項目は評価（1〜5）と本文、任意項目はタイトルとする。
+・商品詳細に平均評価、件数、最新順レビュー一覧を表示する。
+画面要件
+・未ログイン時は投稿ボタン押下でログインへ遷移し、処理は行わない。
+・投稿済み会員には「編集」導線を表示する。
+データ要件
+・レビュー本体（会員ID、商品ID、評価、タイトル、本文、公開状態、作成更新日時）を保持する。
+
+`docs/issues/FEAT-003-requirements.md`の内容について、設計・実装を行うにあたって不足している内容がないかチェックしてください。
+
+
+以下の方針で`docs/issues/FEAT-003-requirements.md`を更新してください。
+A. 機能要件の不足
+#1 購入履歴の判定条件はorder_statusが「cancelled」以外。
+#2 投稿したレビューの削除は可能とする。
+#3 投稿者または管理者が更改状態を変更できるようにする。
+   登録・更新時に選択できるようにする。
+   管理者用の更新画面には投稿者による更新ができないように制御する項目を設けチェックボックスにより切り替えられるようにする。レビューテーブルに更新ブロック項目を追加する。
+#4 ページネーションは「もっと見る」の形式とする。
+B. 入力制約の不足
+#5 タイトルの最大文字数は100文字。
+#6 本文の最大文字数は1000文字。
+C. 画面要件の不足
+#7 レビューの表示は「評価、タイトル、本文、投稿日時」の4項目。
+#8 レビュー投稿画は商品詳細内のインライン表示で行う。
+#9 投稿/更新成功時は商品詳細ページに戻る。
+#10 購入履歴なし会員の場合は、投稿ボタンを非表示にする
+D. データ要件の不足
+#11 products.product_id と order_items.product_code の紐付け。
+#12 (product_id, created_at DESC) の複合インデックスとする。
+
+
+要件定義書 `docs/issues/FEAT-003-requirements.md` をもとに、それを実現するために必要な設計を行ってください。
+必要な設計書を洗い出し、`docs/design` フォルダ内に新規に作成してください。
+
+要件定義書 `docs/issues/FEAT-003-requirements.md` と各設計書をもとに、コード実装と単体テストのための実装計画を作成してください。
+実装計画はTODOリストとして`docs/issues/FEAT-003-TODO.md`として作成してください。
+コードの構成や実装方法については、既存のソースコードを参考にしてください。
+
+要件定義書 `docs/issues/FEAT-003-requirements.md` と各設計書をもとに、
+実行計画 `docs/issues/FEAT-003-TODO.md` を更新しつつ実装を行ってください。
+
+
+技術スタックのバージョンアップを行いたい。各技術スタックごとに下記まとめてほしい内容について整理し`docs/issues/FEAT-008-requirements.md` を作成してください。
+・バージョンアップを行いたい技術スタック
+　- Java: 21 →  25
+　- Spring Boot: 3.5.11 → 4.0.3
+　- PostgreSQL: 16 → 18
+・まとめてほしい内容
+　- バージョンアップにおける変更点
+　- 本プロジェクトへ適用するにあたっての課題
+　- 水準移行するために修正が必要な個所と具体的な修正方法
+
+
+`docs/result/海老原寿一.txt`ファイルの記述をマークダウン形式に変更し、`海老原寿一.md`として保存してください。
+

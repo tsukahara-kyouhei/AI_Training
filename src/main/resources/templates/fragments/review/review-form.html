@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="reviewForm(productId, myReview, reviewForm)">
+    <div class="review-form-section" id="review-form-section" style="display:none;">
+        <h3 class="review-form__heading"
+            th:text="${myReview != null ? 'レビューを編集' : 'レビューを投稿'}">レビューを投稿</h3>
+
+        <form th:if="${myReview != null}"
+              th:action="@{/products/{pid}/reviews/{rid}(pid=${productId}, rid=${myReview.reviewId})}"
+              th:object="${reviewForm}"
+              method="post"
+              class="review-form">
+            <div class="review-form__rating">
+                <label>評価</label>
+                <div class="star-select" data-star-select>
+                    <span class="star-select__star" th:each="i : ${#numbers.sequence(1, 5)}"
+                          th:attr="data-value=${i}"
+                          th:classappend="${reviewForm.rating != null and reviewForm.rating >= i} ? ' is-selected'">&#9733;</span>
+                </div>
+                <input type="hidden" th:field="*{rating}">
+                <div class="field-error" th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}">エラー</div>
+            </div>
+
+            <div class="review-form__field">
+                <label for="review-title">タイトル（任意）</label>
+                <input id="review-title" type="text" th:field="*{title}" maxlength="100" class="input">
+                <div class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">エラー</div>
+            </div>
+
+            <div class="review-form__field">
+                <label for="review-body">本文</label>
+                <textarea id="review-body" th:field="*{body}" maxlength="1000" rows="5" class="input" data-review-body></textarea>
+                <span class="review-form__counter" data-review-counter>0/1000文字</span>
+                <div class="field-error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}">エラー</div>
+            </div>
+
+            <div class="review-form__field">
+                <label>
+                    <input type="checkbox" th:field="*{published}"> このレビューを公開する
+                </label>
+            </div>
+
+            <div class="review-form__actions">
+                <button class="btn" type="submit">更新する</button>
+                <button class="btn btn--outline" type="button" data-review-cancel>キャンセル</button>
+            </div>
+
+            <div class="review-form__delete">
+                <form th:action="@{/products/{pid}/reviews/{rid}/delete(pid=${productId}, rid=${myReview.reviewId})}"
+                      method="post" style="display:inline;" data-review-delete-form>
+                    <button class="link-btn link-btn--danger" type="submit">このレビューを削除する</button>
+                </form>
+            </div>
+        </form>
+
+        <form th:if="${myReview == null}"
+              th:action="@{/products/{pid}/reviews(pid=${productId})}"
+              th:object="${reviewForm}"
+              method="post"
+              class="review-form">
+            <div class="review-form__rating">
+                <label>評価</label>
+                <div class="star-select" data-star-select>
+                    <span class="star-select__star" th:each="i : ${#numbers.sequence(1, 5)}"
+                          th:attr="data-value=${i}"
+                          th:classappend="${reviewForm.rating != null and reviewForm.rating >= i} ? ' is-selected'">&#9733;</span>
+                </div>
+                <input type="hidden" th:field="*{rating}">
+                <div class="field-error" th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}">エラー</div>
+            </div>
+
+            <div class="review-form__field">
+                <label for="review-title-new">タイトル（任意）</label>
+                <input id="review-title-new" type="text" th:field="*{title}" maxlength="100" class="input">
+                <div class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">エラー</div>
+            </div>
+
+            <div class="review-form__field">
+                <label for="review-body-new">本文</label>
+                <textarea id="review-body-new" th:field="*{body}" maxlength="1000" rows="5" class="input" data-review-body></textarea>
+                <span class="review-form__counter" data-review-counter>0/1000文字</span>
+                <div class="field-error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}">エラー</div>
+            </div>
+
+            <div class="review-form__field">
+                <label>
+                    <input type="checkbox" th:field="*{published}"> このレビューを公開する
+                </label>
+            </div>
+
+            <div class="review-form__actions">
+                <button class="btn" type="submit">投稿する</button>
+                <button class="btn btn--outline" type="button" data-review-cancel>キャンセル</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

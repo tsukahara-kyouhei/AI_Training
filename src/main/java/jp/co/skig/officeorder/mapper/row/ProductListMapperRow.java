@@ -10,6 +10,8 @@ public record ProductListMapperRow(
         String productName,
         BigDecimal minPrice,
         Integer maxStock,
-        String productCode
+        String productCode,
+        Integer reviewCount,
+        BigDecimal averageRating
 ) {
 }

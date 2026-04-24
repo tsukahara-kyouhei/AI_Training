@@ -10,7 +10,7 @@
 
 ### Phase 1: DB スキーマ
 
-- [ ] **1-1. `sql/schema/reviews.sql` を新規作成する**
+- [x] **1-1. `sql/schema/reviews.sql` を新規作成する**
   - `reviews` テーブルの DDL（DB 設計書 §1.1）
   - カラム: `review_id`, `member_id`, `product_id`, `rating`, `title`, `body`, `is_published`, `is_blocked`, `created_at`, `updated_at`
   - 制約: PK, FK(members), FK(products), UNIQUE(member_id, product_id), CHECK(rating BETWEEN 1 AND 5)
@@ -20,11 +20,11 @@
 
 ### Phase 2: MapperRow（マッピング用 record）
 
-- [ ] **2-1. `ReviewMapperRow` を新規作成する**
+- [x] **2-1. `ReviewMapperRow` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/mapper/row/ReviewMapperRow.java`（新規）
   - record: `reviewId`, `memberId`, `productId`, `rating`, `title`, `body`, `isPublished`, `isBlocked`, `createdAt`, `updatedAt`
 
-- [ ] **2-2. `ReviewSummaryMapperRow` を新規作成する**
+- [x] **2-2. `ReviewSummaryMapperRow` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/mapper/row/ReviewSummaryMapperRow.java`（新規）
   - record: `productId`, `reviewCount`, `averageRating`
 
@@ -32,7 +32,7 @@
 
 ### Phase 3: Mapper インターフェース＋ XML
 
-- [ ] **3-1. `ReviewMapper` インターフェースを新規作成する**
+- [x] **3-1. `ReviewMapper` インターフェースを新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/mapper/ReviewMapper.java`（新規）
   - メソッド（クラス設計書 §3.5）:
     - `selectReviewSummary(@Param productId)`
@@ -46,7 +46,7 @@
     - `selectReviewSummaries(@Param productIds)`
     - `countByProduct(@Param productId)`
 
-- [ ] **3-2. `ReviewMapper.xml` を新規作成する**
+- [x] **3-2. `ReviewMapper.xml` を新規作成する**
   - 対象ファイル: `src/main/resources/mappers/ReviewMapper.xml`（新規）
   - resultMap: `ReviewRowMap`, `ReviewSummaryRowMap`
   - SQL 定義（DB 設計書 §2, §3 参照）:
@@ -65,25 +65,25 @@
 
 ### Phase 4: Model 層
 
-- [ ] **4-1. `ReviewForm` を新規作成する**
+- [x] **4-1. `ReviewForm` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/model/review/ReviewForm.java`（新規）
   - JavaBean（Serializable）、既存 ContactForm と同パターン
   - フィールド: `rating`(@NotNull @Min(1) @Max(5)), `title`(@Size(max=100)), `body`(@NotBlank @Size(max=1000)), `published`(boolean, default true)
   - getter/setter
 
-- [ ] **4-2. `ReviewView` を新規作成する**
+- [x] **4-2. `ReviewView` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/model/review/ReviewView.java`（新規）
   - record: `reviewId`, `memberId`, `productId`, `rating`, `title`, `body`, `published`, `blocked`, `createdAt`, `updatedAt`
 
-- [ ] **4-3. `ReviewSummaryView` を新規作成する**
+- [x] **4-3. `ReviewSummaryView` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/model/review/ReviewSummaryView.java`（新規）
   - record: `productId`, `reviewCount`, `averageRating`（BigDecimal, 小数点 1 桁）
 
-- [ ] **4-4. `ReviewListResponse` を新規作成する**
+- [x] **4-4. `ReviewListResponse` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/model/review/ReviewListResponse.java`（新規）
   - record: `items`(List\<ReviewView\>), `hasNext`(boolean)
 
-- [ ] **4-5. `ProductCardView` に `reviewCount`, `averageRating` を追加する**
+- [x] **4-5. `ProductCardView` に `reviewCount`, `averageRating` を追加する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/model/product/ProductCardView.java`
   - record にフィールド追加 → 生成箇所（ProductRepository 内）をすべて更新
 
@@ -91,13 +91,13 @@
 
 ### Phase 5: Repository 層
 
-- [ ] **5-1. `ReviewRepository` を新規作成する**
+- [x] **5-1. `ReviewRepository` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/repository/ReviewRepository.java`（新規）
   - ReviewMapper に依存
   - メソッド（クラス設計書 §3.4）: `findSummary`, `findByProduct`, `findByMemberAndProduct`, `findById`, `existsPurchase`, `insert`, `update`, `delete`, `findSummaries`, `countByProduct`
   - MapperRow → View 変換ロジックを実装
 
-- [ ] **5-2. `ProductRepository` の商品一覧取得にレビュー集計を追加する**
+- [x] **5-2. `ProductRepository` の商品一覧取得にレビュー集計を追加する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/repository/ProductRepository.java`
   - ProductCardView 生成時に reviewCount, averageRating をセット
   - ProductMapper.xml の商品一覧クエリにレビュー集計サブクエリを LEFT JOIN で追加
@@ -106,7 +106,7 @@
 
 ### Phase 6: Service 層
 
-- [ ] **6-1. `ReviewService` を新規作成する**
+- [x] **6-1. `ReviewService` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/service/review/ReviewService.java`（新規）
   - @Service、メソッド単位で @Transactional
   - メソッド（クラス設計書 §3.3）:
@@ -123,7 +123,7 @@
 
 ### Phase 7: Controller 層
 
-- [ ] **7-1. `ReviewController` を新規作成する**
+- [x] **7-1. `ReviewController` を新規作成する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/web/ReviewController.java`（新規）
   - @Controller、依存: ReviewService, MemberSessionService
   - エンドポイント（API 設計書 §1 参照）:
@@ -133,7 +133,7 @@
     - `GET /products/{productId}/reviews` → もっと見る（JSON: @ResponseBody）
   - 未ログイン時: `/login?redirect=...` へリダイレクト（お気に入りトグルと同パターン）
 
-- [ ] **7-2. `CatalogController.productDetail()` を拡張する**
+- [x] **7-2. `CatalogController.productDetail()` を拡張する**
   - 対象ファイル: `src/main/java/jp/co/skig/officeorder/web/CatalogController.java`
   - ReviewService を DI に追加
   - モデル属性追加（API 設計書 §1.5）: `reviewSummary`, `reviews`, `hasMoreReviews`, `canPostReview`, `hasPurchased`, `myReview`, `reviewForm`
@@ -143,7 +143,7 @@
 
 ### Phase 8: Mapper XML（商品一覧クエリ拡張）
 
-- [ ] **8-1. `ProductMapper.xml` の商品一覧クエリにレビュー集計を追加する**
+- [x] **8-1. `ProductMapper.xml` の商品一覧クエリにレビュー集計を追加する**
   - 対象ファイル: `src/main/resources/mappers/ProductMapper.xml`
   - 商品一覧の SELECT 句にレビュー集計サブクエリを LEFT JOIN
   - `review_count`, `average_rating` カラムを追加
@@ -153,25 +153,25 @@
 
 ### Phase 9: テンプレート
 
-- [ ] **9-1. `fragments/review/review-list.html` を新規作成する**
+- [x] **9-1. `fragments/review/review-list.html` を新規作成する**
   - レビュー一覧フラグメント（星表示、タイトル、本文、投稿日時）
   - タイトル未入力時はタイトル行を非表示
   - 「もっと見る」ボタン（hasMoreReviews で表示制御）
 
-- [ ] **9-2. `fragments/review/review-form.html` を新規作成する**
+- [x] **9-2. `fragments/review/review-form.html` を新規作成する**
   - インライン投稿/編集フォームフラグメント
   - 評価（星クリック選択 + hidden input）、タイトル、本文（文字数カウンター）、公開状態チェックボックス
   - 新規投稿 / 編集（既存値プリセット）/ 削除の action 分岐
   - バリデーションエラー表示
 
-- [ ] **9-3. `pages/product-detail.html` にレビューセクションを追加する**
+- [x] **9-3. `pages/product-detail.html` にレビューセクションを追加する**
   - 対象ファイル: `src/main/resources/templates/pages/product-detail.html`
   - 関連商品セクションの直前に挿入（画面設計書 §1.1）
   - サマリー表示（平均評価・件数）
   - 投稿/編集ボタン表示条件分岐（画面設計書 §1.3）
   - review-list / review-form フラグメントの include
 
-- [ ] **9-4. `fragments/common/product-card.html` に平均評価・件数を追加する**
+- [x] **9-4. `fragments/common/product-card.html` に平均評価・件数を追加する**
   - 対象ファイル: `src/main/resources/templates/fragments/common/product-card.html`
   - 価格行の下に「★ 4.2 (12)」行を追加
   - レビュー 0 件時は非表示
@@ -180,14 +180,14 @@
 
 ### Phase 10: JavaScript / CSS
 
-- [ ] **10-1. `js/review.js` を新規作成する**
+- [x] **10-1. `js/review.js` を新規作成する**
   - 「もっと見る」の非同期取得（fetch → DOM 追加）
   - 星評価クリック選択（hidden input 連動）
   - 本文の文字数カウンター
   - 削除確認ダイアログ（confirm）
   - フォーム展開/非表示切替
 
-- [ ] **10-2. レビュー関連の CSS を追加する**
+- [x] **10-2. レビュー関連の CSS を追加する**
   - 星評価表示（塗りつぶし表現）
   - レビュー一覧・フォームのスタイリング
 
@@ -195,7 +195,7 @@
 
 ### Phase 11: 単体テスト
 
-- [ ] **11-1. `ReviewServiceTest` を作成する**
+- [x] **11-1. `ReviewServiceTest` を作成する**
   - 対象ファイル: `src/test/java/jp/co/skig/officeorder/service/review/ReviewServiceTest.java`（新規）
   - Mockito で ReviewRepository をモック
   - テスト対象:
@@ -206,13 +206,13 @@
     - `updateReview`: 本人確認、ブロック確認、正常更新
     - `deleteReview`: 本人確認、ブロック確認、正常削除
 
-- [ ] **11-2. `ReviewRepositoryTest` を作成する**
+- [x] **11-2. `ReviewRepositoryTest` を作成する**
   - 対象ファイル: `src/test/java/jp/co/skig/officeorder/repository/ReviewRepositoryTest.java`（新規）
   - Mockito で ReviewMapper をモック
   - MapperRow → View 変換ロジックの検証
   - findSummary: レビューなし時のデフォルト値検証
 
-- [ ] **11-3. `ReviewControllerTest` を作成する**
+- [x] **11-3. `ReviewControllerTest` を作成する**
   - 対象ファイル: `src/test/java/jp/co/skig/officeorder/web/ReviewControllerTest.java`（新規）
   - @WebMvcTest + MockMvc
   - テスト対象:
@@ -221,7 +221,7 @@
     - 投稿成功時のリダイレクト
     - もっと見るの JSON レスポンス
 
-- [ ] **11-4. `ReviewFormTest` を作成する**
+- [x] **11-4. `ReviewFormTest` を作成する**
   - 対象ファイル: `src/test/java/jp/co/skig/officeorder/model/review/ReviewFormTest.java`（新規）
   - Bean Validation のテスト
   - rating: null/0/6 → エラー、1〜5 → OK

@@ -163,6 +163,47 @@
                 </div>
             </section>
 
+            <!-- レビューセクション -->
+            <section class="section review-section" aria-label="カスタマーレビュー" th:if="${detail != null}">
+                <div class="section__head">
+                    <h2 class="section__title">カスタマーレビュー</h2>
+                </div>
+
+                <!-- サマリー -->
+                <div class="review-summary" th:if="${reviewSummary != null and reviewSummary.reviewCount > 0}">
+                    <span class="review-stars">
+                        <span class="review-stars__filled" th:each="i : ${#numbers.sequence(1, reviewSummary.averageRating.intValue())}">&#9733;</span>
+                        <span class="review-stars__empty" th:each="i : ${#numbers.sequence(reviewSummary.averageRating.intValue() + 1, 5)}">&#9734;</span>
+                    </span>
+                    <span class="review-summary__rating" th:text="${#numbers.formatDecimal(reviewSummary.averageRating, 1, 1)}">4.2</span>
+                    <span class="review-summary__count" th:text="'(' + ${reviewSummary.reviewCount} + '件のレビュー)'">（12件のレビュー）</span>
+                </div>
+                <div class="review-summary" th:if="${reviewSummary == null or reviewSummary.reviewCount == 0}">
+                    <p class="muted">まだレビューはありません</p>
+                </div>
+
+                <!-- フラッシュメッセージ -->
+                <div class="help" th:if="${reviewMessage}" th:text="${reviewMessage}" style="margin-bottom:12px;"></div>
+
+                <!-- 投稿/編集ボタン -->
+                <div class="review-actions" th:if="${isLoggedIn and hasPurchased}">
+                    <button class="btn btn--outline" type="button" data-review-toggle
+                            th:if="${myReview == null}">レビューを書く</button>
+                    <button class="btn btn--outline" type="button" data-review-toggle
+                            th:if="${myReview != null and !myReview.blocked}">レビューを編集する</button>
+                </div>
+                <div class="review-actions" th:if="${!isLoggedIn}">
+                    <a class="btn btn--outline" th:href="@{/login(redirect=${detailPagePath})}">レビューを書く</a>
+                </div>
+
+                <!-- インラインフォーム -->
+                <div th:if="${isLoggedIn and hasPurchased}"
+                     th:replace="~{fragments/review/review-form :: reviewForm(${detail.productId}, ${myReview}, ${reviewForm})}"></div>
+
+                <!-- レビュー一覧 -->
+                <div th:replace="~{fragments/review/review-list :: reviewList(${reviews}, ${hasMoreReviews}, ${detail.productId})}"></div>
+            </section>
+
             <section class="section" aria-label="おすすめ関連商品" th:if="${detail != null}">
                 <div class="section__head">
                     <h2 class="section__title">おすすめ関連商品</h2>

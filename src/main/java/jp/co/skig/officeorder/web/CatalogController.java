@@ -19,11 +19,16 @@ import jp.co.skig.officeorder.model.product.ProductListPage;
 import jp.co.skig.officeorder.model.product.ProductListSearchResult;
 import jp.co.skig.officeorder.model.product.ProductSearchCondition;
 import jp.co.skig.officeorder.model.product.ProductSort;
+import jp.co.skig.officeorder.model.review.ReviewForm;
+import jp.co.skig.officeorder.model.review.ReviewListResponse;
+import jp.co.skig.officeorder.model.review.ReviewSummaryView;
+import jp.co.skig.officeorder.model.review.ReviewView;
 import jp.co.skig.officeorder.service.member.FavoritesLimitExceededException;
 import jp.co.skig.officeorder.service.member.MemberService;
 import jp.co.skig.officeorder.service.product.ProductFilterOptionService;
 import jp.co.skig.officeorder.service.product.ProductListSearchService;
 import jp.co.skig.officeorder.service.product.ProductService;
+import jp.co.skig.officeorder.service.review.ReviewService;
 import jp.co.skig.officeorder.web.auth.MemberSessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +64,8 @@ public class CatalogController {
     private final MemberService memberService;
     /** 会員セッションサービス。 */
     private final MemberSessionService memberSessionService;
+    /** レビューサービス。 */
+    private final ReviewService reviewService;
 
     /**
      * 商品Catalog Controllerを生成する。
@@ -68,17 +75,20 @@ public class CatalogController {
      * @param productFilterOptionService 絞り込み候補サービス
      * @param memberService 会員サービス
      * @param memberSessionService 会員セッションサービス
+     * @param reviewService レビューサービス
      */
     public CatalogController(ProductService productService,
                              ProductListSearchService productListSearchService,
                              ProductFilterOptionService productFilterOptionService,
                              MemberService memberService,
-                             MemberSessionService memberSessionService) {
+                             MemberSessionService memberSessionService,
+                             ReviewService reviewService) {
         this.productService = productService;
         this.productListSearchService = productListSearchService;
         this.productFilterOptionService = productFilterOptionService;
         this.memberService = memberService;
         this.memberSessionService = memberSessionService;
+        this.reviewService = reviewService;
     }
 
     /**
@@ -292,14 +302,50 @@ public class CatalogController {
         ProductDetailView detail = productService.findDetail(productId, forceOutOfStock)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
 
-        boolean isFavorite = memberSessionService.currentMember(session)
-                .map(member -> memberService.isFavorite(member.memberId(), productId))
-                .orElse(false);
+        MemberSessionUser member = memberSessionService.currentMember(session).orElse(null);
+
+        boolean isFavorite = member != null
+                && memberService.isFavorite(member.memberId(), productId);
+
+        // レビュー関連
+        ReviewSummaryView reviewSummary = reviewService.findReviewSummary(productId);
+        ReviewListResponse reviewListResponse = reviewService.findReviews(productId, 1, 5);
+        boolean hasPurchased = false;
+        boolean canPostReview = false;
+        ReviewView myReview = null;
+
+        if (member != null) {
+            hasPurchased = reviewService.hasPurchased(member.memberId(), productId);
+            myReview = reviewService.findMyReview(member.memberId(), productId).orElse(null);
+            canPostReview = hasPurchased;
+        }
 
         model.addAttribute("detail", detail);
         model.addAttribute("categoryLabel", resolveCategoryLabel(detail.categoryId()));
         model.addAttribute("isFavorite", isFavorite);
         model.addAttribute("detailPagePath", buildProductDetailPath(productId, forceOutOfStock));
+
+        // レビューモデル属性
+        model.addAttribute("reviewSummary", reviewSummary);
+        model.addAttribute("reviews", reviewListResponse.items());
+        model.addAttribute("hasMoreReviews", reviewListResponse.hasNext());
+        model.addAttribute("hasPurchased", hasPurchased);
+        model.addAttribute("canPostReview", canPostReview);
+        model.addAttribute("myReview", myReview);
+        model.addAttribute("isLoggedIn", member != null);
+
+        // フォーム: flash 属性で戻ってきた場合はそれを使う、なければ新規 or 既存値で初期化
+        if (!model.containsAttribute("reviewForm")) {
+            ReviewForm reviewForm = new ReviewForm();
+            if (myReview != null) {
+                reviewForm.setRating(myReview.rating());
+                reviewForm.setTitle(myReview.title());
+                reviewForm.setBody(myReview.body());
+                reviewForm.setPublished(myReview.published());
+            }
+            model.addAttribute("reviewForm", reviewForm);
+        }
+
         return "pages/product-detail";
     }
 

@@ -11,6 +11,8 @@
             <arg column="min_price" javaType="java.math.BigDecimal"/>
             <arg column="max_stock" javaType="int"/>
             <arg column="product_code" javaType="string"/>
+            <arg column="review_count" javaType="java.lang.Integer"/>
+            <arg column="average_rating" javaType="java.math.BigDecimal"/>
         </constructor>
     </resultMap>
 
@@ -353,13 +355,21 @@
         p.product_name,
         MIN(pv.unit_price) AS min_price,
         MAX(pv.stock_quantity) AS max_stock,
-        MIN(pv.product_code) AS product_code
+        MIN(pv.product_code) AS product_code,
+        rs.review_count,
+        rs.average_rating
         FROM products p
         JOIN product_variants pv ON pv.product_id = p.product_id
+        LEFT JOIN (
+            SELECT product_id, COUNT(*) AS review_count, AVG(rating) AS average_rating
+            FROM reviews
+            WHERE is_published = TRUE
+            GROUP BY product_id
+        ) rs ON rs.product_id = p.product_id
         WHERE
         <include refid="BaseProductWhere"/>
         <include refid="VariantFilterPv"/>
-        GROUP BY p.product_id, p.product_name
+        GROUP BY p.product_id, p.product_name, rs.review_count, rs.average_rating
         ORDER BY
         <choose>
             <when test="sort == 'price_asc'">
@@ -384,16 +394,24 @@
         p.product_name,
         MIN(pv.unit_price) AS min_price,
         MAX(pv.stock_quantity) AS max_stock,
-        MIN(pv.product_code) AS product_code
+        MIN(pv.product_code) AS product_code,
+        rs.review_count,
+        rs.average_rating
         FROM products p
         JOIN product_variants pv ON pv.product_id = p.product_id
+        LEFT JOIN (
+            SELECT product_id, COUNT(*) AS review_count, AVG(rating) AS average_rating
+            FROM reviews
+            WHERE is_published = TRUE
+            GROUP BY product_id
+        ) rs ON rs.product_id = p.product_id
         WHERE p.product_id IN
         <foreach collection="productIds" item="productId" open="(" close=")" separator=",">
             #{productId}
         </foreach>
         AND p.sale_start_at &lt;= #{now}
         AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
-        GROUP BY p.product_id, p.product_name
+        GROUP BY p.product_id, p.product_name, rs.review_count, rs.average_rating
     </select>
 
     <select id="selectColorCodes" resultMap="ProductColorCodeRowMap">
