@@ -301,3 +301,13 @@ SELECT
     o.order_datetime + INTERVAL '6 hour'
 FROM orders o
 WHERE o.order_status = 'cancelled';
+
+-- BUG-001 修正: seed が CURRENT_DATE で ORD{YYYYMMDD}-000001 〜 ORD{YYYYMMDD}-000100 を挿入するため、
+-- 同日に注文確定すると order_number が重複し UNIQUE 制約違反が発生していた。
+-- seed 実行後に当日の最終連番 (100) を order_number_counters に登録することで、
+-- 初回注文の採番を sequence = 101 から開始させ衝突を防ぐ。
+INSERT INTO order_number_counters (order_date, last_sequence, created_at, updated_at)
+VALUES (CURRENT_DATE, 100, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT (order_date) DO UPDATE
+    SET last_sequence = GREATEST(order_number_counters.last_sequence, 100),
+        updated_at    = CURRENT_TIMESTAMP;
