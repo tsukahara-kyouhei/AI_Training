@@ -163,19 +163,27 @@
                 </div>
             </section>
 
-            <section class="section" aria-label="おすすめ関連商品" th:if="${detail != null}">
+            <section class="section"
+                     aria-label="この商品と合わせてよく見られています"
+                     th:if="${detail != null and detail.relatedProducts != null and !#lists.isEmpty(detail.relatedProducts)}">
                 <div class="section__head">
-                    <h2 class="section__title">おすすめ関連商品</h2>
+                    <h2 class="section__title">この商品と合わせてよく見られています</h2>
                 </div>
-                <div class="grid grid--4">
-                    <div class="card" th:if="${detail.relatedProducts == null or #lists.isEmpty(detail.relatedProducts)}">
-                        <div class="card__pad">
-                            <p class="muted" style="margin:0;">おすすめ関連商品はありません。</p>
+                <div class="carousel" data-carousel>
+                    <button class="carousel__btn carousel__btn--prev" type="button" aria-label="前へ" data-carousel-prev>
+                        <span class="material-icons" aria-hidden="true">chevron_left</span>
+                    </button>
+                    <div class="carousel__viewport">
+                        <div class="carousel__track" data-carousel-track>
+                            <div class="carousel__item" data-carousel-item
+                                 th:each="product : ${detail.relatedProducts}">
+                                <div th:replace="~{fragments/common/product-card :: productCardByView(${product})}"></div>
+                            </div>
                         </div>
                     </div>
-                    <th:block th:each="product : ${detail.relatedProducts}">
-                        <div th:replace="~{fragments/common/product-card :: productCardByView(${product})}"></div>
-                    </th:block>
+                    <button class="carousel__btn carousel__btn--next" type="button" aria-label="次へ" data-carousel-next>
+                        <span class="material-icons" aria-hidden="true">chevron_right</span>
+                    </button>
                 </div>
             </section>
 

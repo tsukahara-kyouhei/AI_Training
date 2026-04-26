@@ -48,6 +48,10 @@ public class CatalogController {
     private static final Logger log = LoggerFactory.getLogger(CatalogController.class);
     /** 最近見た商品として扱う最大件数。 */
     private static final int RECENTLY_VIEWED_LIMIT = 4;
+    /** セッション保持する最近見た商品IDの最大件数。 */
+    static final int RECENTLY_VIEWED_SESSION_LIMIT = 8;
+    /** セッションに最近見た商品IDリストを保持するキー。 */
+    static final String RECENTLY_VIEWED_SESSION_KEY = "recently_viewed_product_ids";
 
     /** 商品検索・詳細サービス。 */
     private final ProductService productService;
@@ -295,6 +299,8 @@ public class CatalogController {
                 .map(member -> memberService.isFavorite(member.memberId(), productId))
                 .orElse(false);
 
+        updateRecentlyViewedSession(session, productId);
+
         model.addAttribute("detail", detail);
         model.addAttribute("categoryLabel", resolveCategoryLabel(detail.categoryId()));
         model.addAttribute("isFavorite", isFavorite);
@@ -403,6 +409,23 @@ public class CatalogController {
      */
     private String buildProductDetailPath(long productId, boolean forceOutOfStock) {
         return "/products/" + productId + (forceOutOfStock ? "?stock=out" : "");
+    }
+
+    /**
+     * セッションの最近見た商品IDリストを更新する。
+     *
+     * <p>先頭に今回の商品IDを追加し、重複を除いて最大{@code RECENTLY_VIEWED_SESSION_LIMIT}件に切り詰める。
+     */
+    @SuppressWarnings("unchecked")
+    private void updateRecentlyViewedSession(HttpSession session, long productId) {
+        List<Long> existing = (List<Long>) session.getAttribute(RECENTLY_VIEWED_SESSION_KEY);
+        List<Long> updated = new ArrayList<>(existing == null ? List.of() : existing);
+        updated.remove(productId);
+        updated.add(0, productId);
+        if (updated.size() > RECENTLY_VIEWED_SESSION_LIMIT) {
+            updated = updated.subList(0, RECENTLY_VIEWED_SESSION_LIMIT);
+        }
+        session.setAttribute(RECENTLY_VIEWED_SESSION_KEY, List.copyOf(updated));
     }
 
     /**

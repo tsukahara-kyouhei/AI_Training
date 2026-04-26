@@ -126,6 +126,28 @@
                 </aside>
             </div>
 
+            <section class="section" aria-label="一緒に購入されている商品" th:if="${hasCrossSellProducts}">
+                <div class="section__head">
+                    <h2 class="section__title">一緒に購入されている商品</h2>
+                </div>
+                <div class="carousel" data-carousel>
+                    <button class="carousel__btn carousel__btn--prev" type="button" aria-label="前へ" data-carousel-prev>
+                        <span class="material-icons" aria-hidden="true">chevron_left</span>
+                    </button>
+                    <div class="carousel__viewport">
+                        <div class="carousel__track" data-carousel-track>
+                            <div class="carousel__item" data-carousel-item
+                                 th:each="product : ${crossSellProducts}">
+                                <div th:replace="~{fragments/common/product-card :: productCardByView(${product})}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel__btn carousel__btn--next" type="button" aria-label="次へ" data-carousel-next>
+                        <span class="material-icons" aria-hidden="true">chevron_right</span>
+                    </button>
+                </div>
+            </section>
+
         </div>
     </main>
 

@@ -77,7 +77,7 @@ INSERT INTO orders (
     updated_at
 )
 SELECT
-    'ORD' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(p.n::TEXT, 6, '0'),
+    'ORD20000101-' || LPAD(p.n::TEXT, 6, '0'),
     p.order_datetime,
     p.final_status,
     p.customer_type,

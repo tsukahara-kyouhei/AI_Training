@@ -273,6 +273,59 @@ public class ProductRepository {
     }
 
     /**
+     * 複数の起点商品IDを基にクロスセル／パーソナライズ推薦商品を取得する。
+     *
+     * <p>起点IDが空の場合または limit が 0 以下の場合は空リストを返す。
+     *
+     * @param sourceProductIds 起点商品ID一覧（最近見た商品、購入履歴など）
+     * @param excludeProductIds 除外商品ID一覧（カート内商品、表示済みなど）
+     * @param limit 取得件数上限
+     * @return 推薦商品カード一覧
+     */
+    public List<ProductCardView> findCrossSellProducts(List<Long> sourceProductIds,
+                                                       List<Long> excludeProductIds,
+                                                       int limit) {
+        if (sourceProductIds == null || sourceProductIds.isEmpty() || limit <= 0) {
+            return List.of();
+        }
+        OffsetDateTime now = appTimeProvider.nowOffsetDateTime();
+        List<Long> normalizedExclude = excludeProductIds == null ? List.of() : excludeProductIds;
+        List<ProductListMapperRow> rows = productMapper.selectCrossSellProducts(
+                sourceProductIds, normalizedExclude, now, limit);
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, List<String>> colorMap = findColorCodes(rows.stream().map(ProductListMapperRow::productId).toList());
+        return rows.stream()
+                .map(row -> toCard(row, colorMap.getOrDefault(row.productId(), List.of())))
+                .toList();
+    }
+
+    /**
+     * 売れ筋ランキングから除外商品を除いた推薦フォールバック商品を取得する。
+     *
+     * @param excludeProductIds 除外商品ID一覧
+     * @param limit 取得件数上限
+     * @return 推薦商品カード一覧
+     */
+    public List<ProductCardView> findRankedForRecommendation(List<Long> excludeProductIds, int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+        OffsetDateTime now = appTimeProvider.nowOffsetDateTime();
+        List<Long> normalizedExclude = excludeProductIds == null ? List.of() : excludeProductIds;
+        List<ProductRankedMapperRow> rows = productMapper.selectRankedForRecommendation(
+                normalizedExclude, now, limit);
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, List<String>> colorMap = findColorCodes(rows.stream().map(ProductRankedMapperRow::productId).toList());
+        return rows.stream()
+                .map(row -> toCard(toListRow(row), colorMap.getOrDefault(row.productId(), List.of())))
+                .toList();
+    }
+
+    /**
      * 検索条件をMyBatis検索パラメータへ変換する。
      *
      * <p>カテゴリ固有フィルタの有無や価格・寸法レンジをここでSQL向けに解決する。
@@ -469,7 +522,7 @@ public class ProductRepository {
      * @return 商品カード一覧
      */
     private List<ProductCardView> findRecommendedProducts(long sourceProductId, int limit) {
-        List<ProductRankedMapperRow> rankedRows = productMapper.selectRecommendedProducts(sourceProductId, limit);
+        List<ProductRankedMapperRow> rankedRows = productMapper.selectRecommendedProducts(sourceProductId, appTimeProvider.nowOffsetDateTime(), limit);
         if (rankedRows.isEmpty()) {
             ProductSearchCondition fallbackCondition = new ProductSearchCondition(
                     null,

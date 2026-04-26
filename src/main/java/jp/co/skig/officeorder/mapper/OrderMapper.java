@@ -92,6 +92,13 @@ public interface OrderMapper {
      * 指定時点で有効な消費税率を取得する。
      */
     BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);
-}
 
+    /**
+     * 会員の購入履歴から商品IDを重複なく取得する。
+     *
+     * <p>推薦の起点として使用する。廃番等で {@code product_variants} に存在しない商品コードは除外される。
+     */
+    List<Long> selectPurchasedProductIds(@Param("memberId") long memberId,
+                                         @Param("from") OffsetDateTime from);
+}
 

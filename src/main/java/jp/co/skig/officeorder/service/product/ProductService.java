@@ -87,6 +87,20 @@ public class ProductService {
     }
 
     /**
+     * カート内商品を除いたクロスセル推薦商品を取得する。
+     *
+     * <p>最近見た商品IDを起点に推薦関連商品テーブルから取得する。
+     *
+     * @param recentlyViewedIds 最近見た商品ID一覧（起点）
+     * @param excludeProductIds 除外商品ID一覧（カート内商品など）
+     * @return 推薦商品カード一覧（最大4件）
+     */
+    public List<ProductCardView> findCrossSellProducts(List<Long> recentlyViewedIds,
+                                                       List<Long> excludeProductIds) {
+        return repository.findCrossSellProducts(recentlyViewedIds, excludeProductIds, 4);
+    }
+
+    /**
      * 商品詳細を取得する。
      *
      * @param productId 商品ID

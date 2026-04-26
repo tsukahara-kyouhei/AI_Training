@@ -69,7 +69,25 @@ public interface ProductMapper {
      * 保存済みのおすすめ関連商品を取得する。
      */
     List<ProductRankedMapperRow> selectRecommendedProducts(@Param("sourceProductId") long sourceProductId,
+                                                           @Param("now") OffsetDateTime now,
                                                            @Param("limit") int limit);
+
+    /**
+     * 複数の起点商品IDを基に推薦関連商品を取得する（クロスセル・パーソナライズ用）。
+     *
+     * <p>販売期間フィルタ・除外リストを適用する。
+     */
+    List<ProductListMapperRow> selectCrossSellProducts(@Param("sourceProductIds") List<Long> sourceProductIds,
+                                                       @Param("excludeProductIds") List<Long> excludeProductIds,
+                                                       @Param("now") OffsetDateTime now,
+                                                       @Param("limit") int limit);
+
+    /**
+     * 売れ筋ランキングから除外商品を除いた推薦フォールバック商品を取得する。
+     */
+    List<ProductRankedMapperRow> selectRankedForRecommendation(@Param("excludeProductIds") List<Long> excludeProductIds,
+                                                               @Param("now") OffsetDateTime now,
+                                                               @Param("limit") int limit);
 
     /**
      * 一覧絞り込みで使用するカラー選択肢を取得する。

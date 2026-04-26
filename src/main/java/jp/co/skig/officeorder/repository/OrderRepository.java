@@ -2,6 +2,7 @@ package jp.co.skig.officeorder.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -340,5 +341,17 @@ public class OrderRepository {
                 row.quantity() == null ? 0 : row.quantity(),
                 assemblyRequested
         );
+    }
+
+    /**
+     * 指定会員が指定日時以降に購入した商品IDを重複なく返す。
+     *
+     * @param memberId 会員ID
+     * @param from 取得開始日時（この日時以降の注文が対象）
+     * @return 商品ID一覧（順不同）
+     */
+    public List<Long> findPurchasedProductIds(long memberId, OffsetDateTime from) {
+        List<Long> result = orderMapper.selectPurchasedProductIds(memberId, from);
+        return result == null ? List.of() : result;
     }
 }

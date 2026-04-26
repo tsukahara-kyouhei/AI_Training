@@ -410,3 +410,30 @@
 
 > 既存テストクラスが存在しないため、`SearchKeywordNormalizerTest` が本課題における単体テストの主体となる。  
 > Service層・Repository層のテストは既存プロジェクトにテストが存在しないため、本課題では対象外とする。
+
+---
+
+## シードデータ追加・変更時の注意事項
+
+> **BUG-002（2026/4/18 対応）を踏まえた規則。詳細は [FEAT-001-troubleList.md](FEAT-001-troubleList.md) を参照。**
+
+シードデータ（`sql/seed/test-data/` 配下）に注文レコードを追加・変更する際は、以下の規則を必ず守ること。
+
+### 注文番号のフォーマット規則
+
+- `orders` テーブルのシードデータにおける `order_number` の日付部には **固定値 `20000101`** を使用すること。
+- `CURRENT_DATE` や `NOW()` など実行時の日付に依存する値は **使用禁止**。
+
+```sql
+-- ✅ 正しい例
+'ORD20000101-' || LPAD(n::TEXT, 6, '0')
+
+-- ❌ 禁止（初期構築当日に実データと衝突して UNIQUE 制約違反が発生する）
+'ORD' || TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(n::TEXT, 6, '0')
+```
+
+### 理由
+
+アプリケーションの採番ロジック（`OrderMapper.xml` の `nextOrderSequence`）は `order_number_counters` テーブルの連番を 1 から開始する。  
+シードデータが `CURRENT_DATE` で注文番号を生成していると、初期構築当日にアプリが採番する番号（例: `ORD20260310-000001`）とシードデータの番号が衝突し、`orders.order_number` の UNIQUE 制約違反でシステムエラーになる。  
+固定過去日付 `20000101` を使うことで、このリスクを根本的に排除できる。

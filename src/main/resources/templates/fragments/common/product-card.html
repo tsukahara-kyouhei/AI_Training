@@ -20,13 +20,16 @@
    th:fragment="productCardByView(product)"
    th:href="${product != null ? product.detailUrl : '#'}"
    href="/products/1"
-   style="display:block;">
+   style="display:block; position:relative;">
     <img class="product-card__image"
          th:if="${product != null and product.productCode != null}"
          th:src="@{|/images/products/${product.productCode}.png|}"
          th:alt="${product.productName}"
          loading="lazy">
     <div class="ph-img" th:if="${product == null or product.productCode == null}" aria-hidden="true"></div>
+    <div class="product-card__out-of-stock"
+         th:if="${product != null and !product.inStock}"
+         aria-label="入荷待ち">入荷待ち</div>
     <div class="card__pad">
         <p class="product-name" th:text="${product != null ? product.productName : '商品情報'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
         <p class="product-price"><span class="price" th:text="${product != null ? product.priceText : '0'}">12,800</span>円（税込）</p>

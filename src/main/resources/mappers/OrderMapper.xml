@@ -377,6 +377,16 @@
         ORDER BY effective_start_at DESC
         LIMIT 1
     </select>
+
+    <select id="selectPurchasedProductIds" resultType="long">
+        SELECT DISTINCT p.product_id
+        FROM orders o
+        JOIN order_items oi ON oi.order_id = o.order_id
+        JOIN product_variants pv ON pv.product_code = oi.product_code
+        JOIN products p ON p.product_id = pv.product_id
+        WHERE o.member_id = #{memberId}
+        AND o.order_datetime &gt;= #{from}
+    </select>
 </mapper>
 
 

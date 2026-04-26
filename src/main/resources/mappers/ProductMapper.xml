@@ -485,6 +485,61 @@
         JOIN product_variants pv ON pv.product_id = p.product_id
         WHERE r.source_product_id = #{sourceProductId}
         AND r.recommendation_date = (SELECT MAX(recommendation_date) FROM recommended_related_products)
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+        GROUP BY r.rank, p.product_id, p.product_name
+        ORDER BY r.rank ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectCrossSellProducts" resultMap="ProductListRowMap">
+        SELECT
+        p.product_id,
+        p.product_name,
+        MIN(pv.unit_price) AS min_price,
+        MAX(pv.stock_quantity) AS max_stock,
+        MIN(pv.product_code) AS product_code
+        FROM recommended_related_products r
+        JOIN products p ON p.product_id = r.recommended_product_id
+        JOIN product_variants pv ON pv.product_id = p.product_id
+        WHERE r.source_product_id IN
+        <foreach collection="sourceProductIds" item="srcId" open="(" close=")" separator=",">
+            #{srcId}
+        </foreach>
+        AND r.recommendation_date = (SELECT MAX(recommendation_date) FROM recommended_related_products)
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+        <if test="excludeProductIds != null and !excludeProductIds.isEmpty()">
+        AND p.product_id NOT IN
+        <foreach collection="excludeProductIds" item="exId" open="(" close=")" separator=",">
+            #{exId}
+        </foreach>
+        </if>
+        GROUP BY p.product_id, p.product_name
+        ORDER BY MIN(r.rank) ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectRankedForRecommendation" resultMap="ProductRankedRowMap">
+        SELECT
+        r.rank,
+        p.product_id,
+        p.product_name,
+        MIN(pv.unit_price) AS min_price,
+        MAX(pv.stock_quantity) AS max_stock,
+        MIN(pv.product_code) AS product_code
+        FROM popular_product_rankings r
+        JOIN products p ON p.product_id = r.product_id
+        JOIN product_variants pv ON pv.product_id = p.product_id
+        WHERE r.ranking_date = (SELECT MAX(ranking_date) FROM popular_product_rankings)
+        AND p.sale_start_at &lt;= #{now}
+        AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
+        <if test="excludeProductIds != null and !excludeProductIds.isEmpty()">
+        AND p.product_id NOT IN
+        <foreach collection="excludeProductIds" item="exId" open="(" close=")" separator=",">
+            #{exId}
+        </foreach>
+        </if>
         GROUP BY r.rank, p.product_id, p.product_name
         ORDER BY r.rank ASC
         LIMIT #{limit}

@@ -9,10 +9,12 @@ import jp.co.skig.officeorder.service.cart.CartService;
 import jp.co.skig.officeorder.model.cart.CartView;
 import jp.co.skig.officeorder.model.member.MemberAdditionalAddressView;
 import jp.co.skig.officeorder.model.member.MemberSessionUser;
+import jp.co.skig.officeorder.model.product.ProductCardView;
 import jp.co.skig.officeorder.service.member.MemberService;
 import jp.co.skig.officeorder.service.order.OrderService;
 import jp.co.skig.officeorder.model.order.CheckoutInputForm;
 import jp.co.skig.officeorder.model.order.OrderCompleteView;
+import jp.co.skig.officeorder.service.product.ProductService;
 import jp.co.skig.officeorder.web.auth.LoginEmailCookieService;
 import jp.co.skig.officeorder.web.auth.MemberSessionService;
 import org.slf4j.Logger;
@@ -61,6 +63,8 @@ public class CartController {
     private final MemberService memberService;
     /** 注文サービス。 */
     private final OrderService orderService;
+    /** 商品表示系サービス（クロスセル画取用）。 */
+    private final ProductService productService;
     /** 利用者向けメッセージ取得ヘルパ。 */
     private final MessageSourceAccessor messages;
 
@@ -72,6 +76,7 @@ public class CartController {
      * @param loginEmailCookieService ログイン画面メールアドレス記憶Cookieサービス
      * @param memberService 会員サービス
      * @param orderService 注文サービス
+     * @param productService 商品表示系サービス
      * @param messageSource 利用者向けメッセージ取得元
      */
     public CartController(CartService cartService,
@@ -79,12 +84,14 @@ public class CartController {
                           LoginEmailCookieService loginEmailCookieService,
                           MemberService memberService,
                           OrderService orderService,
+                          ProductService productService,
                           MessageSource messageSource) {
         this.cartService = cartService;
         this.memberSessionService = memberSessionService;
         this.loginEmailCookieService = loginEmailCookieService;
         this.memberService = memberService;
         this.orderService = orderService;
+        this.productService = productService;
         this.messages = new MessageSourceAccessor(messageSource);
     }
 
@@ -93,16 +100,35 @@ public class CartController {
      *
      * @param request 現在リクエスト
      * @param response 現在レスポンス
+     * @param session HTTPセッション
      * @param model 画面モデル
      * @return カート画面
      */
     @GetMapping("/cart")
     public String cart(HttpServletRequest request,
                        HttpServletResponse response,
+                       HttpSession session,
                        Model model) {
         CartView cart = cartService.getCart(request, response);
         model.addAttribute("cart", cart);
         model.addAttribute("isCartEmpty", cart.isEmpty());
+
+        @SuppressWarnings("unchecked")
+        List<Long> recentlyViewedIds = (List<Long>) session.getAttribute(
+                CatalogController.RECENTLY_VIEWED_SESSION_KEY);
+        if (recentlyViewedIds != null && !recentlyViewedIds.isEmpty()) {
+            List<Long> cartProductIds = cart.items().stream()
+                    .map(item -> item.productId())
+                    .toList();
+            List<ProductCardView> crossSell = productService.findCrossSellProducts(
+                    recentlyViewedIds, cartProductIds);
+            model.addAttribute("crossSellProducts", crossSell);
+            model.addAttribute("hasCrossSellProducts", !crossSell.isEmpty());
+        } else {
+            model.addAttribute("crossSellProducts", List.of());
+            model.addAttribute("hasCrossSellProducts", false);
+        }
+
         return "pages/cart";
     }
 
