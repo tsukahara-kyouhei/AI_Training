@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
@@ -22,10 +23,15 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -119,6 +125,88 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.placeOrder(1L, minimalForm(), minimalCart()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("連番");
+    }
+
+    // ---- カート業務バリデーション ----
+
+    @Test
+    void placeOrder_nullカートはIllegalArgumentExceptionが発生する() {
+        when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
+                .thenReturn("エラー");
+
+        assertThatThrownBy(() -> orderService.placeOrder(1L, minimalForm(), null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void placeOrder_空カートはIllegalArgumentExceptionが発生する() {
+        when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
+                .thenReturn("エラー");
+        CartView emptyCart = new CartView(List.of(), 0, 0, minimalCart().summary());
+
+        assertThatThrownBy(() -> orderService.placeOrder(1L, minimalForm(), emptyCart))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    // ---- findOrderCompleteView 早期リターン ----
+
+    @Test
+    void findOrderCompleteView_nullはOptionalEmptyを返す() {
+        assertThat(orderService.findOrderCompleteView(null)).isEmpty();
+    }
+
+    @Test
+    void findOrderCompleteView_空文字はOptionalEmptyを返す() {
+        assertThat(orderService.findOrderCompleteView("")).isEmpty();
+    }
+
+    @Test
+    void findOrderCompleteView_空白のみはOptionalEmptyを返す() {
+        assertThat(orderService.findOrderCompleteView("   ")).isEmpty();
+    }
+
+    // ---- findMemberOrderDetail 早期リターン ----
+
+    @Test
+    void findMemberOrderDetail_nullはOptionalEmptyを返す() {
+        assertThat(orderService.findMemberOrderDetail(1L, null)).isEmpty();
+    }
+
+    @Test
+    void findMemberOrderDetail_空文字はOptionalEmptyを返す() {
+        assertThat(orderService.findMemberOrderDetail(1L, "")).isEmpty();
+    }
+
+    // ---- findReorderItems 早期リターン ----
+
+    @Test
+    void findReorderItems_nullは空リストを返す() {
+        assertThat(orderService.findReorderItems(1L, null)).isEmpty();
+    }
+
+    @Test
+    void findReorderItems_空文字は空リストを返す() {
+        assertThat(orderService.findReorderItems(1L, "")).isEmpty();
+    }
+
+    // ---- findMemberOrderHistories ページ補正 ----
+
+    @Test
+    void findMemberOrderHistories_pageが0のとき1に補正される() {
+        orderService.findMemberOrderHistories(1L, 0);
+        verify(orderRepository).findMemberOrders(1L, 1, 10);
+    }
+
+    @Test
+    void findMemberOrderHistories_pageが負のとき1に補正される() {
+        orderService.findMemberOrderHistories(1L, -3);
+        verify(orderRepository).findMemberOrders(1L, 1, 10);
+    }
+
+    @Test
+    void findMemberOrderHistories_pageが正のときそのまま渡される() {
+        orderService.findMemberOrderHistories(1L, 5);
+        verify(orderRepository).findMemberOrders(1L, 5, 10);
     }
 
     // ---- ヘルパーメソッド ----

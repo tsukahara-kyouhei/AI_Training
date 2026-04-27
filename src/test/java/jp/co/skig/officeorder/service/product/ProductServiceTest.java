@@ -70,4 +70,212 @@ class ProductServiceTest {
         );
         assertThat(condition.tasteIds()).containsExactly(1L, 2L);
     }
+
+    // ---- キーワード正規化 ----
+
+    @Test
+    void buildCondition_キーワードの前後空白はトリムされる() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, "  desk  ", false,
+                List.of(), List.of(),
+                null, 1, 15,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.keyword()).isEqualTo("desk");
+    }
+
+    @Test
+    void buildCondition_nullキーワードはnullのまま() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, 1, 15,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.keyword()).isNull();
+    }
+
+    // ---- ページ補正 ----
+
+    @Test
+    void buildCondition_pageが0のとき1に補正される() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, 0, 15,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.page()).isEqualTo(1);
+    }
+
+    @Test
+    void buildCondition_pageが負のとき1に補正される() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, -5, 15,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.page()).isEqualTo(1);
+    }
+
+    @Test
+    void buildCondition_pageが正のときそのまま渡される() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, 3, 15,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.page()).isEqualTo(3);
+    }
+
+    // ---- 表示件数補正 ----
+
+    @Test
+    void buildCondition_許可されていないsizeは15に補正される() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, 1, 20,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.size()).isEqualTo(15);
+    }
+
+    @Test
+    void buildCondition_size30は通過する() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, 1, 30,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.size()).isEqualTo(30);
+    }
+
+    @Test
+    void buildCondition_size60は通過する() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, 1, 60,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.size()).isEqualTo(60);
+    }
+
+    // ---- 並び順解決 ----
+
+    @Test
+    void buildCondition_nullのsortは既定値になる() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, 1, 15,
+                ProductSort.PRICE_ASC,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.sort()).isEqualTo(ProductSort.PRICE_ASC);
+    }
+
+    @Test
+    void buildCondition_不正なsort文字列は既定値になる() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                "invalid_sort", 1, 15,
+                ProductSort.PRICE_DESC,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.sort()).isEqualTo(ProductSort.PRICE_DESC);
+    }
+
+    @Test
+    void buildCondition_有効なsort文字列は解決される() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                "price_asc", 1, 15,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.sort()).isEqualTo(ProductSort.PRICE_ASC);
+    }
+
+    // ---- カラーID正規化 ----
+
+    @Test
+    void buildCondition_nullのcolorIdsは空リストになる() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), null,
+                null, 1, 15,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.colorIds()).isEmpty();
+    }
+
+    @Test
+    void buildCondition_重複するcolorIdsは除去される() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(1L, 1L, 2L),
+                null, 1, 15,
+                ProductSort.RECOMMENDED,
+                ProductCategoryFilter.empty(),
+                List.of(),
+                null
+        );
+        assertThat(condition.colorIds()).containsExactly(1L, 2L);
+    }
+
+    // ---- カテゴリフィルタ正規化 ----
+
+    @Test
+    void buildCondition_nullのcategoryFilterはemptyになる() {
+        ProductSearchCondition condition = service.buildCondition(
+                null, null, false,
+                List.of(), List.of(),
+                null, 1, 15,
+                ProductSort.RECOMMENDED,
+                null,
+                List.of(),
+                null
+        );
+        assertThat(condition.categoryFilter().isEmpty()).isTrue();
+    }
 }
