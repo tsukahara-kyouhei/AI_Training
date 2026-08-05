@@ -10,5 +10,5 @@ public class OfficeOrderApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(OfficeOrderApplication.class, args);
-    }
+    } // 最終実行場所
 }
