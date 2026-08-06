@@ -314,6 +314,7 @@ public class ProductRepository {
 
         params.put("categoryId", normalizedCategoryId);
         params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordTokens", toKeywordTokens(condition.keyword()));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);

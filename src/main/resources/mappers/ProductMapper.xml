@@ -300,6 +300,48 @@
         <if test="hasStorageFilter">
             <include refid="StorageAttributeFilter"/>
         </if>
+        <if test="searchDeskTasteIds != null and searchDeskTasteIds.size() &gt; 0">
+            AND (
+                p.category_id != 'DESK'
+                OR EXISTS (
+                    SELECT 1
+                    FROM product_desk_attributes da
+                    WHERE da.product_id = p.product_id
+                    AND da.taste_id IN
+                    <foreach collection="searchDeskTasteIds" item="tasteId" open="(" close=")" separator=",">
+                        #{tasteId}
+                    </foreach>
+                )
+            )
+        </if>
+        <if test="searchChairTasteIds != null and searchChairTasteIds.size() &gt; 0">
+            AND (
+                p.category_id != 'CHAIR'
+                OR EXISTS (
+                    SELECT 1
+                    FROM product_chair_attributes ca
+                    WHERE ca.product_id = p.product_id
+                    AND ca.taste_id IN
+                    <foreach collection="searchChairTasteIds" item="tasteId" open="(" close=")" separator=",">
+                        #{tasteId}
+                    </foreach>
+                )
+            )
+        </if>
+        <if test="searchStorageTasteIds != null and searchStorageTasteIds.size() &gt; 0">
+            AND (
+                p.category_id != 'STORAGE'
+                OR EXISTS (
+                    SELECT 1
+                    FROM product_storage_attributes sa
+                    WHERE sa.product_id = p.product_id
+                    AND sa.taste_id IN
+                    <foreach collection="searchStorageTasteIds" item="tasteId" open="(" close=")" separator=",">
+                        #{tasteId}
+                    </foreach>
+                )
+            )
+        </if>
     </sql>
 
     <select id="countProducts" parameterType="map" resultType="long">
