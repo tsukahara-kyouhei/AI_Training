@@ -121,7 +121,7 @@ public class CartController {
     @PostMapping("/cart/items")
     public String addItem(@RequestParam("productVariantId") long productVariantId,
                           @RequestParam(name = "quantity", defaultValue = "1") int quantity,
-                          @RequestParam(name = "assemblyRequested", required = false) Boolean assemblyRequested,
+                          @RequestParam(name = "assemblyRequested", required = false) String[] assemblyRequestedValues,
                           @RequestParam(name = "redirect", required = false) String redirect,
                           HttpServletRequest request,
                           HttpServletResponse response,
@@ -131,6 +131,7 @@ public class CartController {
             redirectPath = "/cart";
         }
         try {
+            Boolean assemblyRequested = resolveAssemblyRequested(assemblyRequestedValues);
             cartService.addItem(request, response, productVariantId, quantity, assemblyRequested);
             redirectAttributes.addFlashAttribute("cartMessage", message("flash.cart.added"));
         } catch (IllegalArgumentException ex) {
@@ -158,11 +159,12 @@ public class CartController {
     @PostMapping("/cart/items/{productVariantId}/update")
     public String updateItem(@PathVariable long productVariantId,
                              @RequestParam(name = "quantity", defaultValue = "1") int quantity,
-                             @RequestParam(name = "assemblyRequested", required = false) Boolean assemblyRequested,
+                             @RequestParam(name = "assemblyRequested", required = false) String[] assemblyRequestedValues,
                              HttpServletRequest request,
                              HttpServletResponse response,
                              RedirectAttributes redirectAttributes) {
         try {
+            Boolean assemblyRequested = resolveAssemblyRequested(assemblyRequestedValues);
             cartService.updateItem(request, response, productVariantId, quantity, assemblyRequested);
         } catch (IllegalArgumentException ex) {
             log.warn("event={} productVariantId={} quantity={} reason={}",
@@ -173,6 +175,29 @@ public class CartController {
             redirectAttributes.addFlashAttribute("cartError", ex.getMessage());
         }
         return "redirect:/cart";
+    }
+
+    /**
+     * リクエストに複数の組立指定値が含まれていても、最後に送られた値を優先して解釈する。
+     *
+     * @param values 組立指定のリクエスト値一覧
+     * @return 解釈済み組立指定。未指定時は {@code null}
+     */
+    private Boolean resolveAssemblyRequested(String[] values) {
+        if (values == null || values.length == 0) {
+            return null;
+        }
+        for (int i = values.length - 1; i >= 0; i--) {
+            String value = values[i];
+            if (value == null) {
+                continue;
+            }
+            String trimmed = value.trim();
+            if (!trimmed.isEmpty()) {
+                return Boolean.parseBoolean(trimmed);
+            }
+        }
+        return null;
     }
 
     /**
