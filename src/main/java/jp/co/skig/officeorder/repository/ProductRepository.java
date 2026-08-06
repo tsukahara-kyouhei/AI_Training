@@ -37,7 +37,8 @@ import org.springframework.stereotype.Repository;
 /**
  * 商品一覧・商品詳細表示に必要な取得と整形を担当するリポジトリ。
  *
- * <p>一覧検索条件をSQLパラメータへ変換し、Mapper行を画面表示用モデルへ整形する。
+ * <p>
+ * 一覧検索条件をSQLパラメータへ変換し、Mapper行を画面表示用モデルへ整形する。
  */
 @Repository
 public class ProductRepository {
@@ -54,8 +55,7 @@ public class ProductRepository {
             Map.entry(8, new RangeValue(2400L, 2799L)),
             Map.entry(9, new RangeValue(2800L, 3199L)),
             Map.entry(10, new RangeValue(3200L, 3599L)),
-            Map.entry(11, new RangeValue(3600L, null))
-    );
+            Map.entry(11, new RangeValue(3600L, null)));
 
     /** デスク奥行レンジIDと実寸範囲の対応表。 */
     private static final Map<Integer, RangeValue> DESK_DEPTH_RANGES = Map.ofEntries(
@@ -64,16 +64,14 @@ public class ProductRepository {
             Map.entry(3, new RangeValue(700L, 899L)),
             Map.entry(4, new RangeValue(900L, 1099L)),
             Map.entry(5, new RangeValue(1100L, 1399L)),
-            Map.entry(6, new RangeValue(1400L, null))
-    );
+            Map.entry(6, new RangeValue(1400L, null)));
 
     /** デスク高さレンジIDと実寸範囲の対応表。 */
     private static final Map<Integer, RangeValue> DESK_HEIGHT_RANGES = Map.ofEntries(
             Map.entry(1, new RangeValue(null, 699L)),
             Map.entry(2, new RangeValue(700L, 759L)),
             Map.entry(3, new RangeValue(760L, 799L)),
-            Map.entry(4, new RangeValue(800L, null))
-    );
+            Map.entry(4, new RangeValue(800L, null)));
 
     /** 商品SQLを呼び出す MyBatis Mapper。 */
     private final ProductMapper productMapper;
@@ -83,7 +81,7 @@ public class ProductRepository {
     /**
      * 商品リポジトリを生成する。
      *
-     * @param productMapper 商品Mapper
+     * @param productMapper   商品Mapper
      * @param appTimeProvider 共通時刻プロバイダ
      */
     public ProductRepository(ProductMapper productMapper, AppTimeProvider appTimeProvider) {
@@ -119,7 +117,7 @@ public class ProductRepository {
      * 商品ID一覧から最近見た商品などの表示用商品を取得する。
      *
      * @param productIds 商品ID一覧
-     * @param limit 取得件数上限
+     * @param limit      取得件数上限
      * @return 表示用商品カード一覧
      */
     public List<ProductCardView> findByProductIds(List<Long> productIds, int limit) {
@@ -138,8 +136,7 @@ public class ProductRepository {
 
         List<ProductListMapperRow> rows = productMapper.selectProductsByIds(
                 normalizedIds,
-                appTimeProvider.nowOffsetDateTime()
-        );
+                appTimeProvider.nowOffsetDateTime());
         if (rows.isEmpty()) {
             return List.of();
         }
@@ -178,15 +175,15 @@ public class ProductRepository {
                 ProductSort.NEWEST,
                 1,
                 limit,
-                appTimeProvider.nowOffsetDateTime().minusMonths(6)
-        );
+                appTimeProvider.nowOffsetDateTime().minusMonths(6));
         return search(condition).items();
     }
 
     /**
      * トップ画面用の売れ筋ランキング商品を取得する。
      *
-     * <p>ランキングテーブルが空の場合は新着商品で代替する。
+     * <p>
+     * ランキングテーブルが空の場合は新着商品で代替する。
      *
      * @param limit 取得件数上限
      * @return 順位付き商品カード一覧
@@ -202,22 +199,21 @@ public class ProductRepository {
             return fallbackRanked;
         }
 
-        Map<Long, List<String>> colorMap = findColorCodes(rows.stream().map(ProductRankedMapperRow::productId).toList());
+        Map<Long, List<String>> colorMap = findColorCodes(
+                rows.stream().map(ProductRankedMapperRow::productId).toList());
         return rows.stream()
                 .map(row -> new RankedProductCardView(
                         row.rank(),
                         toCard(
                                 toListRow(row),
-                                colorMap.getOrDefault(row.productId(), List.of())
-                        )
-                ))
+                                colorMap.getOrDefault(row.productId(), List.of()))))
                 .toList();
     }
 
     /**
      * 商品詳細画面表示用の情報を取得する。
      *
-     * @param productId 商品ID
+     * @param productId       商品ID
      * @param forceOutOfStock 在庫切れ表示を強制するか
      * @return 商品詳細
      */
@@ -266,15 +262,15 @@ public class ProductRepository {
                 variants,
                 seriesLinks,
                 relatedProducts,
-                selectedVariant.stockQuantity() <= 0 || forceOutOfStock
-        );
+                selectedVariant.stockQuantity() <= 0 || forceOutOfStock);
         return Optional.of(detail);
     }
 
     /**
      * 検索条件をMyBatis検索パラメータへ変換する。
      *
-     * <p>カテゴリ固有フィルタの有無や価格・寸法レンジをここでSQL向けに解決する。
+     * <p>
+     * カテゴリ固有フィルタの有無や価格・寸法レンジをここでSQL向けに解決する。
      *
      * @param condition 検索条件
      * @return SQLパラメータ
@@ -316,6 +312,7 @@ public class ProductRepository {
 
         params.put("categoryId", normalizedCategoryId);
         params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordCodeLike", toCodePrefixLike(condition.keyword()));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -359,7 +356,7 @@ public class ProductRepository {
     /**
      * レンジID一覧を対応表から実寸レンジへ変換する。
      *
-     * @param bandIds レンジID一覧
+     * @param bandIds     レンジID一覧
      * @param definitions レンジ定義
      * @return 実寸レンジ一覧
      */
@@ -375,7 +372,7 @@ public class ProductRepository {
     }
 
     /**
-     * キーワード検索用のLIKE文字列を生成する。
+     * 商品名検索用のLIKE文字列を生成する。
      *
      * @param keyword キーワード
      * @return LIKE検索文字列
@@ -385,6 +382,20 @@ public class ProductRepository {
             return null;
         }
         return "%" + keyword.trim() + "%";
+    }
+
+    /**
+     * 商品コード検索用の前方一致文字列を生成する
+     * 
+     * @param keyword 商品コード
+     * @return 前方一致索文字列
+     */
+
+    private String toCodePrefixLike(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        return keyword.trim() + "%";
     }
 
     /**
@@ -408,14 +419,14 @@ public class ProductRepository {
     /**
      * 同一シリーズバリエーショングループの商品リンクを取得する。
      *
-     * @param productId 現在表示中の商品ID
+     * @param productId        現在表示中の商品ID
      * @param variationGroupId バリエーショングループID
-     * @param now 販売期間判定時刻
+     * @param now              販売期間判定時刻
      * @return シリーズリンク一覧
      */
     private List<ProductSeriesLinkView> findSeriesLinks(long productId,
-                                                        Long variationGroupId,
-                                                        OffsetDateTime now) {
+            Long variationGroupId,
+            OffsetDateTime now) {
         if (variationGroupId == null) {
             return List.of();
         }
@@ -423,8 +434,7 @@ public class ProductRepository {
                 .map(row -> new ProductSeriesLinkView(
                         row.productId(),
                         row.productName(),
-                        row.productId() == productId
-                ))
+                        row.productId() == productId))
                 .toList();
         return links;
     }
@@ -432,10 +442,11 @@ public class ProductRepository {
     /**
      * 商品詳細下部に表示するおすすめ関連商品を取得する。
      *
-     * <p>ランキングテーブルが空の場合は新着商品から代替候補を返す。
+     * <p>
+     * ランキングテーブルが空の場合は新着商品から代替候補を返す。
      *
      * @param sourceProductId 元商品ID
-     * @param limit 取得件数上限
+     * @param limit           取得件数上限
      * @return 商品カード一覧
      */
     private List<ProductCardView> findRecommendedProducts(long sourceProductId, int limit) {
@@ -451,8 +462,7 @@ public class ProductRepository {
                     ProductSort.NEWEST,
                     1,
                     limit + 1,
-                    null
-            );
+                    null);
             return search(fallbackCondition).items().stream()
                     .filter(item -> item.productId() != sourceProductId)
                     .limit(limit)
@@ -464,17 +474,17 @@ public class ProductRepository {
                 .sorted(Comparator.comparingInt(ProductRankedMapperRow::rank))
                 .map(row -> toCard(
                         toListRow(row),
-                        colorMap.getOrDefault(row.productId(), List.of())
-                ))
+                        colorMap.getOrDefault(row.productId(), List.of())))
                 .toList();
     }
 
     /**
      * 商品詳細で初期選択するカラーを決定する。
      *
-     * <p>在庫切れ表示強制時は在庫なしカラーを優先し、通常時は在庫ありカラーを優先する。
+     * <p>
+     * 在庫切れ表示強制時は在庫なしカラーを優先し、通常時は在庫ありカラーを優先する。
      *
-     * @param variants カラー候補一覧
+     * @param variants        カラー候補一覧
      * @param forceOutOfStock 在庫切れ表示を強制するか
      * @return 初期選択カラー
      */
@@ -507,7 +517,7 @@ public class ProductRepository {
     /**
      * 一覧行を商品カード表示用モデルへ変換する。
      *
-     * @param row 一覧行
+     * @param row    一覧行
      * @param colors カラーコード一覧
      * @return 商品カード
      */
@@ -521,8 +531,7 @@ public class ProductRepository {
                 colors,
                 row.productCode(),
                 inStock,
-                detailUrl
-        );
+                detailUrl);
     }
 
     /**
@@ -537,8 +546,7 @@ public class ProductRepository {
                 row.productName(),
                 row.minPrice(),
                 row.maxStock(),
-                row.productCode()
-        );
+                row.productCode());
     }
 
     /**
@@ -557,12 +565,6 @@ public class ProductRepository {
                 row.colorCode(),
                 unitPrice,
                 MoneyFormatter.formatYen(unitPrice),
-                row.stockQuantity()
-        );
+                row.stockQuantity());
     }
 }
-
-
-
-
-

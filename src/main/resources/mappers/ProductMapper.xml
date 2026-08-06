@@ -273,7 +273,7 @@
             SELECT 1
             FROM product_variants pvk
             WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
+            AND pvk.product_code ILIKE #{keywordCodeLike}
             )
             )
         </if>
