@@ -78,7 +78,7 @@
                                                        name="deskTaste"
                                                        th:value="${option.id}"
                                                        th:checked="${deskTasteIds != null and deskTasteIds.contains(option.id)}">
-                                                <span th:text="${option.displayName}">ナチュラル</span>
+                                                <span th:text="${option.label}">ナチュラル</span>
                                             </label>
                                         </div>
                                     </div>
@@ -90,7 +90,7 @@
                                                        name="chairTaste"
                                                        th:value="${option.id}"
                                                        th:checked="${chairTasteIds != null and chairTasteIds.contains(option.id)}">
-                                                <span th:text="${option.displayName}">モダン</span>
+                                                <span th:text="${option.label}">モダン</span>
                                             </label>
                                         </div>
                                     </div>
@@ -102,7 +102,7 @@
                                                        name="storageTaste"
                                                        th:value="${option.id}"
                                                        th:checked="${storageTasteIds != null and storageTasteIds.contains(option.id)}">
-                                                <span th:text="${option.displayName}">シンプル</span>
+                                                <span th:text="${option.label}">シンプル</span>
                                             </label>
                                         </div>
                                     </div>
@@ -258,7 +258,7 @@
                                        name="deskTaste"
                                        th:value="${option.id}"
                                        th:checked="${deskTasteIds != null and deskTasteIds.contains(option.id)}">
-                                <span th:text="${option.displayName}">ナチュラル</span>
+                                <span th:text="${option.label}">ナチュラル</span>
                             </label>
                         </div>
                     </div>
@@ -270,7 +270,7 @@
                                        name="chairTaste"
                                        th:value="${option.id}"
                                        th:checked="${chairTasteIds != null and chairTasteIds.contains(option.id)}">
-                                <span th:text="${option.displayName}">モダン</span>
+                                <span th:text="${option.label}">モダン</span>
                             </label>
                         </div>
                     </div>
@@ -282,7 +282,7 @@
                                        name="storageTaste"
                                        th:value="${option.id}"
                                        th:checked="${storageTasteIds != null and storageTasteIds.contains(option.id)}">
-                                <span th:text="${option.displayName}">シンプル</span>
+                                <span th:text="${option.label}">シンプル</span>
                             </label>
                         </div>
                     </div>
