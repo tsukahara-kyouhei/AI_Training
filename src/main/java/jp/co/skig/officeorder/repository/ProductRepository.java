@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -315,7 +316,9 @@ public class ProductRepository {
                 || !storageTasteIds.isEmpty());
 
         params.put("categoryId", normalizedCategoryId);
+        params.put("keyword", condition.keyword());
         params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordCodeLike", toCodeKeywordLike(condition.keyword()));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -384,7 +387,22 @@ public class ProductRepository {
         if (keyword == null || keyword.isBlank()) {
             return null;
         }
-        return "%" + keyword.trim() + "%";
+        String normalized = keyword.trim().toLowerCase(Locale.ROOT);
+        return "%" + normalized + "%";
+    }
+
+    /**
+     * 商品コード前方一致検索用のLIKE文字列を生成する。
+     *
+     * @param keyword キーワード
+     * @return LIKE検索文字列
+     */
+    private String toCodeKeywordLike(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        String normalized = keyword.trim().toLowerCase(Locale.ROOT);
+        return normalized + "%";
     }
 
     /**

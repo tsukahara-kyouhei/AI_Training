@@ -47,12 +47,12 @@
                                 <div class="field">
                                     <label>価格帯（税込）</label>
                                     <div class="price-band-list">
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="1" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(1)}"> ～20,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="2" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(2)}"> 20,000円～40,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="3" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(3)}"> 40,000円～60,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="4" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(4)}"> 60,000円～80,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="5" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(5)}"> 80,000円～100,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="6" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(6)}"> 100,000円～</label>
+                                        <label class="check-item"><input type="checkbox" name="priceBand" value="1" th:checked="${selectedPriceBandIds != null and #lists.contains(selectedPriceBandIds, 1)}"> ～20,000円</label>
+                                        <label class="check-item"><input type="checkbox" name="priceBand" value="2" th:checked="${selectedPriceBandIds != null and #lists.contains(selectedPriceBandIds, 2)}"> 20,000円～40,000円</label>
+                                        <label class="check-item"><input type="checkbox" name="priceBand" value="3" th:checked="${selectedPriceBandIds != null and #lists.contains(selectedPriceBandIds, 3)}"> 40,000円～60,000円</label>
+                                        <label class="check-item"><input type="checkbox" name="priceBand" value="4" th:checked="${selectedPriceBandIds != null and #lists.contains(selectedPriceBandIds, 4)}"> 60,000円～80,000円</label>
+                                        <label class="check-item"><input type="checkbox" name="priceBand" value="5" th:checked="${selectedPriceBandIds != null and #lists.contains(selectedPriceBandIds, 5)}"> 80,000円～100,000円</label>
+                                        <label class="check-item"><input type="checkbox" name="priceBand" value="6" th:checked="${selectedPriceBandIds != null and #lists.contains(selectedPriceBandIds, 6)}"> 100,000円～</label>
                                     </div>
                                 </div>
                                 <div class="field">
@@ -62,9 +62,18 @@
                                             <input type="checkbox"
                                                    name="color"
                                                    th:value="${colorOption.key}"
-                                                   th:checked="${selectedColorKeys != null and selectedColorKeys.contains(colorOption.key)}"
+                                                   th:checked="${selectedColorKeys != null and #lists.contains(selectedColorKeys, colorOption.key)}"
                                                    th:aria-label="${colorOption.label}">
                                             <span class="color-option__swatch" th:style="'background:' + ${colorOption.colorCode}"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="field" th:if="${deskTasteOptions != null and !#lists.isEmpty(deskTasteOptions)}">
+                                    <label>テイスト</label>
+                                    <div class="price-band-list">
+                                        <label class="check-item" th:each="option : ${deskTasteOptions}">
+                                            <input type="checkbox" name="deskTaste" th:value="${option.id}" th:checked="${deskTasteIds != null and #lists.contains(deskTasteIds, option.id)}">
+                                            <span th:text="${option.label}">テイスト</span>
                                         </label>
                                     </div>
                                 </div>
@@ -88,6 +97,7 @@
                                 <input type="hidden" name="inStockOnly" value="true" th:if="${inStockOnly}">
                                 <input type="hidden" name="priceBand" th:each="band : ${selectedPriceBandIds}" th:value="${band}">
                                 <input type="hidden" name="color" th:each="key : ${selectedColorKeys}" th:value="${key}">
+                                <input type="hidden" name="deskTaste" th:each="tasteId : ${deskTasteIds}" th:value="${tasteId}">
                                 <input type="hidden" name="page" value="1">
                                 <label class="badge">並び順
                                     <select name="sort" aria-label="並び順" onchange="this.form.submit()">
@@ -110,7 +120,7 @@
 
                     <div class="card" th:if="${products == null or #lists.isEmpty(products)}">
                         <div class="card__pad">
-                            <p class="muted" style="margin:0;">該当する商品は見つかりませんでした。</p>
+                            <p class="muted" style="margin:0;">該当する商品が見つかりませんでした。別のキーワードでお試しください。</p>
                         </div>
                     </div>
                     <div class="grid grid--3" th:if="${products != null and !#lists.isEmpty(products)}">

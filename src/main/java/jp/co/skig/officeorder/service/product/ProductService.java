@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import jp.co.skig.officeorder.common.AppTimeProvider;
 import jp.co.skig.officeorder.model.product.ProductCategoryFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import jp.co.skig.officeorder.model.product.PriceBand;
 import jp.co.skig.officeorder.model.product.ProductCardView;
 import jp.co.skig.officeorder.model.product.ProductDetailView;
@@ -35,6 +36,8 @@ public class ProductService {
     private final ProductRepository repository;
     /** 新着判定などの基準時刻を返す共通時刻プロバイダ。 */
     private final AppTimeProvider appTimeProvider;
+    /** 検索キーワードの正規化を担当するユーティリティ。 */
+    private final SearchKeywordNormalizer searchKeywordNormalizer;
 
     /**
      * 商品サービスを生成する。
@@ -42,9 +45,17 @@ public class ProductService {
      * @param repository 商品参照リポジトリ
      * @param appTimeProvider 共通時刻プロバイダ
      */
+    @Autowired
     public ProductService(ProductRepository repository, AppTimeProvider appTimeProvider) {
+        this(repository, appTimeProvider, new SearchKeywordNormalizer());
+    }
+
+    public ProductService(ProductRepository repository,
+                          AppTimeProvider appTimeProvider,
+                          SearchKeywordNormalizer searchKeywordNormalizer) {
         this.repository = repository;
         this.appTimeProvider = appTimeProvider;
+        this.searchKeywordNormalizer = searchKeywordNormalizer;
     }
 
     /**
@@ -251,9 +262,10 @@ public class ProductService {
         List<Long> uniqueColorIds = colorIds == null
                 ? List.of()
                 : colorIds.stream().filter(id -> id != null).distinct().toList();
+        String normalizedKeyword = searchKeywordNormalizer.normalize(keyword);
         return normalize(new ProductSearchCondition(
                 categoryId,
-                keyword == null ? null : keyword.trim(),
+                normalizedKeyword,
                 inStockOnly,
                 bands,
                 uniqueColorIds,

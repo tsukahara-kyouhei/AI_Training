@@ -266,14 +266,19 @@
         <if test="categoryId != null and categoryId != ''">
             AND p.category_id = #{categoryId}
         </if>
-        <if test="keywordLike != null and keywordLike != ''">
+        <if test="keyword != null and keyword != ''">
             AND (
-            p.product_name ILIKE #{keywordLike}
+            LOWER(COALESCE(p.product_name, '')) LIKE #{keywordLike}
+            OR LOWER(COALESCE(p.variation_name, '')) LIKE #{keywordLike}
+            OR LOWER(COALESCE(p.description, '')) LIKE #{keywordLike}
             OR EXISTS (
             SELECT 1
             FROM product_variants pvk
             WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
+            AND (
+            LOWER(pvk.product_code) = #{keyword}
+            OR LOWER(pvk.product_code) LIKE #{keywordCodeLike}
+            )
             )
             )
         </if>
@@ -326,6 +331,26 @@
             </when>
             <when test="sort == 'newest'">
                 MAX(p.sale_start_at) DESC, p.product_id ASC
+            </when>
+            <when test="keyword != null and keyword != ''">
+                CASE
+                WHEN EXISTS (
+                SELECT 1
+                FROM product_variants pvk
+                WHERE pvk.product_id = p.product_id
+                AND LOWER(pvk.product_code) = #{keyword}
+                ) THEN 1
+                WHEN EXISTS (
+                SELECT 1
+                FROM product_variants pvk
+                WHERE pvk.product_id = p.product_id
+                AND LOWER(pvk.product_code) LIKE #{keywordCodeLike}
+                ) THEN 2
+                WHEN LOWER(COALESCE(p.product_name, '')) LIKE #{keywordLike} THEN 3
+                WHEN LOWER(COALESCE(p.variation_name, '')) LIKE #{keywordLike} THEN 4
+                WHEN LOWER(COALESCE(p.description, '')) LIKE #{keywordLike} THEN 5
+                ELSE 6
+                END ASC, p.product_id ASC
             </when>
             <otherwise>
                 p.product_id ASC

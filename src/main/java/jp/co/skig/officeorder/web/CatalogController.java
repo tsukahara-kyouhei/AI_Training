@@ -115,17 +115,27 @@ public class CatalogController {
                                 @RequestParam(name = "inStockOnly", defaultValue = "false") boolean inStockOnly,
                                 @RequestParam(name = "priceBand", required = false) List<Integer> rawPriceBandIds,
                                 @RequestParam(name = "color", required = false) List<String> rawColorKeys,
+                                @RequestParam(name = "deskTaste", required = false) List<Integer> rawDeskTasteIds,
                                 @RequestParam(name = "sort", required = false) String sort,
                                 @RequestParam(name = "page", defaultValue = "1") int page,
                                 @RequestParam(name = "size", defaultValue = "15") int size,
                                 Model model) {
         ProductFilterOptionsBundle optionsBundle = productFilterOptionService.loadOptionsBundle();
+        ProductCategoryFilter searchFilter = productFilterOptionService.buildDeskFilter(
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                rawDeskTasteIds,
+                optionsBundle
+        );
         ProductSearchCondition condition = productListSearchService.buildCondition(
                 null,
                 keyword,
                 inStockOnly,
                 rawPriceBandIds,
                 rawColorKeys,
+                searchFilter,
                 sort,
                 page,
                 size,
@@ -134,7 +144,9 @@ public class CatalogController {
         );
         ProductListSearchResult result = productListSearchService.searchWithPageCorrection(condition);
         applyProductListModel(model, result.condition(), result.productPage(), optionsBundle);
-        model.addAttribute("keyword", result.condition().keyword() == null ? "" : result.condition().keyword());
+        model.addAttribute("keyword", keyword == null ? "" : keyword);
+        model.addAttribute("deskTasteIds", searchFilter.deskTasteIds());
+        model.addAttribute("deskTasteOptions", optionsBundle.deskTasteOptions());
         return "pages/product-list-search-results";
     }
 
