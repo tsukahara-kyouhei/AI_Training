@@ -2,15 +2,19 @@ package jp.co.skig.officeorder.repository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.Normalizer;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.text.Normalizer;
+import java.util.Locale;
 
 import jp.co.skig.officeorder.common.AppTimeProvider;
 import jp.co.skig.officeorder.common.MoneyFormatter;
@@ -311,8 +315,9 @@ public class ProductRepository {
                 || !storageTasteIds.isEmpty());
 
         params.put("categoryId", normalizedCategoryId);
-        params.put("keywordLike", toKeywordLike(condition.keyword()));
-        params.put("keywordCodeLike", toCodePrefixLike(condition.keyword()));
+        String nomalizedKeyword = normalizeKeyword(condition.keyword());
+        params.put("keywordLike", toKeywordLike(nomalizedKeyword));
+        params.put("keywordCodeLike", toCodePrefixLike(nomalizedKeyword));
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -372,6 +377,26 @@ public class ProductRepository {
     }
 
     /**
+     * 検索キーワードを正規化する。
+     *
+     * <p>
+     * 全角英数字を半角へ変換し、
+     * 英字の大文字小文字を区別しない検索にする。
+     * </p>
+     *
+     * @param keyword 検索キーワード
+     * @return 正規化後のキーワード
+     */
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+
+        return Normalizer.normalize(keyword.trim(), Normalizer.Form.NFKC)
+                .toLowerCase(Locale.ROOT);
+    }
+
+    /**
      * 商品名検索用のLIKE文字列を生成する。
      *
      * @param keyword キーワード
@@ -381,7 +406,7 @@ public class ProductRepository {
         if (keyword == null || keyword.isBlank()) {
             return null;
         }
-        return "%" + keyword.trim() + "%";
+        return "%" + keyword + "%";
     }
 
     /**
@@ -395,7 +420,7 @@ public class ProductRepository {
         if (keyword == null || keyword.isBlank()) {
             return null;
         }
-        return keyword.trim() + "%";
+        return keyword + "%";
     }
 
     /**
