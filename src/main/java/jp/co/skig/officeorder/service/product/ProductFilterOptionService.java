@@ -17,7 +17,8 @@ import org.springframework.stereotype.Service;
 /**
  * 商品一覧の絞り込み候補を取得し、画面入力値を正規化するサービス。
  *
- * <p>カテゴリ固有条件やカラー条件の「選択可能な値」をここで定義し、
+ * <p>
+ * カテゴリ固有条件やカラー条件の「選択可能な値」をここで定義し、
  * 画面から渡された生値を検索条件として安全に使える形へそろえる。
  */
 @Service
@@ -56,25 +57,24 @@ public class ProductFilterOptionService {
                 productFilterOptionRepository.findActiveChairMaterialOptions(),
                 productFilterOptionRepository.findActiveChairTasteOptions(),
                 productFilterOptionRepository.findActiveStorageUsageOptions(),
-                productFilterOptionRepository.findActiveStorageTasteOptions()
-        );
+                productFilterOptionRepository.findActiveStorageTasteOptions());
     }
 
     /**
      * デスク一覧向けのカテゴリ固有絞り込み条件を組み立てる。
      *
-     * @param rawDeskTopShapeIds 天板形状の生入力値
-     * @param rawDeskWidthBandIds 幅レンジの生入力値
-     * @param rawDeskDepthBandIds 奥行レンジの生入力値
+     * @param rawDeskTopShapeIds   天板形状の生入力値
+     * @param rawDeskWidthBandIds  幅レンジの生入力値
+     * @param rawDeskDepthBandIds  奥行レンジの生入力値
      * @param rawDeskHeightBandIds 高さレンジの生入力値
-     * @param rawDeskTasteIds テイストの生入力値
+     * @param rawDeskTasteIds      テイストの生入力値
      * @return 正規化済みカテゴリ条件
      */
     public ProductCategoryFilter buildDeskFilter(List<Integer> rawDeskTopShapeIds,
-                                                 List<Integer> rawDeskWidthBandIds,
-                                                 List<Integer> rawDeskDepthBandIds,
-                                                 List<Integer> rawDeskHeightBandIds,
-                                                 List<Integer> rawDeskTasteIds) {
+            List<Integer> rawDeskWidthBandIds,
+            List<Integer> rawDeskDepthBandIds,
+            List<Integer> rawDeskHeightBandIds,
+            List<Integer> rawDeskTasteIds) {
         return buildDeskFilter(rawDeskTopShapeIds,
                 rawDeskWidthBandIds,
                 rawDeskDepthBandIds,
@@ -86,20 +86,20 @@ public class ProductFilterOptionService {
     /**
      * 候補群を指定してデスク一覧向け絞り込み条件を組み立てる。
      *
-     * @param rawDeskTopShapeIds 天板形状の生入力値
-     * @param rawDeskWidthBandIds 幅レンジの生入力値
-     * @param rawDeskDepthBandIds 奥行レンジの生入力値
+     * @param rawDeskTopShapeIds   天板形状の生入力値
+     * @param rawDeskWidthBandIds  幅レンジの生入力値
+     * @param rawDeskDepthBandIds  奥行レンジの生入力値
      * @param rawDeskHeightBandIds 高さレンジの生入力値
-     * @param rawDeskTasteIds テイストの生入力値
-     * @param optionsBundle 使用する候補群
+     * @param rawDeskTasteIds      テイストの生入力値
+     * @param optionsBundle        使用する候補群
      * @return 正規化済みカテゴリ条件
      */
     public ProductCategoryFilter buildDeskFilter(List<Integer> rawDeskTopShapeIds,
-                                                 List<Integer> rawDeskWidthBandIds,
-                                                 List<Integer> rawDeskDepthBandIds,
-                                                 List<Integer> rawDeskHeightBandIds,
-                                                 List<Integer> rawDeskTasteIds,
-                                                 ProductFilterOptionsBundle optionsBundle) {
+            List<Integer> rawDeskWidthBandIds,
+            List<Integer> rawDeskDepthBandIds,
+            List<Integer> rawDeskHeightBandIds,
+            List<Integer> rawDeskTasteIds,
+            ProductFilterOptionsBundle optionsBundle) {
         List<Integer> allowedDeskTopShapeIds = extractOptionIds(optionsBundle.deskTopShapeOptions());
         List<Integer> allowedDeskTasteIds = extractOptionIds(optionsBundle.deskTasteOptions());
         return new ProductCategoryFilter(
@@ -112,8 +112,7 @@ public class ProductFilterOptionService {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of()
-        );
+                List.of());
     }
 
     /**
@@ -121,12 +120,12 @@ public class ProductFilterOptionService {
      *
      * @param rawChairFunctionIds 機能の生入力値
      * @param rawChairMaterialIds 素材の生入力値
-     * @param rawChairTasteIds テイストの生入力値
+     * @param rawChairTasteIds    テイストの生入力値
      * @return 正規化済みカテゴリ条件
      */
     public ProductCategoryFilter buildChairFilter(List<Integer> rawChairFunctionIds,
-                                                  List<Integer> rawChairMaterialIds,
-                                                  List<Integer> rawChairTasteIds) {
+            List<Integer> rawChairMaterialIds,
+            List<Integer> rawChairTasteIds) {
         return buildChairFilter(rawChairFunctionIds,
                 rawChairMaterialIds,
                 rawChairTasteIds,
@@ -138,14 +137,14 @@ public class ProductFilterOptionService {
      *
      * @param rawChairFunctionIds 機能の生入力値
      * @param rawChairMaterialIds 素材の生入力値
-     * @param rawChairTasteIds テイストの生入力値
-     * @param optionsBundle 使用する候補群
+     * @param rawChairTasteIds    テイストの生入力値
+     * @param optionsBundle       使用する候補群
      * @return 正規化済みカテゴリ条件
      */
     public ProductCategoryFilter buildChairFilter(List<Integer> rawChairFunctionIds,
-                                                  List<Integer> rawChairMaterialIds,
-                                                  List<Integer> rawChairTasteIds,
-                                                  ProductFilterOptionsBundle optionsBundle) {
+            List<Integer> rawChairMaterialIds,
+            List<Integer> rawChairTasteIds,
+            ProductFilterOptionsBundle optionsBundle) {
         List<Integer> allowedChairFunctionIds = extractOptionIds(optionsBundle.chairFunctionOptions());
         List<Integer> allowedChairMaterialIds = extractOptionIds(optionsBundle.chairMaterialOptions());
         List<Integer> allowedChairTasteIds = extractOptionIds(optionsBundle.chairTasteOptions());
@@ -159,8 +158,7 @@ public class ProductFilterOptionService {
                 normalizeIntegerOptions(rawChairMaterialIds, allowedChairMaterialIds),
                 normalizeIntegerOptions(rawChairTasteIds, allowedChairTasteIds),
                 List.of(),
-                List.of()
-        );
+                List.of());
     }
 
     /**
@@ -171,7 +169,7 @@ public class ProductFilterOptionService {
      * @return 正規化済みカテゴリ条件
      */
     public ProductCategoryFilter buildStorageFilter(List<Integer> rawStorageUsageIds,
-                                                    List<Integer> rawStorageTasteIds) {
+            List<Integer> rawStorageTasteIds) {
         return buildStorageFilter(rawStorageUsageIds, rawStorageTasteIds, loadOptionsBundle());
     }
 
@@ -180,12 +178,12 @@ public class ProductFilterOptionService {
      *
      * @param rawStorageUsageIds 用途の生入力値
      * @param rawStorageTasteIds テイストの生入力値
-     * @param optionsBundle 使用する候補群
+     * @param optionsBundle      使用する候補群
      * @return 正規化済みカテゴリ条件
      */
     public ProductCategoryFilter buildStorageFilter(List<Integer> rawStorageUsageIds,
-                                                    List<Integer> rawStorageTasteIds,
-                                                    ProductFilterOptionsBundle optionsBundle) {
+            List<Integer> rawStorageTasteIds,
+            ProductFilterOptionsBundle optionsBundle) {
         List<Integer> allowedStorageUsageIds = extractOptionIds(optionsBundle.storageUsageOptions());
         List<Integer> allowedStorageTasteIds = extractOptionIds(optionsBundle.storageTasteOptions());
         return new ProductCategoryFilter(
@@ -198,8 +196,50 @@ public class ProductFilterOptionService {
                 List.of(),
                 List.of(),
                 normalizeIntegerOptions(rawStorageUsageIds, allowedStorageUsageIds),
-                normalizeIntegerOptions(rawStorageTasteIds, allowedStorageTasteIds)
-        );
+                normalizeIntegerOptions(rawStorageTasteIds, allowedStorageTasteIds));
+    }
+
+    /**
+     * 検索結果ページ向けに複数カテゴリのテイスト絞り込み条件を組み立てる。
+     *
+     * @param rawDeskTasteIds    デスクテイストの生入力値
+     * @param rawChairTasteIds   チェアテイストの生入力値
+     * @param rawStorageTasteIds 収納家具テイストの生入力値
+     * @return 正規化済みカテゴリ条件
+     */
+    public ProductCategoryFilter buildSearchTasteFilter(List<Integer> rawDeskTasteIds,
+            List<Integer> rawChairTasteIds,
+            List<Integer> rawStorageTasteIds) {
+        return buildSearchTasteFilter(rawDeskTasteIds, rawChairTasteIds, rawStorageTasteIds, loadOptionsBundle());
+    }
+
+    /**
+     * 検索結果ページ向けに複数カテゴリのテイスト絞り込み条件を組み立てる。
+     *
+     * @param rawDeskTasteIds    デスクテイストの生入力値
+     * @param rawChairTasteIds   チェアテイストの生入力値
+     * @param rawStorageTasteIds 収納家具テイストの生入力値
+     * @param optionsBundle      使用する候補群
+     * @return 正規化済みカテゴリ条件
+     */
+    public ProductCategoryFilter buildSearchTasteFilter(List<Integer> rawDeskTasteIds,
+            List<Integer> rawChairTasteIds,
+            List<Integer> rawStorageTasteIds,
+            ProductFilterOptionsBundle optionsBundle) {
+        List<Integer> allowedDeskTasteIds = extractOptionIds(optionsBundle.deskTasteOptions());
+        List<Integer> allowedChairTasteIds = extractOptionIds(optionsBundle.chairTasteOptions());
+        List<Integer> allowedStorageTasteIds = extractOptionIds(optionsBundle.storageTasteOptions());
+        return new ProductCategoryFilter(
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                normalizeIntegerOptions(rawDeskTasteIds, allowedDeskTasteIds),
+                List.of(),
+                List.of(),
+                normalizeIntegerOptions(rawChairTasteIds, allowedChairTasteIds),
+                List.of(),
+                normalizeIntegerOptions(rawStorageTasteIds, allowedStorageTasteIds));
     }
 
     /**
@@ -232,12 +272,12 @@ public class ProductFilterOptionService {
     /**
      * カラーキーを指定候補群に基づいて正規化する。
      *
-     * @param rawColorKeys 画面から渡されたカラーキー
+     * @param rawColorKeys  画面から渡されたカラーキー
      * @param optionsBundle 使用する候補群
      * @return 正規化済みカラーキー
      */
     public List<String> normalizeColorKeys(List<String> rawColorKeys,
-                                           ProductFilterOptionsBundle optionsBundle) {
+            ProductFilterOptionsBundle optionsBundle) {
         if (rawColorKeys == null || rawColorKeys.isEmpty()) {
             return List.of();
         }
@@ -264,12 +304,12 @@ public class ProductFilterOptionService {
     /**
      * 画面のカラーキーを指定候補群で color_id に変換する。
      *
-     * @param colorKeys カラーキー一覧
+     * @param colorKeys     カラーキー一覧
      * @param optionsBundle 使用する候補群
      * @return 正規化済み color_id 一覧
      */
     public List<Long> resolveColorIds(List<String> colorKeys,
-                                      ProductFilterOptionsBundle optionsBundle) {
+            ProductFilterOptionsBundle optionsBundle) {
         if (colorKeys == null || colorKeys.isEmpty()) {
             return List.of();
         }
@@ -293,12 +333,12 @@ public class ProductFilterOptionService {
     /**
      * 指定候補群を使って、選択済み color_id をカラーキー順へ戻す。
      *
-     * @param colorIds 選択済み color_id
+     * @param colorIds      選択済み color_id
      * @param optionsBundle 使用する候補群
      * @return 画面表示順に整えたカラーキー
      */
     public List<String> resolveSelectedColorKeys(List<Long> colorIds,
-                                                 ProductFilterOptionsBundle optionsBundle) {
+            ProductFilterOptionsBundle optionsBundle) {
         if (colorIds == null || colorIds.isEmpty()) {
             return List.of();
         }
@@ -390,7 +430,7 @@ public class ProductFilterOptionService {
     /**
      * 許容値に含まれる整数選択肢だけを残す。
      *
-     * @param rawValues 画面から渡された生値
+     * @param rawValues     画面から渡された生値
      * @param allowedValues 許容する値
      * @return 正規化済み値一覧
      */

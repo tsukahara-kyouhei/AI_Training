@@ -266,15 +266,21 @@
         <if test="categoryId != null and categoryId != ''">
             AND p.category_id = #{categoryId}
         </if>
-        <if test="keywordLike != null and keywordLike != ''">
+        <if test="keywordTokens != null and keywordTokens.size() &gt; 0">
             AND (
-            p.product_name ILIKE #{keywordLike}
-            OR EXISTS (
-            SELECT 1
-            FROM product_variants pvk
-            WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
-            )
+            <foreach collection="keywordTokens" item="keywordToken" separator=" AND ">
+                (
+                p.product_name ILIKE #{keywordToken}
+                OR p.description ILIKE #{keywordToken}
+                OR p.variation_name ILIKE #{keywordToken}
+                OR EXISTS (
+                    SELECT 1
+                    FROM product_variants pvk
+                    WHERE pvk.product_id = p.product_id
+                    AND pvk.product_code ILIKE #{keywordToken}
+                )
+                )
+            </foreach>
             )
         </if>
         <if test="hasVariantFilter">
