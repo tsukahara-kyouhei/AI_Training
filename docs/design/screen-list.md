@@ -1,0 +1,36 @@
+# 画面一覧
+
+本プロジェクトで実際に Controller から表示され、Thymeleaf テンプレートが存在する画面を対象に整理した一覧です。
+
+| 画面ID | 画面名 | URL | 主な機能 | 遷移元 | 遷移先 | 備考 |
+|---|---|---|---|---|---|---|
+| TOP-001 | トップ画面 | / | 新着商品・ランキング商品・カテゴリ導線の表示 | ヘッダ／サイト内リンク | /categories/desks, /categories/chairs, /categories/storages, /products/new-arrivals, /products/search, /announcements, /about, /guide, /login, /cart |  |
+| ANN-001 | お知らせ一覧 | /announcements | お知らせ一覧の表示 | トップ画面の通知バー／お知らせリンク | トップ画面 |  |
+| SRH-001 | 商品検索結果一覧 | /products/search | キーワード検索結果の一覧表示、絞り込み、並び替え、ページング | ヘッダ検索フォーム、トップ画面の検索導線 | 商品詳細, カテゴリ一覧, 他ページの検索結果 |  |
+| CAT-001 | 新着商品一覧 | /products/new-arrivals | 新着商品の一覧表示、絞り込み、並び替え、ページング | トップ画面の「もっと見る」 | 商品詳細, 他ページの検索結果 |  |
+| DESK-001 | デスクカテゴリ一覧 | /categories/desks | デスク商品一覧、絞り込み、並び替え、ページング | ヘッダのカテゴリリンク、トップ画面 | 商品詳細 |  |
+| CHAIR-001 | チェアカテゴリ一覧 | /categories/chairs | チェア商品一覧、絞り込み、並び替え、ページング | ヘッダのカテゴリリンク、トップ画面 | 商品詳細 |  |
+| STOR-001 | 収納家具カテゴリ一覧 | /categories/storages | 収納家具商品一覧、絞り込み、並び替え、ページング | ヘッダのカテゴリリンク、トップ画面 | 商品詳細 |  |
+| PROD-001 | 商品詳細 | /products/{productId} | 商品情報、在庫状況、カート追加、お気に入り追加・解除 | 商品一覧・カテゴリ一覧・検索結果・関連商品 | /cart, /products/{productId}/favorite, /contact, /guide |  |
+| CART-001 | カート | /cart | カート内商品の表示、数量変更、削除、カートクリア | 商品詳細、マイページ再注文、ヘッダのカートリンク | /checkout/method, /checkout/input, /categories/desks, / |  |
+| CHK-001 | 購入方法選択 | /checkout/method | 購入方法の選択、ログイン補助表示 | カート画面 | /checkout/input, /login, /members/register | ログイン不要だが、会員ログインを促す画面 |
+| CHK-002 | 注文情報入力 | /checkout/input | 注文情報入力、バリデーション、配送先情報入力 | 購入方法選択、カート画面、注文確認画面からの戻り | /checkout/confirm, /cart |  |
+| CHK-003 | 注文確認 | /checkout/confirm | 注文内容確認、注文確定 | 注文情報入力 | /checkout/complete/{orderNumber}, /checkout/input, /cart |  |
+| CHK-004 | 注文完了 | /checkout/complete/{orderNumber} | 注文完了内容の表示 | 注文確認 | /, /mypage/orders |  |
+| AUTH-001 | ログイン | /login | 会員ログイン、ログイン後戻り先の指定 | ヘッダのログインリンク、購入方法選択、商品お気に入り時のリダイレクト | /mypage/orders, /members/register | 未ログイン時表示 |
+| MEM-001 | 会員登録入力 | /members/register | 会員登録フォーム入力 | ログイン画面の会員登録リンク | /members/register/confirm |  |
+| MEM-002 | 会員登録確認 | /members/register/confirm | 入力内容確認 | 会員登録入力 | /members/register, /members/register/complete | POST時に表示 |
+| MEM-003 | 会員登録完了 | /members/register/complete | 登録完了メッセージ表示 | 会員登録確定 | /, /mypage/orders |  |
+| MYP-001 | 購入履歴一覧 | /mypage/orders | 会員の購入履歴一覧表示、再注文 | ログイン後のマイページ入口、ヘッダのマイページリンク | /mypage/orders/{orderNumber}, /cart | ログイン必須 |
+| MYP-002 | 購入履歴詳細 | /mypage/orders/{orderNumber} | 購入履歴詳細表示、再注文 | 購入履歴一覧 | /cart | ログイン必須 |
+| MYP-003 | お気に入り一覧 | /mypage/favorites | お気に入り商品一覧表示 | ヘッダのマイページリンク | 商品詳細, /products/{productId}/favorite | ログイン必須 |
+| MYP-004 | 会員情報変更 | /mypage/profile | 会員情報の表示・更新 | ヘッダのマイページリンク | /mypage/profile | ログイン必須 |
+| MYP-005 | 追加お届け先一覧 | /mypage/addresses | 追加お届け先の一覧表示 | ヘッダのマイページリンク | /mypage/addresses/new, /mypage/addresses/{memberAddressId}/edit | ログイン必須 |
+| MYP-006 | 追加お届け先登録・編集 | /mypage/addresses/new /mypage/addresses/{memberAddressId}/edit | 追加お届け先の新規登録・編集 | 追加お届け先一覧 | /mypage/addresses | ログイン必須 |
+| MYP-007 | 退会確認 | /mypage/withdraw | 退会確認・退会処理 | ヘッダのマイページリンク | /login | ログイン必須 |
+| CNT-001 | お問い合わせ | /contact | お問い合わせフォームの表示・送信 | フッタ、商品詳細の問い合わせリンク | /contact |  |
+| INFO-001 | OFFICE ORDERについて | /about | 固定ページ表示 | フッタ、ヘッダ | 未確認 |  |
+| INFO-002 | ご利用ガイド | /guide | 固定ページ表示 | フッタ、商品詳細のガイドリンク | 未確認 |  |
+| INFO-003 | 利用規約 | /legal/terms | 固定ページ表示 | フッタ | 未確認 |  |
+| INFO-004 | プライバシーポリシー | /legal/privacy | 固定ページ表示 | フッタ | 未確認 |  |
+| INFO-005 | 特定商取引法に基づく表記 | /legal/tokusho | 固定ページ表示 | フッタ | 未確認 |  |
