@@ -115,17 +115,25 @@ public class CatalogController {
                                 @RequestParam(name = "inStockOnly", defaultValue = "false") boolean inStockOnly,
                                 @RequestParam(name = "priceBand", required = false) List<Integer> rawPriceBandIds,
                                 @RequestParam(name = "color", required = false) List<String> rawColorKeys,
+                                @RequestParam(name = "taste", required = false) List<Integer> rawTasteIds,
                                 @RequestParam(name = "sort", required = false) String sort,
                                 @RequestParam(name = "page", defaultValue = "1") int page,
                                 @RequestParam(name = "size", defaultValue = "15") int size,
                                 Model model) {
         ProductFilterOptionsBundle optionsBundle = productFilterOptionService.loadOptionsBundle();
+        ProductCategoryFilter searchFilter = productFilterOptionService.buildSearchFilter(
+                rawTasteIds,
+                rawTasteIds,
+                rawTasteIds,
+                optionsBundle
+        );
         ProductSearchCondition condition = productListSearchService.buildCondition(
                 null,
                 keyword,
                 inStockOnly,
                 rawPriceBandIds,
                 rawColorKeys,
+                searchFilter,
                 sort,
                 page,
                 size,
@@ -135,6 +143,8 @@ public class CatalogController {
         ProductListSearchResult result = productListSearchService.searchWithPageCorrection(condition);
         applyProductListModel(model, result.condition(), result.productPage(), optionsBundle);
         model.addAttribute("keyword", result.condition().keyword() == null ? "" : result.condition().keyword());
+        model.addAttribute("tasteIds", searchFilter.deskTasteIds());
+        model.addAttribute("tasteOptions", optionsBundle.deskTasteOptions());
         return "pages/product-list-search-results";
     }
 

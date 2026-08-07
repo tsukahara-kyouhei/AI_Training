@@ -40,6 +40,7 @@
                                 <input type="hidden" name="sort" th:value="${sortValue != null ? sortValue : 'recommended'}">
                                 <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 15}">
                                 <input type="hidden" name="page" value="1">
+                                <input type="hidden" name="taste" th:each="id : ${tasteIds}" th:value="${id}">
 
                                 <div class="field">
                                     <label class="check-item"><input type="checkbox" name="inStockOnly" value="true" th:checked="${inStockOnly}"> 在庫有のみ表示</label>
@@ -68,6 +69,15 @@
                                         </label>
                                     </div>
                                 </div>
+                                <div class="field" th:if="${tasteOptions != null and !#lists.isEmpty(tasteOptions)}">
+                                    <label>テイスト</label>
+                                    <div class="price-band-list">
+                                        <label class="check-item" th:each="option : ${tasteOptions}">
+                                            <input type="checkbox" name="taste" th:value="${option.id}" th:checked="${tasteIds != null and tasteIds.contains(option.id)}">
+                                            <span th:text="${option.label}">ベーシック</span>
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="actions actions--stack">
                                     <button class="btn btn--primary" type="submit">検索</button>
                                     <a class="btn" th:href="@{/products/search(q=${keyword})}">リセット</a>
@@ -88,6 +98,7 @@
                                 <input type="hidden" name="inStockOnly" value="true" th:if="${inStockOnly}">
                                 <input type="hidden" name="priceBand" th:each="band : ${selectedPriceBandIds}" th:value="${band}">
                                 <input type="hidden" name="color" th:each="key : ${selectedColorKeys}" th:value="${key}">
+                                <input type="hidden" name="taste" th:each="id : ${tasteIds}" th:value="${id}">
                                 <input type="hidden" name="page" value="1">
                                 <label class="badge">並び順
                                     <select name="sort" aria-label="並び順" onchange="this.form.submit()">
@@ -124,12 +135,12 @@
                          th:with="windowStart=${currentPage > 2 ? currentPage - 1 : 2}, windowEnd=${currentPage < totalPages - 1 ? currentPage + 1 : totalPages - 1}">
                         <a class="btn btn--ghost"
                            th:if="${currentPage > 1}"
-                           th:href="@{/products/search(q=${keyword},page=${currentPage - 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys})}">前へ</a>
+                           th:href="@{/products/search(q=${keyword},page=${currentPage - 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},taste=${tasteIds})}">前へ</a>
                         <span class="btn btn--ghost" style="opacity:.55; cursor:not-allowed;" th:if="${currentPage <= 1}">前へ</span>
 
                         <a class="btn btn--ghost"
                            th:if="${currentPage != 1}"
-                           th:href="@{/products/search(q=${keyword},page=1,size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys})}">1</a>
+                           th:href="@{/products/search(q=${keyword},page=1,size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},taste=${tasteIds})}">1</a>
                         <span class="btn btn--ghost is-disabled" th:if="${currentPage == 1}">1</span>
 
                         <span class="muted" th:if="${windowStart > 2}">...</span>
@@ -138,7 +149,7 @@
                             <th:block th:each="p : ${#numbers.sequence(windowStart, windowEnd)}">
                                 <a class="btn btn--ghost"
                                    th:if="${p != currentPage}"
-                                   th:href="@{/products/search(q=${keyword},page=${p},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys})}"
+                                   th:href="@{/products/search(q=${keyword},page=${p},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},taste=${tasteIds})}"
                                    th:text="${p}">2</a>
                                 <span class="btn btn--ghost is-disabled" th:if="${p == currentPage}" th:text="${p}">2</span>
                             </th:block>
@@ -148,7 +159,7 @@
 
                         <a class="btn btn--ghost"
                            th:if="${totalPages > 1 and currentPage != totalPages}"
-                           th:href="@{/products/search(q=${keyword},page=${totalPages},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys})}"
+                           th:href="@{/products/search(q=${keyword},page=${totalPages},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},taste=${tasteIds})}"
                            th:text="${totalPages}">99</a>
                         <span class="btn btn--ghost is-disabled"
                               th:if="${totalPages > 1 and currentPage == totalPages}"
@@ -156,7 +167,7 @@
 
                         <a class="btn btn--ghost"
                            th:if="${currentPage < totalPages}"
-                           th:href="@{/products/search(q=${keyword},page=${currentPage + 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys})}">次へ</a>
+                           th:href="@{/products/search(q=${keyword},page=${currentPage + 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},taste=${tasteIds})}">次へ</a>
                         <span class="btn btn--ghost" style="opacity:.55; cursor:not-allowed;" th:if="${currentPage >= totalPages}">次へ</span>
                     </nav>
                 </section>
