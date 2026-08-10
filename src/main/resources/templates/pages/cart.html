@@ -58,10 +58,6 @@
                                     <td><strong th:text="${item.unitPriceText + '円'}">18,800円</strong></td>
                                     <td>
                                             <div th:if="${item.assemblyAvailable}">
-                                                <input type="hidden"
-                                                       name="assemblyRequested"
-                                                       value="false"
-                                                       th:form="${'update-' + item.productVariantId}">
                                                 <label class="badge"><input type="checkbox"
                                                                             name="assemblyRequested"
                                                                             value="true"
