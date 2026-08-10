@@ -184,3 +184,24 @@ COMMENT ON COLUMN product_storage_attributes.usage_id IS '用途ID';
 COMMENT ON COLUMN product_storage_attributes.taste_id IS 'テイストID';
 COMMENT ON COLUMN product_storage_attributes.created_at IS '作成日時';
 COMMENT ON COLUMN product_storage_attributes.updated_at IS '更新日時';
+
+
+-- 商品レビューテーブル (product_review) の作成
+-- member_id, product_id, rating(1-5), title, body, published, created_at, updated_at
+-- 1会員1商品1レビューのユニーク制約
+CREATE TABLE product_review ( 
+    review_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    member_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    title VARCHAR(255),
+    body TEXT  NOT NULL,
+    published BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_product_review_member_product UNIQUE (member_id, product_id),
+    CONSTRAINT fk_product_review_member FOREIGN KEY (member_id)
+        REFERENCES members (member_id) ON DELETE CASCADE,
+    CONSTRAINT fk_product_review_product FOREIGN KEY (product_id)
+        REFERENCES products (product_id) ON DELETE CASCADE
+);
