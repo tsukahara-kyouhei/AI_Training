@@ -48,13 +48,13 @@ public class OrderRepository {
     /**
      * 注文リポジトリを生成する。
      *
-     * @param orderMapper 注文Mapper
-     * @param objectMapper JSONシリアライザ
+     * @param orderMapper     注文Mapper
+     * @param objectMapper    JSONシリアライザ
      * @param appTimeProvider 共通時刻プロバイダ
      */
     public OrderRepository(OrderMapper orderMapper,
-                           ObjectMapper objectMapper,
-                           AppTimeProvider appTimeProvider) {
+            ObjectMapper objectMapper,
+            AppTimeProvider appTimeProvider) {
         this.orderMapper = orderMapper;
         this.objectMapper = objectMapper;
         this.appTimeProvider = appTimeProvider;
@@ -145,8 +145,7 @@ public class OrderRepository {
         Map<String, String> instruction = parsePaymentInstruction(
                 orderNumber,
                 paymentMethod,
-                row.paymentInstruction()
-        );
+                row.paymentInstruction());
         if ("convenience_store".equals(paymentMethod)
                 && (instruction.get("payment_number") == null || instruction.get("payment_due_date") == null)) {
             log.warn("event={} orderNumber={} paymentMethod={} reason=missing_payment_instruction_fields",
@@ -172,16 +171,15 @@ public class OrderRepository {
                 row.assemblyFeeTotal(),
                 row.shippingFee(),
                 row.taxAmount(),
-                row.totalAmount()
-        ));
+                row.totalAmount()));
     }
 
     /**
      * 会員の購入履歴一覧をページング付きで取得する。
      *
      * @param memberId 会員ID
-     * @param page ページ番号
-     * @param size ページサイズ
+     * @param page     ページ番号
+     * @param size     ページサイズ
      * @return 購入履歴ページ
      */
     public MemberOrderHistoryPage findMemberOrders(long memberId, int page, int size) {
@@ -197,7 +195,7 @@ public class OrderRepository {
     /**
      * 会員の注文詳細を取得し、履歴と明細をまとめて返す。
      *
-     * @param memberId 会員ID
+     * @param memberId    会員ID
      * @param orderNumber 注文番号
      * @return 注文詳細
      */
@@ -226,14 +224,13 @@ public class OrderRepository {
                 header.taxAmount(),
                 header.totalAmount(),
                 statusHistories,
-                items
-        ));
+                items));
     }
 
     /**
      * 再購入用の注文商品一覧を取得する。
      *
-     * @param memberId 会員ID
+     * @param memberId    会員ID
      * @param orderNumber 注文番号
      * @return 再購入商品一覧
      */
@@ -246,14 +243,14 @@ public class OrderRepository {
     /**
      * payment_instruction を画面表示用の key-value へ変換する。
      *
-     * @param orderNumber 注文番号
-     * @param paymentMethod 支払方法
+     * @param orderNumber    注文番号
+     * @param paymentMethod  支払方法
      * @param rawInstruction 生の保存値
      * @return 支払案内情報
      */
     private Map<String, String> parsePaymentInstruction(String orderNumber,
-                                                        String paymentMethod,
-                                                        Object rawInstruction) {
+            String paymentMethod,
+            Object rawInstruction) {
         if (rawInstruction == null) {
             return Map.of();
         }
@@ -288,8 +285,7 @@ public class OrderRepository {
                 row.orderNumber(),
                 row.orderDatetime(),
                 row.totalAmount(),
-                row.orderStatus()
-        );
+                row.orderStatus());
     }
 
     /**
@@ -301,8 +297,7 @@ public class OrderRepository {
     private MemberOrderStatusHistoryView toMemberOrderStatusHistoryView(MemberOrderStatusHistoryMapperRow row) {
         return new MemberOrderStatusHistoryView(
                 row.changedAt(),
-                row.status()
-        );
+                row.status());
     }
 
     /**
@@ -319,8 +314,7 @@ public class OrderRepository {
                 row.unitPrice(),
                 row.assemblyFee(),
                 row.quantity() == null ? 0 : row.quantity(),
-                row.lineSubtotal()
-        );
+                row.lineSubtotal());
     }
 
     /**
@@ -338,7 +332,13 @@ public class OrderRepository {
                 row.productVariantId(),
                 row.productCode(),
                 row.quantity() == null ? 0 : row.quantity(),
-                assemblyRequested
-        );
+                assemblyRequested);
     }
+
+    // 購入履歴のチェック（1件以上あれば true を返す）
+    public boolean hasPurchasedProduct(Long memberId, Long productId) {
+        Long count = orderMapper.countMemberPurchasedProduct(memberId, productId);
+        return count != null && count > 0;
+    }
+
 }

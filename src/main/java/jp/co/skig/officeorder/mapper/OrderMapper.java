@@ -61,37 +61,39 @@ public interface OrderMapper {
      * 会員の購入履歴一覧をページ単位で取得する。
      */
     List<MemberOrderHistoryMapperRow> selectMemberOrders(@Param("memberId") long memberId,
-                                                         @Param("limit") int limit,
-                                                         @Param("offset") int offset);
+            @Param("limit") int limit,
+            @Param("offset") int offset);
 
     /**
      * 注文詳細のヘッダ部と金額サマリーを取得する。
      */
     MemberOrderDetailMapperRow selectMemberOrderDetail(@Param("memberId") long memberId,
-                                                       @Param("orderNumber") String orderNumber);
+            @Param("orderNumber") String orderNumber);
 
     /**
      * 注文のステータス履歴を時系列で取得する。
      */
     List<MemberOrderStatusHistoryMapperRow> selectMemberOrderStatusHistories(@Param("memberId") long memberId,
-                                                                             @Param("orderNumber") String orderNumber);
+            @Param("orderNumber") String orderNumber);
 
     /**
      * 注文詳細の明細行を取得する。
      */
     List<MemberOrderItemMapperRow> selectMemberOrderItems(@Param("memberId") long memberId,
-                                                          @Param("orderNumber") String orderNumber);
+            @Param("orderNumber") String orderNumber);
 
     /**
      * 再購入時にカートへ積み直すための注文明細情報を取得する。
      */
     List<OrderReorderItemMapperRow> selectMemberReorderItems(@Param("memberId") long memberId,
-                                                              @Param("orderNumber") String orderNumber);
+            @Param("orderNumber") String orderNumber);
 
     /**
      * 指定時点で有効な消費税率を取得する。
      */
     BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);
+
+    // 特定の会員が特定の商品を購入したことがあるか（注文明細の件数）をカウントする
+    Long countMemberPurchasedProduct(@Param("memberId") long memberId, @Param("productId") long productId);
+
 }
-
-
