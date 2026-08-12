@@ -4,26 +4,42 @@ import java.util.List;
 
 public class ProductReviewPage {
 
-    // レビュー一覧ページネーション用モデル（items, totalCount, page, size）
-    private List<ReviewSummaryView> items;
+    private List<ProductReviewView> items;
     private Long totalCount;
     private int page;
     private int size;
 
-    // Getters and Setters
-    public List<ReviewSummaryView> getItems() {
+    // --- Getters and Setters ---
+
+    public List<ProductReviewView> getItems() {
         return items;
+    }
+
+    public void setItems(List<ProductReviewView> items) {
+        this.items = items;
     }
 
     public Long getTotalCount() {
         return totalCount;
     }
 
+    public void setTotalCount(Long totalCount) {
+        this.totalCount = totalCount;
+    }
+
     public int getPage() {
         return page;
     }
 
+    public void setPage(int page) {
+        this.page = page;
+    }
+
     public int getSize() {
         return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 }
