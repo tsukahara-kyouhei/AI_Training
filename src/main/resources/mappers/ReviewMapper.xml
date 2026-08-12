@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.ReviewMapper">
+
+    <!-- ここから下にSQLを書いていきます -->
+<!-- ①商品のレビュー一覧を取得する (selectProductReviews) -->
+    <select id="selectProductReviews" resultType="jp.co.skig.officeorder.model.review.ProductReviewView">
+        SELECT
+            review_id AS reviewId,
+            member_id AS memberId,
+            product_id AS productId,
+            rating,
+            title,
+            body,
+            published,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM product_review
+        WHERE product_id = #{productId}
+          AND published = true
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- ②商品のレビュー件数を取得する (countProductReviews) -->
+    <select id="countProductReviews" resultType="long">
+        SELECT COUNT(*)
+        FROM product_review
+        WHERE product_id = #{productId}
+          AND published = true
+    </select>
+
+    <!-- ③商品のレビュー集計（平均評価と件数）を取得する (selectProductReviewSummary) -->
+    <select id="selectProductReviewSummary" resultType="jp.co.skig.officeorder.model.review.ReviewSummaryView">
+        SELECT AVG(rating) AS averageRating, COUNT(*) AS reviewCount
+        FROM product_review
+        WHERE product_id = #{productId}
+          AND published = true
+    </select>
+
+    <!-- ④特定の会員が書いた商品レビューを取得する (selectMemberProductReview) -->
+    <select id="selectMemberProductReview" resultType="jp.co.skig.officeorder.model.review.ProductReviewView">
+        SELECT
+            review_id AS reviewId,
+            member_id AS memberId,
+            product_id AS productId,
+            rating,
+            title,
+            body,
+            published,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM product_review
+        WHERE member_id = #{memberId}
+          AND product_id = #{productId}
+    </select>
+
+    <!-- ⑤レビューを新規登録する (insertReview) -->
+    <insert id="insertReview">
+        INSERT INTO product_review (
+            member_id,
+            product_id,
+            rating,
+            title,
+            body,
+            published,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{memberId},
+            #{form.productId},
+            #{form.rating},
+            #{form.title},
+            #{form.body},
+            true,
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- ⑥レビューを更新する (updateReview) -->
+    <update id="updateReview">
+        UPDATE product_review
+        SET
+            rating = #{form.rating},
+            title = #{form.title},
+            body = #{form.body},
+            updated_at = NOW()
+        WHERE member_id = #{memberId}
+          AND product_id = #{form.productId}
+    </update>
+</mapper>
