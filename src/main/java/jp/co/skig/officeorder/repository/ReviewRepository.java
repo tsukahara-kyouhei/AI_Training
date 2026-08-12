@@ -20,22 +20,22 @@ public class ReviewRepository {
     }
 
     // ①商品のレビュー一覧を取得する
-    public List<ProductReviewView> findProductReviews(String productId, int limit, int offset) {
+    public List<ProductReviewView> findProductReviews(Long productId, int limit, int offset) {
         return reviewMapper.selectProductReviews(productId, limit, offset);
     }
 
     // ②商品のレビュー件数を取得する
-    public Long countProductReviews(String productId) {
+    public Long countProductReviews(Long productId) {
         return reviewMapper.countProductReviews(productId);
     }
 
     // ③商品のレビュー集計（平均評価と件数）を取得する
-    public ReviewSummaryView findProductReviewSummary(String productId) {
+    public ReviewSummaryView findProductReviewSummary(Long productId) {
         return reviewMapper.selectProductReviewSummary(productId);
     }
 
     // ④特定の会員が書いた商品レビューを取得する
-    public Optional<ProductReviewView> findMemberProductReview(Long memberId, String productId) {
+    public Optional<ProductReviewView> findMemberProductReview(Long memberId, Long productId) {
         return reviewMapper.selectMemberProductReview(memberId, productId);
     }
 

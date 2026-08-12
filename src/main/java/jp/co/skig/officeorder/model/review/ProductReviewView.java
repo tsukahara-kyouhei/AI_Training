@@ -7,7 +7,7 @@ public class ProductReviewView {
     // 商品レビュー表示用モデル（reviewId, memberId, memberName, rating, title, body, published,
     // createdAt, updatedAt）
     private Long reviewId;
-    private String productId;
+    private Long productId;
     private Long memberId;
     private String memberName;
     private Integer rating;
@@ -90,11 +90,11 @@ public class ProductReviewView {
         this.updatedAt = updatedAt;
     }
 
-    public String getProductId() {
+    public Long getProductId() {
         return productId;
     }
 
-    public void setProductId(String productId) {
+    public void setProductId(Long productId) {
         this.productId = productId;
     }
 }

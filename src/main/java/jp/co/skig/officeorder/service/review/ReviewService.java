@@ -26,12 +26,12 @@ public class ReviewService {
     }
 
     // ①商品のレビュー集計を取得する
-    public ReviewSummaryView getProductReviewSummary(String productId) {
+    public ReviewSummaryView getProductReviewSummary(Long productId) {
         return reviewRepository.findProductReviewSummary(productId);
     }
 
     // ②商品のレビュー一覧とページネーション情報を取得する
-    public ProductReviewPage getProductReviews(String productId, int limit, int offset) {
+    public ProductReviewPage getProductReviews(Long productId, int limit, int offset) {
         List<ProductReviewView> reviews = reviewRepository.findProductReviews(productId, limit, offset);
         Long totalCount = reviewRepository.countProductReviews(productId);
 
@@ -43,12 +43,12 @@ public class ReviewService {
     }
 
     // ③特定の会員が書いた商品レビューを取得する
-    public Optional<ProductReviewView> getMemberReview(Long memberId, String productId) {
+    public Optional<ProductReviewView> getMemberReview(Long memberId, Long productId) {
         return reviewRepository.findMemberProductReview(memberId, productId);
     }
 
     // ④会員がその商品を購入したことがあるか判定する
-    public boolean hasPurchasedProduct(Long memberId, String productId) {
+    public boolean hasPurchasedProduct(Long memberId, Long productId) {
         // 【修正ポイント2】正しいメソッド名 (hasPurchasedProduct) を呼び出す
         return orderRepository.hasPurchasedProduct(memberId, productId);
     }

@@ -6,6 +6,7 @@ public class ProductReviewPage {
 
     private List<ProductReviewView> items;
     private Long totalCount;
+    private Long productId;
     private int page;
     private int size;
 
@@ -41,5 +42,13 @@ public class ProductReviewPage {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 }

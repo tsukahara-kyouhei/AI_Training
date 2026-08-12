@@ -94,6 +94,6 @@ public interface OrderMapper {
     BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);
 
     // 特定の会員が特定の商品を購入したことがあるか（注文明細の件数）をカウントする
-    Long countMemberPurchasedProduct(@Param("memberId") long memberId, @Param("productId") String productId);
+    Long countMemberPurchasedProduct(@Param("memberId") long memberId, @Param("productId") Long productId);
 
 }

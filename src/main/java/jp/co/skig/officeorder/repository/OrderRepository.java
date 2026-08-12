@@ -336,7 +336,7 @@ public class OrderRepository {
     }
 
     // 購入履歴のチェック（1件以上あれば true を返す）
-    public boolean hasPurchasedProduct(Long memberId, String productId) {
+    public boolean hasPurchasedProduct(Long memberId, Long productId) {
         Long count = orderMapper.countMemberPurchasedProduct(memberId, productId);
         return count != null && count > 0;
     }
