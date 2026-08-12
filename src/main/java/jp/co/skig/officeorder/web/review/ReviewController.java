@@ -19,7 +19,7 @@ public class ReviewController {
 
     // ① レビュー一覧画面を表示する (GETリクエスト)
     @GetMapping
-    public String showReviewList(@PathVariable Long productId, Model model) {
+    public String showReviewList(@PathVariable String productId, Model model) {
         // レビュー一覧と集計情報を取得
         var reviewPage = reviewService.getProductReviews(productId, 10, 0);
         var reviewSummary = reviewService.getProductReviewSummary(productId);
@@ -32,7 +32,7 @@ public class ReviewController {
 
     // ② レビュー投稿フォームを表示する (GETリクエスト)
     @GetMapping("/new")
-    public String showReviewForm(@PathVariable Long productId, Model model) {
+    public String showReviewForm(@PathVariable String productId, Model model) {
         // 新しいレビュー入力フォームを作成
         ReviewForm form = new ReviewForm();
         form.setProductId(productId);
@@ -42,7 +42,7 @@ public class ReviewController {
 
     // ③ レビューを投稿する (POSTリクエスト)
     @PostMapping
-    public String submitReview(@PathVariable Long productId,
+    public String submitReview(@PathVariable String productId,
             @ModelAttribute ReviewForm form,
             @RequestParam Long memberId) {
         // 会員がその商品を購入したことがあるか判定
@@ -57,7 +57,7 @@ public class ReviewController {
 
     // ② レビュー入力画面を表示する (GETリクエスト)
     @GetMapping("/edit")
-    public String showEditReviewForm(@PathVariable Long productId,
+    public String showEditReviewForm(@PathVariable String productId,
             @RequestParam Long memberId,
             Model model) {
         // 既存のレビューを取得
@@ -78,7 +78,7 @@ public class ReviewController {
 
     // ③ レビューを保存して一覧画面にリダイレクトする (POSTリクエスト)
     @PostMapping("/edit")
-    public String submitEditReview(@PathVariable Long productId,
+    public String submitEditReview(@PathVariable String productId,
             @ModelAttribute ReviewForm form,
             @RequestParam Long memberId) {
         // 会員がその商品を購入したことがあるか判定

@@ -2,16 +2,16 @@ package jp.co.skig.officeorder.model.review;
 
 public class ReviewForm {
     // レビュー入力用フォーム（productId, rating, title, body）
-    private Long productId;
+    private String productId;
     private Integer rating;
     private String title;
     private String body;
 
-    public Long getProductId() {
+    public String getProductId() {
         return productId;
     }
 
-    public void setProductId(Long productId) {
+    public void setProductId(String productId) {
         this.productId = productId;
     }
 
