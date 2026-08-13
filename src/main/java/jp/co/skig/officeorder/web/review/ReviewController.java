@@ -87,7 +87,10 @@ public class ReviewController {
     @PostMapping
     public String submitReview(@PathVariable Long productId,
             @ModelAttribute ReviewForm form,
-            @RequestParam Long memberId) {
+            @AuthenticationPrincipal MemberPrincipal principal) {
+        // ▼ 画面から受け取るのではなく、ログイン情報から安全にIDを取得する ▼
+        Long memberId = principal.getMemberId();
+
         // 会員がその商品を購入したことがあるか判定
         if (!reviewService.hasPurchasedProduct(memberId, productId)) {
             throw new IllegalStateException("この商品は購入していないため、レビューを投稿できません。");
@@ -101,8 +104,12 @@ public class ReviewController {
     // ② レビュー入力画面を表示する (GETリクエスト)
     @GetMapping("/edit")
     public String showEditReviewForm(@PathVariable Long productId,
-            @RequestParam Long memberId,
+            @AuthenticationPrincipal MemberPrincipal principal, // ← 提案通りここを変更！
             Model model) {
+
+        // ▼ 提案通りログイン情報から安全にIDを取得する ▼
+        Long memberId = principal.getMemberId();
+
         // 既存のレビューを取得
         var existingReview = reviewService.getMemberReview(memberId, productId);
         if (existingReview.isEmpty()) {
@@ -123,7 +130,10 @@ public class ReviewController {
     @PostMapping("/edit")
     public String submitEditReview(@PathVariable Long productId,
             @ModelAttribute ReviewForm form,
-            @RequestParam Long memberId) {
+            @AuthenticationPrincipal MemberPrincipal principal) {
+        // ▼ こちらも同様に、ログイン情報から安全にIDを取得する ▼
+        Long memberId = principal.getMemberId();
+
         // 会員がその商品を購入したことがあるか判定
         if (!reviewService.hasPurchasedProduct(memberId, productId)) {
             throw new IllegalStateException("この商品は購入していないため、レビューを投稿できません。");

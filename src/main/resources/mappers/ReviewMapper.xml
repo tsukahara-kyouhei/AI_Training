@@ -8,19 +8,21 @@
 <!-- ①商品のレビュー一覧を取得する (selectProductReviews) -->
     <select id="selectProductReviews" resultType="jp.co.skig.officeorder.model.review.ProductReviewView">
         SELECT
-            review_id AS reviewId,
-            member_id AS memberId,
-            product_id AS productId,
-            rating,
-            title,
-            body,
-            published,
-            created_at AS createdAt,
-            updated_at AS updatedAt
-        FROM product_review
-        WHERE product_id = #{productId}
-          AND published = true
-        ORDER BY created_at DESC
+            pr.review_id AS reviewId,
+            pr.member_id AS memberId,
+           m.last_name || ' ' || m.first_name AS memberName,
+            pr.product_id AS productId,
+            pr.rating,
+            pr.title,
+            pr.body,
+            pr.published,
+            CAST(pr.created_at AS timestamp) AS createdAt,
+            CAST(pr.updated_at AS timestamp) AS updatedAt
+        FROM product_review pr
+        LEFT JOIN members m ON pr.member_id = m.member_id -- ★ 会員テーブルと結合
+        WHERE pr.product_id = #{productId}
+          AND pr.published = true
+        ORDER BY pr.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
@@ -50,8 +52,8 @@
             title,
             body,
             published,
-            created_at AS createdAt,
-            updated_at AS updatedAt
+            CAST(created_at AS timestamp) AS createdAt,
+            CAST(updated_at AS timestamp) AS updatedAt
         FROM product_review
         WHERE member_id = #{memberId}
           AND product_id = #{productId}
