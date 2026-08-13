@@ -5,6 +5,8 @@ import jp.co.skig.officeorder.service.review.ReviewService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import jp.co.skig.officeorder.web.auth.MemberPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Controller
 @RequestMapping("/products/{productId}/reviews")
@@ -19,7 +21,9 @@ public class ReviewController {
 
     // ① レビュー一覧画面を表示する (GETリクエスト)
     @GetMapping
-    public String showReviewList(@PathVariable Long productId, Model model) {
+    public String showReviewList(@PathVariable Long productId,
+            @AuthenticationPrincipal MemberPrincipal principal,
+            Model model) {
         // レビュー一覧と集計情報を取得
         var reviewPage = reviewService.getProductReviews(productId, 10, 0);
         var reviewSummary = reviewService.getProductReviewSummary(productId);
@@ -28,12 +32,50 @@ public class ReviewController {
         reviewPage.setProductId(productId);
         model.addAttribute("reviewPage", reviewPage);
         model.addAttribute("reviewSummary", reviewSummary);
+
+        // ▼▼ ここから書き換え：購入判定と投稿済み判定 ▼▼
+        boolean hasPurchased = false;
+        boolean hasReviewed = false;
+        boolean isLoggedIn = false;
+        Long currentMemberId = null;
+
+        // ログインしている場合のみ判定処理を行う
+        if (principal != null) {
+            isLoggedIn = true;
+            currentMemberId = principal.getMemberId();
+            hasPurchased = reviewService.hasPurchasedProduct(currentMemberId, productId);
+            hasReviewed = reviewService.getMemberReview(currentMemberId, productId).isPresent();
+        }
+
+        // 画面（Thymeleaf）に判定結果のフラグを渡す
+        model.addAttribute("hasPurchased", hasPurchased);
+        model.addAttribute("hasReviewed", hasReviewed);
+        model.addAttribute("isLoggedIn", isLoggedIn);
+        model.addAttribute("currentMemberId", currentMemberId);
+        // ▲▲ ここまで書き換え ▲▲
+
         return "review/list";
     }
 
     // ② レビュー投稿フォームを表示する (GETリクエスト)
     @GetMapping("/new")
-    public String showReviewForm(@PathVariable Long productId, Model model) {
+    public String showReviewForm(@PathVariable Long productId,
+            @AuthenticationPrincipal MemberPrincipal principal,
+            Model model) {
+        Long memberId = principal.getMemberId();
+
+        // 【関所1】購入したことがあるかチェック
+        if (!reviewService.hasPurchasedProduct(memberId, productId)) {
+            // 購入していない場合は、強制的に一覧画面へ戻す
+            return "redirect:/products/" + productId + "/reviews";
+        }
+
+        // 【関所2】すでにレビュー投稿済みかチェック（1人1件の制限）
+        if (reviewService.getMemberReview(memberId, productId).isPresent()) {
+            // 投稿済みの場合は、強制的に編集画面へ飛ばす
+            return "redirect:/products/" + productId + "/reviews/edit?memberId=" + memberId;
+        }
+
         // 新しいレビュー入力フォームを作成
         ReviewForm form = new ReviewForm();
         form.setProductId(productId);

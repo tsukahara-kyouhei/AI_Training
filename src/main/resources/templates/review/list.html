@@ -24,9 +24,30 @@
                             <p class="section__title" style="margin:0 0 8px;">レビュー件数</p>
                             <p class="page-title" style="margin:0; font-size:1.5rem;" th:text="${reviewSummary.reviewCount} + ' 件'">12 件</p>
                         </div>
-                        <div class="actions" style="margin-top:0; justify-content:flex-end;">
-                            <a class="btn btn--primary" th:href="@{/products/{productId}/reviews/new(productId=${reviewPage.productId})}">レビューを書く</a>
-                        </div>
+                       <!-- ▼▼ ここから書き換え ▼▼ -->
+<div class="actions" style="margin-top:0; justify-content:flex-end;">
+
+    <!-- パターン1: 未ログインの場合 -->
+    <a th:if="${!isLoggedIn}" 
+       class="btn btn--primary" 
+       th:href="@{/products/{productId}/reviews/new(productId=${reviewPage.productId})}">レビューを書く</a>
+
+    <!-- パターン2: ログイン済み だが 未購入の場合 -->
+    <p th:if="${isLoggedIn and !hasPurchased}" 
+       style="color: #666; font-size: 0.9em; margin: 0; align-self: center;">※この商品は購入後にレビューを投稿できます。</p>
+
+    <!-- パターン3: 購入済み ＆ まだレビューを書いていない場合 -->
+    <a th:if="${isLoggedIn and hasPurchased and !hasReviewed}" 
+       class="btn btn--primary" 
+       th:href="@{/products/{productId}/reviews/new(productId=${reviewPage.productId})}">レビューを書く</a>
+
+    <!-- パターン4: 購入済み ＆ すでにレビューを書いている場合 -->
+    <a th:if="${isLoggedIn and hasPurchased and hasReviewed}" 
+       class="btn" style="background-color: #6c757d; color: white;" 
+       th:href="@{/products/{productId}/reviews/edit(productId=${reviewPage.productId}, memberId=${currentMemberId})}">レビューを編集する</a>
+
+</div>
+<!-- ▲▲ ここまで書き換え ▲▲ -->
                     </div>
                 </div>
             </div>

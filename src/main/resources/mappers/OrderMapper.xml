@@ -380,12 +380,12 @@
 
     <!-- 特定の会員が特定の商品を購入した件数を取得する -->
     <select id="countMemberPurchasedProduct" resultType="long">
-        SELECT COUNT(oi.order_item_id)
-        FROM orders o
-        INNER JOIN order_items oi ON o.order_id = oi.order_id
-        WHERE o.member_id = #{memberId}
-          AND oi.product_id = #{productId}
-          AND o.order_status = 'COMPLETED' <!-- ※システムによってステータス名は変わる可能性があります -->
+       SELECT COUNT(oi.order_item_id)
+FROM orders o
+INNER JOIN order_items oi ON o.order_id = oi.order_id
+INNER JOIN product_variants pv ON oi.product_code = pv.product_code
+WHERE o.member_id = #{memberId}
+  AND pv.product_id = #{productId}
     </select>
     
 </mapper>
