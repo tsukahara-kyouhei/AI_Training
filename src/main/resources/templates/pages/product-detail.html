@@ -143,6 +143,11 @@
 
                             <a class="pd-inline-link" href="/contact">商品についてのお問い合わせ</a>
                             <a class="pd-guide-link" href="/guide">ご利用ガイドはこちら</a>
+                            <div style="margin-top: 16px;">
+    <a th:href="@{/products/{id}/reviews(id=${detail.productId})}" class="btn" style="width: 100%; border: 1px solid #ccc; text-align: center; display: block; padding: 10px; text-decoration: none; color: #333;">
+        商品レビューを見る
+    </a>
+</div>
                         </div>
 
                         <section class="pd-series"

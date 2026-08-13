@@ -25,6 +25,7 @@ public class ReviewController {
         var reviewSummary = reviewService.getProductReviewSummary(productId);
 
         // モデルに追加
+        reviewPage.setProductId(productId);
         model.addAttribute("reviewPage", reviewPage);
         model.addAttribute("reviewSummary", reviewSummary);
         return "review/list";
