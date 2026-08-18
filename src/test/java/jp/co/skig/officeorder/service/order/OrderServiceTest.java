@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import jp.co.skig.officeorder.model.cart.CartLineView;
 import jp.co.skig.officeorder.model.cart.CartSummaryView;
