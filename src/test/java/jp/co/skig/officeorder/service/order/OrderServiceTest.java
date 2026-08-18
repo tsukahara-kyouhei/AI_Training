@@ -76,8 +76,10 @@ class OrderServiceTest {
 
     @Test
     void placeOrder_whenCartIsEmpty_throwsIllegalArgumentException() {
-        CartView emptyCart = new CartView(List.of(), 0, 0, new CartSummaryView(BigDecimal.ZERO, BigDecimal.ZERO,
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+        CartView emptyCart = new CartView(List.of(), 0, 0, new CartSummaryView(
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                null, BigDecimal.ZERO, null // ← この3つを追加
+        ));
         CheckoutInputForm form = new CheckoutInputForm();
         form.setDeliveryFloor("1");
         form.setEmail("user@example.com");
@@ -91,8 +93,11 @@ class OrderServiceTest {
         try {
             CartLineView line = new CartLineView(1L, 10L, "Desk", "D001", "Black", BigDecimal.valueOf(1000), 10, false,
                     BigDecimal.valueOf(0), false, 1, "/products/10");
-            CartSummaryView summary = new CartSummaryView(BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.ZERO,
-                    BigDecimal.valueOf(100), BigDecimal.valueOf(1100));
+            CartSummaryView summary = new CartSummaryView(
+                    BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.valueOf(100),
+                    BigDecimal.valueOf(1100),
+                    null, BigDecimal.ZERO, null // ← この3つを追加
+            );
             CartView cart = new CartView(List.of(line), 1, 1, summary);
             CheckoutInputForm form = new CheckoutInputForm();
             form.setDeliveryFloor("2");
@@ -115,7 +120,82 @@ class OrderServiceTest {
     }
 
     @Test
+    void legacyConstructor_whenUsingOriginalFiveArguments_setsAdditionalFieldsToDefaults() {
+        LegacyCheckoutInputForm form = new LegacyCheckoutInputForm("corporate", "Yamada", "Taro", "Company Ltd.",
+                "Chiyoda");
+
+        assertEquals("corporate", form.getPersonalOrCorporate());
+        assertEquals("Yamada", form.getLastName());
+        assertEquals("Taro", form.getFirstName());
+        assertEquals("Company Ltd.", form.getCompanyName());
+        assertEquals("Chiyoda", form.getCity());
+        assertEquals(null, form.getCouponCode());
+        assertEquals(BigDecimal.ZERO, form.getDiscountAmount());
+        assertEquals(null, form.getErrorMessage());
+    }
+
+    @Test
     void findOrderCompleteView_whenOrderNumberBlank_returnsEmpty() {
         assertEquals(Optional.empty(), service.findOrderCompleteView("  "));
+    }
+
+    static class LegacyCheckoutInputForm {
+        private final String personalOrCorporate;
+        private final String lastName;
+        private final String firstName;
+        private final String companyName;
+        private final String city;
+        private final String couponCode;
+        private final BigDecimal discountAmount;
+        private final String errorMessage;
+
+        LegacyCheckoutInputForm(String personalOrCorporate, String lastName, String firstName, String companyName,
+                String city) {
+            this(personalOrCorporate, lastName, firstName, companyName, city, null, BigDecimal.ZERO, null);
+        }
+
+        LegacyCheckoutInputForm(String personalOrCorporate, String lastName, String firstName, String companyName,
+                String city, String couponCode, BigDecimal discountAmount, String errorMessage) {
+            this.personalOrCorporate = personalOrCorporate;
+            this.lastName = lastName;
+            this.firstName = firstName;
+            this.companyName = companyName;
+            this.city = city;
+            this.couponCode = couponCode;
+            this.discountAmount = discountAmount;
+            this.errorMessage = errorMessage;
+        }
+
+        public String getPersonalOrCorporate() {
+            return personalOrCorporate;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public String getCompanyName() {
+            return companyName;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public String getCouponCode() {
+            return couponCode;
+        }
+
+        public BigDecimal getDiscountAmount() {
+            return discountAmount;
+        }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
     }
 }

@@ -35,15 +35,20 @@ class CartServiceTest {
     private CartRepository cartRepository;
     private MessageSource messageSource;
     private CartService service;
+    private jp.co.skig.officeorder.service.coupon.CouponService couponService;
 
     @BeforeEach
     void setUp() {
         cartCookieStore = Mockito.mock(CartCookieStore.class);
         cartRepository = Mockito.mock(CartRepository.class);
         messageSource = Mockito.mock(MessageSource.class);
-        when(messageSource.getMessage(any(String.class), any(Object[].class), any(java.util.Locale.class)))
-                .thenReturn("message");
-        service = new CartService(cartCookieStore, cartRepository, messageSource);
+        // ▼ 1. ダミーのCouponServiceを作成
+        couponService = Mockito.mock(jp.co.skig.officeorder.service.coupon.CouponService.class);
+
+        when(messageSource.getMessage(any(String.class), any(Object[].class), any())).thenReturn("message");
+
+        // ▼ 2. 4つ目の引数として couponService を渡す
+        service = new CartService(cartCookieStore, cartRepository, messageSource, couponService);
     }
 
     @Test

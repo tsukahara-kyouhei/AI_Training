@@ -17,6 +17,7 @@ import jp.co.skig.officeorder.model.cart.CartSummaryView;
 import jp.co.skig.officeorder.model.cart.CartView;
 import jp.co.skig.officeorder.repository.CartCookieStore;
 import jp.co.skig.officeorder.repository.CartRepository;
+import jp.co.skig.officeorder.service.coupon.CouponService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -27,7 +28,8 @@ import org.springframework.util.StringUtils;
 /**
  * カートCookieの内容を画面表示用データへ変換し、更新操作を仲介するサービス。
  *
- * <p>商品詳細からの追加、カート画面での更新・削除、ヘッダ件数表示のいずれも
+ * <p>
+ * 商品詳細からの追加、カート画面での更新・削除、ヘッダ件数表示のいずれも
  * ここを通すことで、数量上限・組立可否・送料計算を統一している。
  */
 @Service
@@ -52,37 +54,41 @@ public class CartService {
     private final CartRepository cartRepository;
     /** 利用者向けメッセージ取得ヘルパ。 */
     private final MessageSourceAccessor messages;
+    // クーポンの適用可否判定と割引額計算を担当するサービス
+    private final jp.co.skig.officeorder.service.coupon.CouponService couponService;
 
     /**
      * カートサービスを生成する。
      *
      * @param cartCookieStore カートCookieの読み書き窓口
-     * @param cartRepository カート表示用商品情報の取得窓口
-     * @param messageSource 利用者向けメッセージ取得元
+     * @param cartRepository  カート表示用商品情報の取得窓口
+     * @param messageSource   利用者向けメッセージ取得元
      */
     public CartService(CartCookieStore cartCookieStore,
-                       CartRepository cartRepository,
-                       MessageSource messageSource) {
+            CartRepository cartRepository,
+            MessageSource messageSource,
+            jp.co.skig.officeorder.service.coupon.CouponService couponService) { // ← 引数に追加
         this.cartCookieStore = cartCookieStore;
         this.cartRepository = cartRepository;
         this.messages = new MessageSourceAccessor(messageSource);
+        this.couponService = couponService;
     }
 
     /**
      * 現在のカート内容を画面表示用に組み立てる。
      *
-     * <p>Cookie内の数量・組立指定を商品スナップショットと突き合わせて正規化し、
+     * <p>
+     * Cookie内の数量・組立指定を商品スナップショットと突き合わせて正規化し、
      * 商品小計、組立費、送料、消費税、合計金額を計算する。
      *
-     * @param request 現在のHTTPリクエスト
+     * @param request  現在のHTTPリクエスト
      * @param response 現在のHTTPレスポンス
      * @return 表示用カート情報
      */
     public CartView getCart(HttpServletRequest request, HttpServletResponse response) {
         List<CartCookieItem> rawItems = loadCurrentCartItems(request);
         Map<Long, CartProductSnapshot> snapshots = cartRepository.findProductSnapshotsByVariantIds(
-                rawItems.stream().map(CartCookieItem::productVariantId).toList()
-        );
+                rawItems.stream().map(CartCookieItem::productVariantId).toList());
         List<CartCookieItem> normalizedCookieItems = new ArrayList<>();
         List<CartLineView> lineViews = new ArrayList<>();
 
@@ -119,8 +125,7 @@ public class CartService {
                     snapshot.assemblyFee(),
                     Boolean.TRUE.equals(assemblyRequested),
                     quantity,
-                    buildProductDetailUrl(snapshot.productId(), snapshot.stockQuantity())
-            ));
+                    buildProductDetailUrl(snapshot.productId(), snapshot.stockQuantity())));
         }
 
         if (!rawItems.equals(normalizedCookieItems)) {
@@ -138,13 +143,44 @@ public class CartService {
                 : BigDecimal.valueOf(FLAT_SHIPPING_FEE);
         BigDecimal totalAmount = taxableSubtotal.add(taxAmount).add(shippingFee);
 
+        // --- クーポン計算と適用処理 ---
+        String appliedCouponCode = null;
+        BigDecimal couponDiscountAmount = BigDecimal.ZERO;
+        String couponErrorMessage = null;
+
+        var session = request.getSession(false);
+        if (session != null && session.getAttribute("appliedCouponCode") != null
+                && session.getAttribute("memberId") != null) {
+            appliedCouponCode = (String) session.getAttribute("appliedCouponCode");
+            Long memberId = (Long) session.getAttribute("memberId");
+
+            try {
+                // クーポン割引額の計算
+                couponDiscountAmount = couponService.validateAndCalculateDiscount(appliedCouponCode, memberId,
+                        totalAmount);
+                totalAmount = totalAmount.subtract(couponDiscountAmount);
+                // 割引後金額が0円を下回らないように補正
+                if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
+                    totalAmount = BigDecimal.ZERO;
+                }
+            } catch (IllegalArgumentException e) {
+                // エラー時はセッションからクーポンを削除し、エラーメッセージを画面に返す
+                session.removeAttribute("appliedCouponCode");
+                couponErrorMessage = e.getMessage();
+                appliedCouponCode = null;
+            }
+        }
+
+        // 8つの引数を渡してエラー解消！
         CartSummaryView summary = new CartSummaryView(
                 productSubtotal,
                 assemblySubtotal,
                 shippingFee,
                 taxAmount,
-                totalAmount
-        );
+                totalAmount,
+                appliedCouponCode,
+                couponDiscountAmount,
+                couponErrorMessage);
         return new CartView(lineViews, lineViews.size(), totalQuantity, summary);
     }
 
@@ -163,20 +199,21 @@ public class CartService {
     /**
      * 商品をカートへ追加する。
      *
-     * <p>同一商品が既に入っている場合は数量を加算し、
+     * <p>
+     * 同一商品が既に入っている場合は数量を加算し、
      * 組立指定は商品可否に応じて正規化する。
      *
-     * @param request 現在のHTTPリクエスト
-     * @param response 現在のHTTPレスポンス
-     * @param productVariantId 追加対象の商品バリアントID
-     * @param quantity 追加数量
+     * @param request           現在のHTTPリクエスト
+     * @param response          現在のHTTPレスポンス
+     * @param productVariantId  追加対象の商品バリアントID
+     * @param quantity          追加数量
      * @param assemblyRequested 組立指定
      */
     public void addItem(HttpServletRequest request,
-                        HttpServletResponse response,
-                        long productVariantId,
-                        int quantity,
-                        Boolean assemblyRequested) {
+            HttpServletResponse response,
+            long productVariantId,
+            int quantity,
+            Boolean assemblyRequested) {
         if (productVariantId <= 0) {
             throw new IllegalArgumentException(message("business.cart.invalidProduct"));
         }
@@ -195,8 +232,7 @@ public class CartService {
             int mergedQuantity = Math.min(MAX_QUANTITY_PER_LINE, existing.quantity() + quantity);
             Boolean mergedAssembly = normalizeAssembly(
                     assemblyRequested != null ? assemblyRequested : existing.assemblyRequested(),
-                    snapshot.assemblyAvailable()
-            );
+                    snapshot.assemblyAvailable());
             items.set(existingIndex, new CartCookieItem(productVariantId, mergedQuantity, mergedAssembly));
         } else {
             if (items.size() >= CartCookieStore.MAX_LINE_ITEMS) {
@@ -205,8 +241,7 @@ public class CartService {
             items.add(new CartCookieItem(
                     productVariantId,
                     quantity,
-                    normalizeAssembly(assemblyRequested, snapshot.assemblyAvailable())
-            ));
+                    normalizeAssembly(assemblyRequested, snapshot.assemblyAvailable())));
         }
         saveCurrentCartItems(request, response, deduplicate(items));
         log.info("event={} productVariantId={} quantity={} lineCount={}",
@@ -219,17 +254,17 @@ public class CartService {
     /**
      * 既存カート明細の数量・組立指定を更新する。
      *
-     * @param request 現在のHTTPリクエスト
-     * @param response 現在のHTTPレスポンス
-     * @param productVariantId 更新対象の商品バリアントID
-     * @param quantity 更新後数量
+     * @param request           現在のHTTPリクエスト
+     * @param response          現在のHTTPレスポンス
+     * @param productVariantId  更新対象の商品バリアントID
+     * @param quantity          更新後数量
      * @param assemblyRequested 更新後組立指定
      */
     public void updateItem(HttpServletRequest request,
-                           HttpServletResponse response,
-                           long productVariantId,
-                           int quantity,
-                           Boolean assemblyRequested) {
+            HttpServletResponse response,
+            long productVariantId,
+            int quantity,
+            Boolean assemblyRequested) {
         if (quantity < 1 || quantity > MAX_QUANTITY_PER_LINE) {
             throw new IllegalArgumentException(message("business.cart.quantityRange"));
         }
@@ -245,8 +280,7 @@ public class CartService {
         items.set(targetIndex, new CartCookieItem(
                 productVariantId,
                 quantity,
-                normalizeAssembly(assemblyRequested, snapshot.assemblyAvailable())
-        ));
+                normalizeAssembly(assemblyRequested, snapshot.assemblyAvailable())));
         saveCurrentCartItems(request, response, deduplicate(items));
         log.info("event={} productVariantId={} quantity={} lineCount={}",
                 LogEvent.CART_ITEM_UPDATED.value(),
@@ -258,8 +292,8 @@ public class CartService {
     /**
      * 指定明細をカートから削除する。
      *
-     * @param request 現在のHTTPリクエスト
-     * @param response 現在のHTTPレスポンス
+     * @param request          現在のHTTPリクエスト
+     * @param response         現在のHTTPレスポンス
      * @param productVariantId 削除対象の商品バリアントID
      */
     public void removeItem(HttpServletRequest request, HttpServletResponse response, long productVariantId) {
@@ -275,7 +309,7 @@ public class CartService {
     /**
      * カートを空にする。
      *
-     * @param request 現在のHTTPリクエスト
+     * @param request  現在のHTTPリクエスト
      * @param response 現在のHTTPレスポンス
      */
     public void clear(HttpServletRequest request, HttpServletResponse response) {
@@ -314,7 +348,8 @@ public class CartService {
      * @return 商品スナップショット
      */
     private CartProductSnapshot findSnapshot(long productVariantId) {
-        CartProductSnapshot snapshot = cartRepository.findProductSnapshotsByVariantIds(List.of(productVariantId)).get(productVariantId);
+        CartProductSnapshot snapshot = cartRepository.findProductSnapshotsByVariantIds(List.of(productVariantId))
+                .get(productVariantId);
         if (snapshot == null) {
             throw new IllegalArgumentException(message("business.cart.loadFailed"));
         }
@@ -335,7 +370,7 @@ public class CartService {
     /**
      * 明細一覧から対象バリアントの位置を探す。
      *
-     * @param items カート明細
+     * @param items            カート明細
      * @param productVariantId 商品バリアントID
      * @return 見つかった位置。存在しない場合は {@code -1}
      */
@@ -378,7 +413,7 @@ public class CartService {
     /**
      * 商品の組立可否を踏まえて組立指定を正規化する。
      *
-     * @param requested 入力された組立指定
+     * @param requested         入力された組立指定
      * @param assemblyAvailable 組立対象商品か
      * @return 正規化後の組立指定。対象外商品の場合は {@code null}
      */
@@ -403,7 +438,7 @@ public class CartService {
     /**
      * 在庫有無に応じた商品詳細URLを生成する。
      *
-     * @param productId 商品ID
+     * @param productId     商品ID
      * @param stockQuantity 在庫数
      * @return 商品詳細URL
      */
@@ -414,7 +449,8 @@ public class CartService {
     /**
      * 同一リクエスト中は request attribute を優先して現在カートを読み出す。
      *
-     * <p>1リクエスト内で複数回カート操作を行う際に、Cookie再読込で直前更新を失わないようにする。
+     * <p>
+     * 1リクエスト内で複数回カート操作を行う際に、Cookie再読込で直前更新を失わないようにする。
      *
      * @param request 現在のHTTPリクエスト
      * @return 現在カート明細
@@ -436,13 +472,13 @@ public class CartService {
     /**
      * カートCookie保存と request attribute 更新を同時に行う。
      *
-     * @param request 現在のHTTPリクエスト
+     * @param request  現在のHTTPリクエスト
      * @param response 現在のHTTPレスポンス
-     * @param items 保存対象明細
+     * @param items    保存対象明細
      */
     private void saveCurrentCartItems(HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      List<CartCookieItem> items) {
+            HttpServletResponse response,
+            List<CartCookieItem> items) {
         List<CartCookieItem> normalized = deduplicate(items);
         cartCookieStore.save(request, response, normalized);
         rememberCurrentCartItems(request, normalized);
@@ -452,7 +488,7 @@ public class CartService {
      * 同一リクエスト中に再利用するカート状態を request attribute に保持する。
      *
      * @param request 現在のHTTPリクエスト
-     * @param items 保持対象明細
+     * @param items   保持対象明細
      */
     private void rememberCurrentCartItems(HttpServletRequest request, List<CartCookieItem> items) {
         if (request == null) {
@@ -461,6 +497,3 @@ public class CartService {
         request.setAttribute(REQUEST_ATTR_CART_ITEMS, List.copyOf(items));
     }
 }
-
-
-

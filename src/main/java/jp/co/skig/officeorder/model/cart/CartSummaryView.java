@@ -12,8 +12,10 @@ public record CartSummaryView(
         BigDecimal assemblyFeeTotal,
         BigDecimal shippingFee,
         BigDecimal taxAmount,
-        BigDecimal totalAmount
-) {
+        BigDecimal totalAmount,
+        String appliedCouponCode,
+        BigDecimal couponDiscountAmount,
+        String couponErrorMessage) {
     /**
      * 商品小計を画面表示用に整形する。
      */
@@ -49,4 +51,3 @@ public record CartSummaryView(
         return MoneyFormatter.formatYen(totalAmount);
     }
 }
-
