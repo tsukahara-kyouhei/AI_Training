@@ -18,9 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.JobInstance;
+import org.springframework.batch.core.repository.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.stereotype.Service;
 
