@@ -79,8 +79,6 @@ public class BatchExecutionConfig {
         jobOperator.setJobRepository(jobRepository);
         jobOperator.setJobRegistry(jobRegistry);
         jobOperator.afterPropertiesSet();
-
-        jobOperator.afterPropertiesSet();
         return jobOperator;
     }
 }
