@@ -1,28 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mapper.CouponMapper">
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespaceも正しいMapperのパスに修正しています -->
+<mapper namespace="jp.co.skig.officeorder.mapper.CouponMapper">
 
-    <!-- クーポンコードでクーポン情報を取得 -->
-    <select id="findByCode" parameterType="String" resultType="com.example.model.Coupon">
+    <!-- resultTypeを正しいCouponクラスのパスに修正 -->
+    <select id="findByCode" resultType="jp.co.skig.officeorder.model.coupon.Coupon">
         SELECT *
         FROM coupons
         WHERE coupon_code = #{code}
     </select>
 
-    <!-- 会員のクーポン使用回数を取得 -->
-    <select id="countUsage" parameterType="map" resultType="int">
+    <select id="countUsage" resultType="int">
         SELECT COALESCE(SUM(usage_count), 0)
         FROM member_coupon_usage
         WHERE member_id = #{memberId}
           AND coupon_id = #{couponId}
     </select>
 
-    <!-- 会員のクーポン使用履歴を登録 -->
-    <insert id="insertUsage" parameterType="map">
-        INSERT INTO member_coupon_usage
-        (member_id, coupon_id, usage_count, last_used_at, created_at, updated_at)
-        VALUES
-        (#{memberId}, #{couponId}, 1, #{lastUsedAt}, #{createdAt}, #{updatedAt})
+    <!-- 引数のusageプロパティから値を取得してINSERT -->
+    <insert id="insertUsage">
+        INSERT INTO member_coupon_usage (
+            member_id,
+            coupon_id,
+            usage_count,
+            last_used_at,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{usage.memberId},
+            #{usage.couponId},
+            #{usage.usageCount},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
     </insert>
 
 </mapper>
