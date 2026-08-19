@@ -2,7 +2,7 @@ spring:
   application:
     name: office-order
   datasource:
-    url: jdbc:postgresql://localhost:5432/office_order
+    url: jdbc:postgresql://localhost:5433/office_order
     username: office_order
     password: office_order
   sql:
