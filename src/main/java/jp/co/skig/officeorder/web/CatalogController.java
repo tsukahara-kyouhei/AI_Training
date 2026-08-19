@@ -38,6 +38,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriUtils;
 
+import jp.co.skig.officeorder.model.product.ProductReviewForm;
+import jp.co.skig.officeorder.service.product.ProductReviewService;
+
 /**
  * 商品一覧・商品詳細・お気に入り操作を担当するController。
  */
@@ -59,6 +62,8 @@ public class CatalogController {
     private final MemberService memberService;
     /** 会員セッションサービス。 */
     private final MemberSessionService memberSessionService;
+    // 1. レビューサービスを追加
+    private final ProductReviewService productReviewService;
 
     /**
      * 商品Catalog Controllerを生成する。
@@ -73,12 +78,14 @@ public class CatalogController {
                              ProductListSearchService productListSearchService,
                              ProductFilterOptionService productFilterOptionService,
                              MemberService memberService,
-                             MemberSessionService memberSessionService) {
+                             MemberSessionService memberSessionService,
+                             ProductReviewService productReviewService) {
         this.productService = productService;
         this.productListSearchService = productListSearchService;
         this.productFilterOptionService = productFilterOptionService;
         this.memberService = memberService;
         this.memberSessionService = memberSessionService;
+        this.productReviewService = productReviewService;
     }
 
     /**
@@ -298,14 +305,32 @@ public class CatalogController {
         ProductDetailView detail = productService.findDetail(productId, forceOutOfStock)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
 
-        boolean isFavorite = memberSessionService.currentMember(session)
+        // ログイン会員の取得
+        var currentMember = memberSessionService.currentMember(session);
+
+        boolean isFavorite = currentMember
                 .map(member -> memberService.isFavorite(member.memberId(), productId))
                 .orElse(false);
+
+        // --- レビュー情報の取得を追加 ---
+        var reviews = productReviewService.getReviewsByProductId(productId);
+        var reviewStat = productReviewService.getReviewStatByProductId(productId);
+        
+        // ログイン中かつ購入済みかどうかの投稿可否判定
+        Long memberId = currentMember.map(MemberSessionUser::memberId).orElse(null);
+        boolean canWriteReview = productReviewService.canWriteReview(memberId, productId);
 
         model.addAttribute("detail", detail);
         model.addAttribute("categoryLabel", resolveCategoryLabel(detail.categoryId()));
         model.addAttribute("isFavorite", isFavorite);
         model.addAttribute("detailPagePath", buildProductDetailPath(productId, forceOutOfStock));
+        
+        // --- レビュー用のモデル属性を追加 ---
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("reviewStat", reviewStat);
+        model.addAttribute("canWriteReview", canWriteReview);
+        model.addAttribute("reviewForm", new ProductReviewForm(productId, 5, "", ""));
+
         return "pages/product-detail";
     }
 
