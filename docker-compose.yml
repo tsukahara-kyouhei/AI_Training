@@ -3,7 +3,7 @@ services:
     image: postgres:16
     container_name: office-order-db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_DB: office_order
       POSTGRES_USER: office_order

@@ -1,0 +1,23 @@
+[33mc4d6b14[m[33m ([m[1;31morigin/traning-iwanaga2[m[33m, [m[1;32mtraning-iwanaga2[m[33m)[m マイグレーション3
+[33m0d6a412[m マイグレーション2
+[33mdf3e341[m マイグレーション1
+[33m99a18ac[m Java25に変更
+[33md6af5f1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/training-iwanaga[m[33m, [m[1;31morigin/feature/training-iwanaga[m[33m)[m テストコード2
+[33maa94644[m テストコード作成1
+[33mcec641a[m ドキュメント作成
+[33m0ecd171[m 設計書作成
+[33m4d4ba50[m 商品検索機能の要件定義書
+[33m1d37806[m 検索機能改善3
+[33me45f6dc[m 検索機能改善2
+[33m63552c3[m 組立・設置費更新の不具合
+[33me67f945[m 検索機能改善
+[33ma9b3ed0[m[33m ([m[1;31morigin/feature/training-ito[m[33m)[m コメント追加
+[33mf3b6eed[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/feature/training-tsutsumi[m[33m, [m[1;31morigin/feature/training-develop[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m, [m[1;32mfeature/training-develop[m[33m)[m Merge pull request #2 from skig-bob-adoption/revert-1-yoshihiko.imai
+[33m680922b[m Revert "要件定義書納品"
+[33md49ed1d[m Merge pull request #1 from skig-bob-adoption/yoshihiko.imai
+[33mafb5a7f[m 要件定義書納品
+[33m71eaa1f[m update
+[33mddda3ed[m update
+[33m9d1da0c[m init
+[33md9a16e2[m Update README.md
+[33mede02be[m Initial commit
