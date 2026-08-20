@@ -74,9 +74,9 @@
                                        th:each="variant : ${detail.variants}"
                                        th:attr="data-variant-id=${variant.productVariantId},
                                                 data-product-code=${variant.productCode},
-                                               data-color-name=${variant.colorName},
-                                               data-unit-price=${variant.unitPrice},
-                                               data-unit-price-text=${variant.unitPriceText},
+                                                data-color-name=${variant.colorName},
+                                                data-unit-price=${variant.unitPrice},
+                                                data-unit-price-text=${variant.unitPriceText},
                                                 data-stock-quantity=${variant.stockQuantity}"
                                        th:classappend="${variant.productVariantId == detail.selectedVariant.productVariantId} ? ' is-selected'">
                                     <input type="radio"
@@ -162,6 +162,94 @@
                     </div>
                 </div>
             </section>
+
+            <!-- ===== ここからレビューセクション追加 ===== -->
+            <section class="section" aria-label="カスタマーレビュー" th:if="${detail != null}" style="margin-top: 48px;">
+                <div class="section__head">
+                    <h2 class="section__title">カスタマーレビュー</h2>
+                </div>
+
+                <!-- フラッシュメッセージ表示 -->
+                <div class="help" th:if="${successMessage}" th:text="${successMessage}" style="margin-bottom: 16px; font-weight: bold;"></div>
+                <div class="error" th:if="${errorMessage}" th:text="${errorMessage}" style="margin-bottom: 16px;"></div>
+
+                <!-- レビュー集計サマリー -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card__pad" style="display: flex; align-items: center; gap: 24px;">
+                        <div>
+                            <span style="font-size: 2rem; font-weight: bold; color: #f59e0b;"
+                                  th:text="${reviewStat != null and reviewStat.averageRating != null ? #numbers.formatDecimal(reviewStat.averageRating, 1, 1) : '0.0'}">4.5</span>
+                            <span class="muted" style="font-size: 0.875rem;">/ 5.0</span>
+                        </div>
+                        <div class="muted">
+                            全 <strong th:text="${reviewStat != null ? reviewStat.reviewCount : 0}">0</strong> 件のレビュー
+                        </div>
+                    </div>
+                </div>
+
+                <!-- レビュー投稿フォーム（投稿権限がある場合） -->
+                <div class="card" th:if="${canWriteReview}" style="margin-bottom: 32px; border: 1px solid #e5e7eb;">
+                    <div class="card__pad">
+                        <h3 style="font-size: 1.125rem; font-weight: bold; margin-bottom: 16px;">レビューを投稿する</h3>
+                        <form th:action="@{/products/{productId}/reviews(productId=${detail.productId})}" method="post" th:object="${reviewForm}">
+                            <input type="hidden" name="productId" th:value="${detail.productId}" />
+
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 4px;">評価</label>
+                                <select name="rating" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; max-width: 240px;">
+                                    <option value="5">★★★★★ (5 - 非常に満足)</option>
+                                    <option value="4">★★★★☆ (4 - 満足)</option>
+                                    <option value="3">★★★☆☆ (3 - 普通)</option>
+                                    <option value="2">★★☆☆☆ (2 - やや不満)</option>
+                                    <option value="1">★☆☆☆☆ (1 - 不満)</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 4px;">タイトル</label>
+                                <input type="text" name="title" maxlength="100" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="レビューのタイトルを入力してください" />
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 4px;">コメント</label>
+                                <textarea name="comment" rows="4" maxlength="1000" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="商品の感想や使用感を入力してください"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn" style="background-color: #2563eb; color: #fff; padding: 10px 24px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                レビューを投稿する
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 投稿不可（未購入など）の場合のメッセージ -->
+                <p class="muted" th:unless="${canWriteReview}" style="margin-bottom: 24px; font-size: 0.875rem;">
+                    ※レビューの投稿は、この商品を購入された会員様のみ可能です。
+                </p>
+
+                <!-- レビュー一覧 -->
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="card" th:if="${reviews == null or #lists.isEmpty(reviews)}">
+                        <div class="card__pad">
+                            <p class="muted" style="margin: 0;">まだレビューはありません。</p>
+                        </div>
+                    </div>
+
+                    <div class="card" th:each="review : ${reviews}">
+                        <div class="card__pad">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div>
+                                    <span style="color: #f59e0b; font-weight: bold;" th:text="${'★'.repeat(review.rating)}">★★★★★</span>
+                                    <strong style="margin-left: 8px; font-size: 1rem;" th:text="${review.title}">タイトル</strong>
+                                </div>
+                                <span class="muted" style="font-size: 0.875rem;" th:text="${#temporals.format(review.createdAt, 'yyyy/MM/dd')}">2026/08/20</span>
+                            </div>
+                            <p style="margin: 0; white-space: pre-line; line-height: 1.6;" th:text="${review.comment}">レビュー内容</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- ===== ここまでレビューセクション追加 ===== -->
 
             <section class="section" aria-label="おすすめ関連商品" th:if="${detail != null}">
                 <div class="section__head">
