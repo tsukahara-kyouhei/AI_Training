@@ -92,6 +92,10 @@
                             <div class="summary__row"><span>組立・設置費</span><strong th:text="${cart.summary.assemblyFeeTotalText + '円'}">3,000円</strong></div>
                             <div class="summary__row"><span>送料</span><strong th:text="${cart.summary.shippingFeeText + '円'}">0円</strong></div>
                             <div class="summary__row"><span>消費税</span><strong th:text="${cart.summary.taxAmountText + '円'}">3,940円</strong></div>
+                            <div class="summary__row" th:if="${cart.summary.couponDiscountAmount != null and cart.summary.couponDiscountAmount > 0}">
+                                <span>割引額</span>
+                                <strong style="color:#d32f2f;" th:text="'-' + ${#numbers.formatInteger(cart.summary.couponDiscountAmount, 1, 'COMMA')} + '円'">-500円</strong>
+                            </div>
                             <div class="summary__row summary__total"><span>合計（税込）</span><strong style="font-size:18px;" th:text="${cart.summary.totalAmountText + '円'}">43,340円</strong></div>
                         </div>
                     </div>

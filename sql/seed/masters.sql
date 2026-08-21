@@ -84,3 +84,12 @@ VALUES
   (8.00, '2014-04-01 00:00:00+09', '2019-09-30 23:59:59+09', FALSE),
   (10.00, '2019-10-01 00:00:00+09', NULL, TRUE)
 ON CONFLICT DO NOTHING;
+
+-- クーポン初期データの投入
+INSERT INTO coupons (
+    coupon_code, discount_type, discount_value, valid_from, valid_to, min_purchase_amount, usage_limit, is_active
+) VALUES
+('WELCOME500', 'FIXED', 500, '2026-01-01 00:00:00', '2026-12-31 23:59:59', 0, 1, true),
+('OFFICE10', 'PERCENT', 10, '2026-01-01 00:00:00', '2026-12-31 23:59:59', 10000, 5, true),
+('EXPIRED50', 'PERCENT', 50, '2025-01-01 00:00:00', '2025-12-31 23:59:59', 0, 1, true)
+ON CONFLICT (coupon_code) DO NOTHING;

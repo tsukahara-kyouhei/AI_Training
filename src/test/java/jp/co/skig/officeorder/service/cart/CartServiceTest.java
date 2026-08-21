@@ -3,15 +3,19 @@ package jp.co.skig.officeorder.service.cart;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jp.co.skig.officeorder.model.cart.CartCookieItem;
 import jp.co.skig.officeorder.model.cart.CartProductSnapshot;
 import jp.co.skig.officeorder.model.cart.CartSummaryView;
 import jp.co.skig.officeorder.model.cart.CartView;
+import jp.co.skig.officeorder.model.member.MemberSessionUser;
 import jp.co.skig.officeorder.repository.CartCookieStore;
 import jp.co.skig.officeorder.repository.CartRepository;
+import jp.co.skig.officeorder.web.auth.MemberSessionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,6 +38,7 @@ class CartServiceTest {
     private CartCookieStore cartCookieStore;
     private CartRepository cartRepository;
     private MessageSource messageSource;
+    private MemberSessionService memberSessionService;
     private CartService service;
     private jp.co.skig.officeorder.service.coupon.CouponService couponService;
 
@@ -42,13 +47,12 @@ class CartServiceTest {
         cartCookieStore = Mockito.mock(CartCookieStore.class);
         cartRepository = Mockito.mock(CartRepository.class);
         messageSource = Mockito.mock(MessageSource.class);
-        // ▼ 1. ダミーのCouponServiceを作成
+        memberSessionService = Mockito.mock(MemberSessionService.class);
         couponService = Mockito.mock(jp.co.skig.officeorder.service.coupon.CouponService.class);
 
         when(messageSource.getMessage(any(String.class), any(Object[].class), any())).thenReturn("message");
 
-        // ▼ 2. 4つ目の引数として couponService を渡す
-        service = new CartService(cartCookieStore, cartRepository, messageSource, couponService);
+        service = new CartService(cartCookieStore, cartRepository, messageSource, couponService, memberSessionService);
     }
 
     @Test
@@ -113,6 +117,29 @@ class CartServiceTest {
         assertEquals(BigDecimal.valueOf(800), summary.shippingFee());
         assertEquals(BigDecimal.valueOf(2120), summary.totalAmount());
         verify(cartCookieStore).save(eq(request), eq(response), any());
+    }
+
+    @Test
+    void getCart_appliesCouponForLoggedInMember() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        HttpSession session = request.getSession(true);
+        session.setAttribute("appliedCouponCode", "SAVE10");
+        when(memberSessionService.currentMember(session))
+                .thenReturn(Optional.of(new MemberSessionUser(99L, "user@example.com", "山田", "太郎")));
+        when(cartCookieStore.load(request)).thenReturn(List.of(new CartCookieItem(1L, 1, false)));
+        when(cartRepository.findProductSnapshotsByVariantIds(List.of(1L))).thenReturn(Map.of(
+                1L, new CartProductSnapshot(1L, 10L, "Desk", "D001", "Black", BigDecimal.valueOf(1000), 10, false,
+                        BigDecimal.ZERO)));
+        when(cartRepository.findCurrentTaxRatePercent()).thenReturn(BigDecimal.TEN);
+        when(couponService.validateAndCalculateDiscount(eq("SAVE10"), eq(99L), any(BigDecimal.class)))
+                .thenReturn(BigDecimal.valueOf(100));
+
+        CartView cartView = service.getCart(request, response);
+
+        assertEquals("SAVE10", cartView.summary().appliedCouponCode());
+        assertEquals(BigDecimal.valueOf(100), cartView.summary().couponDiscountAmount());
+        assertEquals(BigDecimal.valueOf(1800), cartView.summary().totalAmount());
     }
 
     @Test

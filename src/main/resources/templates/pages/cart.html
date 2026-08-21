@@ -107,13 +107,13 @@
                                 <div class="error" th:if="${cart.summary.couponErrorMessage}" th:text="${cart.summary.couponErrorMessage}" style="margin-bottom: 8px; font-size: 13px;"></div>
                                 
                                 <!-- クーポン未適用時：入力フォーム -->
-                                <form th:if="${cart.summary.appliedCouponCode == null}" th:action="@{/cart/coupon/apply}" method="post" style="display: flex; gap: 8px;">
+                                <form th:if="${cart.summary.appliedCouponCode == null}" th:action="@{/cart/apply-coupon}" method="post" style="display: flex; gap: 8px;">
                                     <input type="text" name="couponCode" placeholder="クーポンコード" style="flex: 1; border: 1px solid #ccc; border-radius: 4px; padding: 6px 10px; font-size: 14px;" required>
                                     <button class="btn btn--cart-update" type="submit" style="padding: 6px 12px;">適用</button>
                                 </form>
 
                                 <!-- クーポン適用済時：適用中のコードと解除ボタン -->
-                                <form th:if="${cart.summary.appliedCouponCode != null}" th:action="@{/cart/coupon/remove}" method="post" style="display: flex; justify-content: space-between; align-items: center; background: #f4f6f8; padding: 10px; border-radius: 4px;">
+                                <form th:if="${cart.summary.appliedCouponCode != null}" th:action="@{/cart/remove-coupon}" method="post" style="display: flex; justify-content: space-between; align-items: center; background: #f4f6f8; padding: 10px; border-radius: 4px;">
                                     <div style="font-size: 14px;">
                                         <span class="muted" style="font-size: 12px; display: block;">適用中のクーポン</span>
                                         <strong th:text="${cart.summary.appliedCouponCode}"></strong>

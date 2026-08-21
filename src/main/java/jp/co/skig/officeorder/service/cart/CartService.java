@@ -15,9 +15,11 @@ import jp.co.skig.officeorder.model.cart.CartLineView;
 import jp.co.skig.officeorder.model.cart.CartProductSnapshot;
 import jp.co.skig.officeorder.model.cart.CartSummaryView;
 import jp.co.skig.officeorder.model.cart.CartView;
+import jp.co.skig.officeorder.model.member.MemberSessionUser;
 import jp.co.skig.officeorder.repository.CartCookieStore;
 import jp.co.skig.officeorder.repository.CartRepository;
 import jp.co.skig.officeorder.service.coupon.CouponService;
+import jp.co.skig.officeorder.web.auth.MemberSessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -55,7 +57,9 @@ public class CartService {
     /** 利用者向けメッセージ取得ヘルパ。 */
     private final MessageSourceAccessor messages;
     // クーポンの適用可否判定と割引額計算を担当するサービス
-    private final jp.co.skig.officeorder.service.coupon.CouponService couponService;
+    private final CouponService couponService;
+    /** 現在のログイン会員の取得を担当するサービス。 */
+    private final MemberSessionService memberSessionService;
 
     /**
      * カートサービスを生成する。
@@ -67,11 +71,13 @@ public class CartService {
     public CartService(CartCookieStore cartCookieStore,
             CartRepository cartRepository,
             MessageSource messageSource,
-            jp.co.skig.officeorder.service.coupon.CouponService couponService) { // ← 引数に追加
+            CouponService couponService,
+            MemberSessionService memberSessionService) {
         this.cartCookieStore = cartCookieStore;
         this.cartRepository = cartRepository;
         this.messages = new MessageSourceAccessor(messageSource);
         this.couponService = couponService;
+        this.memberSessionService = memberSessionService;
     }
 
     /**
@@ -149,25 +155,31 @@ public class CartService {
         String couponErrorMessage = null;
 
         var session = request.getSession(false);
-        if (session != null && session.getAttribute("appliedCouponCode") != null
-                && session.getAttribute("memberId") != null) {
-            appliedCouponCode = (String) session.getAttribute("appliedCouponCode");
-            Long memberId = (Long) session.getAttribute("memberId");
-
-            try {
-                // クーポン割引額の計算
-                couponDiscountAmount = couponService.validateAndCalculateDiscount(appliedCouponCode, memberId,
-                        totalAmount);
-                totalAmount = totalAmount.subtract(couponDiscountAmount);
-                // 割引後金額が0円を下回らないように補正
-                if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
-                    totalAmount = BigDecimal.ZERO;
+        if (session != null) {
+            Object rawCouponCode = session.getAttribute("appliedCouponCode");
+            if (rawCouponCode instanceof String couponCode && StringUtils.hasText(couponCode)) {
+                appliedCouponCode = couponCode.trim();
+                Long memberId = memberSessionService.currentMember(session)
+                        .map(MemberSessionUser::memberId)
+                        .orElse(null);
+                if (memberId == null) {
+                    session.removeAttribute("appliedCouponCode");
+                    appliedCouponCode = null;
+                    couponErrorMessage = "ログイン後にクーポンを適用できます。";
+                } else {
+                    try {
+                        couponDiscountAmount = couponService.validateAndCalculateDiscount(appliedCouponCode, memberId,
+                                totalAmount);
+                        totalAmount = totalAmount.subtract(couponDiscountAmount);
+                        if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
+                            totalAmount = BigDecimal.ZERO;
+                        }
+                    } catch (IllegalArgumentException e) {
+                        session.removeAttribute("appliedCouponCode");
+                        couponErrorMessage = e.getMessage();
+                        appliedCouponCode = null;
+                    }
                 }
-            } catch (IllegalArgumentException e) {
-                // エラー時はセッションからクーポンを削除し、エラーメッセージを画面に返す
-                session.removeAttribute("appliedCouponCode");
-                couponErrorMessage = e.getMessage();
-                appliedCouponCode = null;
             }
         }
 

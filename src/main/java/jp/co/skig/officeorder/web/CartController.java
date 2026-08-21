@@ -38,7 +38,8 @@ import java.util.UUID;
 /**
  * カート画面と購入フロー前半を担当するController。
  *
- * <p>カート表示・更新に加え、購入方法選択、注文情報入力、確認、完了画面までを扱う。
+ * <p>
+ * カート表示・更新に加え、購入方法選択、注文情報入力、確認、完了画面までを扱う。
  */
 @Controller
 public class CartController {
@@ -67,19 +68,19 @@ public class CartController {
     /**
      * カートControllerを生成する。
      *
-     * @param cartService カートサービス
-     * @param memberSessionService 会員セッションサービス
+     * @param cartService             カートサービス
+     * @param memberSessionService    会員セッションサービス
      * @param loginEmailCookieService ログイン画面メールアドレス記憶Cookieサービス
-     * @param memberService 会員サービス
-     * @param orderService 注文サービス
-     * @param messageSource 利用者向けメッセージ取得元
+     * @param memberService           会員サービス
+     * @param orderService            注文サービス
+     * @param messageSource           利用者向けメッセージ取得元
      */
     public CartController(CartService cartService,
-                          MemberSessionService memberSessionService,
-                          LoginEmailCookieService loginEmailCookieService,
-                          MemberService memberService,
-                          OrderService orderService,
-                          MessageSource messageSource) {
+            MemberSessionService memberSessionService,
+            LoginEmailCookieService loginEmailCookieService,
+            MemberService memberService,
+            OrderService orderService,
+            MessageSource messageSource) {
         this.cartService = cartService;
         this.memberSessionService = memberSessionService;
         this.loginEmailCookieService = loginEmailCookieService;
@@ -91,15 +92,15 @@ public class CartController {
     /**
      * カート画面を表示する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param model 画面モデル
+     * @param model    画面モデル
      * @return カート画面
      */
     @GetMapping("/cart")
     public String cart(HttpServletRequest request,
-                       HttpServletResponse response,
-                       Model model) {
+            HttpServletResponse response,
+            Model model) {
         CartView cart = cartService.getCart(request, response);
         model.addAttribute("cart", cart);
         model.addAttribute("isCartEmpty", cart.isEmpty());
@@ -109,23 +110,23 @@ public class CartController {
     /**
      * 商品をカートへ追加する。
      *
-     * @param productVariantId 商品バリアントID
-     * @param quantity 追加数量
-     * @param assemblyRequested 組立指定
-     * @param redirect 追加後戻り先
-     * @param request 現在リクエスト
-     * @param response 現在レスポンス
+     * @param productVariantId   商品バリアントID
+     * @param quantity           追加数量
+     * @param assemblyRequested  組立指定
+     * @param redirect           追加後戻り先
+     * @param request            現在リクエスト
+     * @param response           現在レスポンス
      * @param redirectAttributes フラッシュ属性
      * @return リダイレクト先
      */
     @PostMapping("/cart/items")
     public String addItem(@RequestParam("productVariantId") long productVariantId,
-                          @RequestParam(name = "quantity", defaultValue = "1") int quantity,
-                          @RequestParam(name = "assemblyRequested", required = false) Boolean assemblyRequested,
-                          @RequestParam(name = "redirect", required = false) String redirect,
-                          HttpServletRequest request,
-                          HttpServletResponse response,
-                          RedirectAttributes redirectAttributes) {
+            @RequestParam(name = "quantity", defaultValue = "1") int quantity,
+            @RequestParam(name = "assemblyRequested", required = false) Boolean assemblyRequested,
+            @RequestParam(name = "redirect", required = false) String redirect,
+            HttpServletRequest request,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
         String redirectPath = cartService.sanitizeRedirectPath(redirect);
         if (redirectPath == null) {
             redirectPath = "/cart";
@@ -147,21 +148,21 @@ public class CartController {
     /**
      * カート明細の数量・組立指定を更新する。
      *
-     * @param productVariantId 商品バリアントID
-     * @param quantity 更新数量
-     * @param assemblyRequested 組立指定
-     * @param request 現在リクエスト
-     * @param response 現在レスポンス
+     * @param productVariantId   商品バリアントID
+     * @param quantity           更新数量
+     * @param assemblyRequested  組立指定
+     * @param request            現在リクエスト
+     * @param response           現在レスポンス
      * @param redirectAttributes フラッシュ属性
      * @return カート画面へのリダイレクト
      */
     @PostMapping("/cart/items/{productVariantId}/update")
     public String updateItem(@PathVariable long productVariantId,
-                             @RequestParam(name = "quantity", defaultValue = "1") int quantity,
-                             @RequestParam(name = "assemblyRequested", required = false) Boolean assemblyRequested,
-                             HttpServletRequest request,
-                             HttpServletResponse response,
-                             RedirectAttributes redirectAttributes) {
+            @RequestParam(name = "quantity", defaultValue = "1") int quantity,
+            @RequestParam(name = "assemblyRequested", required = false) Boolean assemblyRequested,
+            HttpServletRequest request,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
         try {
             cartService.updateItem(request, response, productVariantId, quantity, assemblyRequested);
         } catch (IllegalArgumentException ex) {
@@ -179,28 +180,54 @@ public class CartController {
      * カート明細を削除する。
      *
      * @param productVariantId 商品バリアントID
-     * @param request 現在リクエスト
-     * @param response 現在レスポンス
+     * @param request          現在リクエスト
+     * @param response         現在レスポンス
      * @return カート画面へのリダイレクト
      */
     @PostMapping("/cart/items/{productVariantId}/delete")
     public String deleteItem(@PathVariable long productVariantId,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         cartService.removeItem(request, response, productVariantId);
+        return "redirect:/cart";
+    }
+
+    /**
+     * カートへクーポンを適用する。
+     */
+    @PostMapping({ "/cart/apply-coupon", "/cart/coupon/apply" })
+    public String applyCoupon(@RequestParam(name = "couponCode", required = false) String couponCode,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        String trimmedCode = couponCode == null ? "" : couponCode.trim();
+        if (trimmedCode.isEmpty()) {
+            redirectAttributes.addFlashAttribute("cartError", "クーポンコードを入力してください。");
+            return "redirect:/cart";
+        }
+
+        session.setAttribute("appliedCouponCode", trimmedCode);
+        return "redirect:/cart";
+    }
+
+    /**
+     * 適用中のクーポンを解除する。
+     */
+    @PostMapping({ "/cart/remove-coupon", "/cart/coupon/remove" })
+    public String removeCoupon(HttpSession session) {
+        session.removeAttribute("appliedCouponCode");
         return "redirect:/cart";
     }
 
     /**
      * カートを空にする。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
      * @return カート画面へのリダイレクト
      */
     @PostMapping("/cart/clear")
     public String clearCart(HttpServletRequest request,
-                            HttpServletResponse response) {
+            HttpServletResponse response) {
         cartService.clear(request, response);
         return "redirect:/cart";
     }
@@ -208,17 +235,18 @@ public class CartController {
     /**
      * 購入方法選択画面を表示する。
      *
-     * <p>ログイン補助用に、記憶済みメールアドレスCookieがあれば左パネルのログインフォームへ反映する。
+     * <p>
+     * ログイン補助用に、記憶済みメールアドレスCookieがあれば左パネルのログインフォームへ反映する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param model 画面モデル
+     * @param model    画面モデル
      * @return 購入方法選択画面
      */
     @GetMapping("/checkout/method")
     public String checkoutMethod(HttpServletRequest request,
-                                 HttpServletResponse response,
-                                 Model model) {
+            HttpServletResponse response,
+            Model model) {
         CartView cart = cartService.getCart(request, response);
         if (cart.isEmpty()) {
             return "redirect:/cart";
@@ -231,17 +259,17 @@ public class CartController {
     /**
      * 注文情報入力画面を表示する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param session 現在セッション
-     * @param model 画面モデル
+     * @param session  現在セッション
+     * @param model    画面モデル
      * @return 注文情報入力画面
      */
     @GetMapping("/checkout/input")
     public String checkoutInput(HttpServletRequest request,
-                                HttpServletResponse response,
-                                HttpSession session,
-                                Model model) {
+            HttpServletResponse response,
+            HttpSession session,
+            Model model) {
         CartView cart = cartService.getCart(request, response);
         if (cart.isEmpty()) {
             return "redirect:/cart";
@@ -263,23 +291,23 @@ public class CartController {
     /**
      * 注文情報入力を検証し、確認画面へ送る。
      *
-     * @param checkoutForm 入力フォーム
-     * @param bindingResult バリデーション結果
-     * @param request 現在リクエスト
-     * @param response 現在レスポンス
-     * @param session 現在セッション
-     * @param model 画面モデル
+     * @param checkoutForm       入力フォーム
+     * @param bindingResult      バリデーション結果
+     * @param request            現在リクエスト
+     * @param response           現在レスポンス
+     * @param session            現在セッション
+     * @param model              画面モデル
      * @param redirectAttributes フラッシュ属性
      * @return 遷移先
      */
     @PostMapping("/checkout/input")
     public String checkoutInputSubmit(@Valid @ModelAttribute("checkoutForm") CheckoutInputForm checkoutForm,
-                                      BindingResult bindingResult,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      HttpSession session,
-                                      Model model,
-                                      RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult,
+            HttpServletRequest request,
+            HttpServletResponse response,
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         CartView cart = cartService.getCart(request, response);
         if (cart.isEmpty()) {
             return "redirect:/cart";
@@ -303,17 +331,17 @@ public class CartController {
     /**
      * 注文確認画面を表示する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param session 現在セッション
-     * @param model 画面モデル
+     * @param session  現在セッション
+     * @param model    画面モデル
      * @return 注文確認画面
      */
     @GetMapping("/checkout/confirm")
     public String checkoutConfirm(HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  HttpSession session,
-                                  Model model) {
+            HttpServletResponse response,
+            HttpSession session,
+            Model model) {
         CartView cart = cartService.getCart(request, response);
         if (cart.isEmpty()) {
             clearCheckoutSession(session);
@@ -330,6 +358,8 @@ public class CartController {
         }
         model.addAttribute("checkoutForm", sessionForm);
         model.addAttribute("cart", cart);
+        model.addAttribute("couponDiscountAmount", cart.summary().couponDiscountAmount());
+        model.addAttribute("appliedCouponCode", cart.summary().appliedCouponCode());
         model.addAttribute("checkoutConfirmToken", token);
         return "pages/checkout-confirm";
     }
@@ -337,19 +367,19 @@ public class CartController {
     /**
      * 注文確定処理を実行する。
      *
-     * @param token ワンタイムトークン
-     * @param request 現在リクエスト
-     * @param response 現在レスポンス
-     * @param session 現在セッション
+     * @param token              ワンタイムトークン
+     * @param request            現在リクエスト
+     * @param response           現在レスポンス
+     * @param session            現在セッション
      * @param redirectAttributes フラッシュ属性
      * @return 遷移先
      */
     @PostMapping("/checkout/confirm")
     public String placeOrder(@RequestParam("token") String token,
-                             HttpServletRequest request,
-                             HttpServletResponse response,
-                             HttpSession session,
-                             RedirectAttributes redirectAttributes) {
+            HttpServletRequest request,
+            HttpServletResponse response,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
         CartView cart = cartService.getCart(request, response);
         if (cart.isEmpty()) {
             clearCheckoutSession(session);
@@ -398,12 +428,12 @@ public class CartController {
      * 注文完了画面を表示する。
      *
      * @param orderNumber 注文番号
-     * @param model 画面モデル
+     * @param model       画面モデル
      * @return 注文完了画面
      */
     @GetMapping("/checkout/complete/{orderNumber}")
     public String checkoutComplete(@PathVariable String orderNumber,
-                                   Model model) {
+            Model model) {
         OrderCompleteView order = orderService.findOrderCompleteView(orderNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("order", order);
@@ -413,7 +443,7 @@ public class CartController {
     /**
      * Bean Validationでは表現しづらい業務ルールを追加検証する。
      *
-     * @param form 正規化済みフォーム
+     * @param form          正規化済みフォーム
      * @param bindingResult 検証結果
      */
     private void validateCheckoutFormBusinessRules(CheckoutInputForm form, BindingResult bindingResult) {
@@ -439,7 +469,7 @@ public class CartController {
      * 会員注文時に選択可能な追加お届け先一覧をモデルへ積む。
      *
      * @param session 現在セッション
-     * @param model 画面モデル
+     * @param model   画面モデル
      */
     private void bindCheckoutAddressOptions(HttpSession session, Model model) {
         Optional<MemberSessionUser> member = memberSessionService.currentMember(session);
@@ -460,7 +490,7 @@ public class CartController {
      * 購入方法選択画面のログインフォームへ記憶済みメールアドレスを反映する。
      *
      * @param request 現在リクエスト
-     * @param model 画面モデル
+     * @param model   画面モデル
      */
     private void bindRememberedLoginEmail(HttpServletRequest request, Model model) {
         Optional<String> rememberedEmail = loginEmailCookieService.findRememberedEmail(request);
