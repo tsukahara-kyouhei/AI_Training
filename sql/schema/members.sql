@@ -56,21 +56,26 @@ CREATE TABLE IF NOT EXISTS member_additional_addresses (
 CREATE INDEX IF NOT EXISTS idx_member_additional_addresses_member_created
     ON member_additional_addresses (member_id, created_at ASC);
 
-CREATE TABLE IF NOT EXISTS member_favorites (
+CREATE TABLE IF NOT EXISTS product_review (
+    review_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     member_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    title VARCHAR(255),
+    body TEXT NOT NULL,
+    published BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (member_id, product_id),
-    CONSTRAINT fk_member_favorites_member FOREIGN KEY (member_id)
+    CONSTRAINT uq_product_review_member_product UNIQUE (member_id, product_id),
+    CONSTRAINT fk_product_review_member FOREIGN KEY (member_id)
         REFERENCES members (member_id) ON DELETE CASCADE,
-    CONSTRAINT fk_member_favorites_product FOREIGN KEY (product_id)
+    CONSTRAINT fk_product_review_product FOREIGN KEY (product_id)
         REFERENCES products (product_id) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS idx_member_favorites_member_created
-    ON member_favorites (member_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_member_favorites_product
-    ON member_favorites (product_id);
+CREATE INDEX IF NOT EXISTS idx_product_review_product_created
+    ON product_review (product_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_product_review_member_created
+    ON product_review (member_id, created_at DESC);
 
 -- logical comments
 COMMENT ON TABLE members IS '会員';
@@ -120,8 +125,13 @@ COMMENT ON COLUMN member_additional_addresses.fax IS 'FAX';
 COMMENT ON COLUMN member_additional_addresses.created_at IS '作成日時';
 COMMENT ON COLUMN member_additional_addresses.updated_at IS '更新日時';
 
-COMMENT ON TABLE member_favorites IS '会員お気に入り';
-COMMENT ON COLUMN member_favorites.member_id IS '会員ID';
-COMMENT ON COLUMN member_favorites.product_id IS '商品ID';
-COMMENT ON COLUMN member_favorites.created_at IS '作成日時';
-COMMENT ON COLUMN member_favorites.updated_at IS '更新日時';
+COMMENT ON TABLE product_review IS '商品レビュー';
+COMMENT ON COLUMN product_review.review_id IS 'レビューID';
+COMMENT ON COLUMN product_review.member_id IS '会員ID';
+COMMENT ON COLUMN product_review.product_id IS '商品ID';
+COMMENT ON COLUMN product_review.rating IS '評価';
+COMMENT ON COLUMN product_review.title IS 'タイトル';
+COMMENT ON COLUMN product_review.body IS '本文';
+COMMENT ON COLUMN product_review.published IS '公開状態';
+COMMENT ON COLUMN product_review.created_at IS '作成日時';
+COMMENT ON COLUMN product_review.updated_at IS '更新日時';

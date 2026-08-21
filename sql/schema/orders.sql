@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS orders (
     note VARCHAR(500),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    applied_coupon_code VARCHAR(50),
+    coupon_discount_amount DECIMAL(10, 2) DEFAULT 0,
     CONSTRAINT fk_orders_member FOREIGN KEY (member_id)
         REFERENCES members (member_id) ON DELETE SET NULL,
     CHECK ((customer_type = 'member' AND member_id IS NOT NULL) OR (customer_type = 'guest' AND member_id IS NULL)),

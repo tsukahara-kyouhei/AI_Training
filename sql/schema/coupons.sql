@@ -31,3 +31,25 @@ CREATE TABLE member_coupon_usage (
 
 CREATE INDEX idx_member_coupon_usage_member_id ON member_coupon_usage(member_id);
 CREATE INDEX idx_member_coupon_usage_coupon_id ON member_coupon_usage(coupon_id);
+
+CREATE TABLE IF NOT EXISTS member_favorites (
+    member_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (member_id, product_id),
+    CONSTRAINT fk_member_favorites_member FOREIGN KEY (member_id)
+        REFERENCES members (member_id) ON DELETE CASCADE,
+    CONSTRAINT fk_member_favorites_product FOREIGN KEY (product_id)
+        REFERENCES products (product_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_member_favorites_member_created
+    ON member_favorites (member_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_member_favorites_product
+    ON member_favorites (product_id);
+
+COMMENT ON TABLE member_favorites IS '会員お気に入り';
+COMMENT ON COLUMN member_favorites.member_id IS '会員ID';
+COMMENT ON COLUMN member_favorites.product_id IS '商品ID';
+COMMENT ON COLUMN member_favorites.created_at IS '作成日時';
+COMMENT ON COLUMN member_favorites.updated_at IS '更新日時';
