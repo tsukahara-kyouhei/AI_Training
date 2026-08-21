@@ -6,17 +6,22 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+//import jp.co.skig.officeorder.config.AppProperties.Cookie.Cart;
 import jp.co.skig.officeorder.logging.LogEvent;
 import jp.co.skig.officeorder.model.cart.CartCookieItem;
 import jp.co.skig.officeorder.model.cart.CartLineView;
 import jp.co.skig.officeorder.model.cart.CartProductSnapshot;
 import jp.co.skig.officeorder.model.cart.CartSummaryView;
 import jp.co.skig.officeorder.model.cart.CartView;
+import jp.co.skig.officeorder.model.coupon.CouponForm;
 import jp.co.skig.officeorder.repository.CartCookieStore;
 import jp.co.skig.officeorder.repository.CartRepository;
+import jp.co.skig.officeorder.repository.OrderRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -50,6 +55,7 @@ public class CartService {
     private final CartCookieStore cartCookieStore;
     /** カート表示用商品情報と税率取得を担当するリポジトリ。 */
     private final CartRepository cartRepository;
+    private final OrderRepository orderRepository;
     /** 利用者向けメッセージ取得ヘルパ。 */
     private final MessageSourceAccessor messages;
 
@@ -58,13 +64,16 @@ public class CartService {
      *
      * @param cartCookieStore カートCookieの読み書き窓口
      * @param cartRepository カート表示用商品情報の取得窓口
+     * @param orderRepository
      * @param messageSource 利用者向けメッセージ取得元
      */
     public CartService(CartCookieStore cartCookieStore,
                        CartRepository cartRepository,
+                       OrderRepository orderRepository,
                        MessageSource messageSource) {
         this.cartCookieStore = cartCookieStore;
         this.cartRepository = cartRepository;
+        this.orderRepository = orderRepository;
         this.messages = new MessageSourceAccessor(messageSource);
     }
 
@@ -460,6 +469,86 @@ public class CartService {
         }
         request.setAttribute(REQUEST_ATTR_CART_ITEMS, List.copyOf(items));
     }
+
+    /**
+     * クーポン割引額を計算する
+     * 
+     * @param couponCode ユーザーが入力したクーポンコード
+     * @param cart カート表示情報
+     */
+/**
+     * クーポンを適用できるか検証する
+     */
+    public void applyCoupon(String couponCode, CartView cart) {
+        if (couponCode == null || couponCode.isBlank()) {
+            throw new IllegalArgumentException("クーポンコードを入力してください。");
+        }
+
+        // 1. DBから有効なクーポンを取得
+        CouponForm coupon = orderRepository.findActiveCouponByCode(couponCode.trim())
+            .orElseThrow(() -> new IllegalArgumentException("無効なクーポンコード、または期限切れです。"));
+
+        // 2. カートの小計金額が最低購入金額を満たしているかチェック
+        BigDecimal subtotal = calculateSubtotal(cart);
+        if (coupon.minPurchaseAmount() != null && subtotal.compareTo(coupon.minPurchaseAmount()) < 0) {
+            throw new IllegalArgumentException(
+                String.format("このクーポンは %,d 円以上のお買い上げでご利用いただけます。", coupon.minPurchaseAmount().longValue())
+            );
+        }
+
+        // ※Cookie等へのクーポン保存処理は、プロジェクトの保持方法（Cookieストア等）に合わせて呼んでください
+    }
+
+    /**
+     * クーポン割引額を計算する
+     */
+    public BigDecimal calculateDiscountAmount(String couponCode, CartView cart) {
+        if (couponCode == null || couponCode.isBlank() || cart == null || cart.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        Optional<CouponForm> couponOpt = orderRepository.findActiveCouponByCode(couponCode);
+        if (couponOpt.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        CouponForm coupon = couponOpt.get();
+        BigDecimal subtotal = calculateSubtotal(cart);
+
+        // 最低購入金額に満たなくなっていれば割引適用外
+        if (coupon.minPurchaseAmount() != null && subtotal.compareTo(coupon.minPurchaseAmount()) < 0) {
+            return BigDecimal.ZERO;
+        }
+
+        if (coupon.isFixed()) {
+            // 定額割引
+            BigDecimal discount = coupon.discountValue();
+            return discount.compareTo(subtotal) > 0 ? subtotal : discount;
+
+        } else if (coupon.isPercentage()) {
+            // 定率割引
+            BigDecimal percentage = coupon.discountValue();
+            return subtotal.multiply(percentage)
+                .divide(BigDecimal.valueOf(100), 0, java.math.RoundingMode.DOWN);
+        }
+
+        return BigDecimal.ZERO;
+    }
+
+    /**
+     * カートの小計金額（商品代金＋組立費）を計算するプライベートメソッド
+     */
+    private BigDecimal calculateSubtotal(CartView cart) {
+        if (cart == null || cart.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        // CartLineView の lineSubtotalBeforeTax() を足し合わせる
+        return cart.items().stream()
+                .map(CartLineView::lineSubtotalBeforeTax)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
 }
 
 

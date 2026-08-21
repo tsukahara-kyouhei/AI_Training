@@ -17,6 +17,7 @@ import jp.co.skig.officeorder.mapper.row.MemberOrderItemMapperRow;
 import jp.co.skig.officeorder.mapper.row.MemberOrderStatusHistoryMapperRow;
 import jp.co.skig.officeorder.mapper.row.OrderCompleteMapperRow;
 import jp.co.skig.officeorder.mapper.row.OrderReorderItemMapperRow;
+import jp.co.skig.officeorder.model.coupon.CouponForm;
 import jp.co.skig.officeorder.model.member.MemberOrderDetailView;
 import jp.co.skig.officeorder.model.member.MemberOrderHistoryPage;
 import jp.co.skig.officeorder.model.member.MemberOrderHistoryView;
@@ -339,6 +340,49 @@ public class OrderRepository {
                 row.productCode(),
                 row.quantity() == null ? 0 : row.quantity(),
                 assemblyRequested
+        );
+    }
+
+    /**
+     * 指定されたクーポンコードと現在時刻をもとに、有効なクーポンを取得する。
+     *
+     * @param couponCode クーポンコード
+     * @return クーポン情報（存在しない場合はEmpty）
+     */
+    public Optional<CouponForm> findActiveCouponByCode(String couponCode) {
+        if (couponCode == null || couponCode.isBlank()) {
+            return Optional.empty();
+        }
+        CouponForm coupon = orderMapper.selectActiveCouponByCode(
+            couponCode.trim(), 
+            appTimeProvider.nowOffsetDateTime()
+        );
+        return Optional.ofNullable(coupon);
+    }
+
+    /**
+     * 会員の特定クーポン利用回数を取得する。
+     *
+     * @param memberId 会員ID
+     * @param couponId クーポンID
+     * @return 利用回数（未利用の場合は0）
+     */
+    public int getCustomerCouponUsageCount(long memberId, long couponId) {
+        Integer count = orderMapper.selectCustomerCouponUsageCount(memberId, couponId);
+        return count == null ? 0 : count;
+    }
+
+    /**
+     * 会員のクーポン利用実績をインクリメント（初回はINSERT）する。
+     *
+     * @param memberId 会員ID
+     * @param couponId クーポンID
+     */
+    public void incrementCustomerCouponUsage(long memberId, long couponId) {
+        orderMapper.upsertCustomerCouponUsage(
+            memberId, 
+            couponId, 
+            appTimeProvider.nowOffsetDateTime()
         );
     }
 }

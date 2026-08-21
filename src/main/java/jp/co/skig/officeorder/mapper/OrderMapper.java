@@ -12,6 +12,7 @@ import jp.co.skig.officeorder.mapper.row.MemberOrderHistoryMapperRow;
 import jp.co.skig.officeorder.mapper.row.MemberOrderStatusHistoryMapperRow;
 import jp.co.skig.officeorder.mapper.row.OrderCompleteMapperRow;
 import jp.co.skig.officeorder.mapper.row.OrderReorderItemMapperRow;
+import jp.co.skig.officeorder.model.coupon.CouponForm;
 import jp.co.skig.officeorder.model.order.CheckoutMemberPrefill;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -92,6 +93,43 @@ public interface OrderMapper {
      * 指定時点で有効な消費税率を取得する。
      */
     BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);
+
+    /**
+     * 指定されたクーポンコードと現在時刻をもとに、有効なクーポンを取得する。
+     *
+     * @param couponCode クーポンコード
+     * @param now 現在時刻
+     * @return クーポンDTO
+     */
+    CouponForm selectActiveCouponByCode(
+        @Param("couponCode") String couponCode, 
+        @Param("now") OffsetDateTime now
+    );
+
+    /**
+     * 会員の特定クーポン利用回数を取得する。
+     *
+     * @param memberId 会員ID
+     * @param couponId クーポンID
+     * @return 利用回数
+     */
+    Integer selectCustomerCouponUsageCount(
+        @Param("memberId") long memberId, 
+        @Param("couponId") long couponId
+    );
+
+    /**
+     * 会員のクーポン利用実績をインクリメント（初回はINSERT）する。
+     *
+     * @param memberId 会員ID
+     * @param couponId クーポンID
+     * @param now 現在時刻
+     */
+    void upsertCustomerCouponUsage(
+        @Param("memberId") long memberId, 
+        @Param("couponId") long couponId, 
+        @Param("now") OffsetDateTime now
+    );
 }
 
 

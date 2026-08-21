@@ -377,6 +377,43 @@
         ORDER BY effective_start_at DESC
         LIMIT 1
     </select>
+<!-- 指定コードの有効なクーポンを取得 -->
+    <select id="selectActiveCouponByCode" resultType="jp.co.skig.officeorder.model.order.CouponForm">
+        SELECT 
+            coupon_id AS couponId,
+            coupon_code AS couponCode,
+            discount_type AS discountType,
+            discount_value AS discountValue,
+            min_purchase_amount AS minPurchaseAmount,
+            starts_at AS startsAt,
+            expires_at AS expiresAt,
+            usage_limit_total AS usageLimitTotal,
+            usage_limit_per_customer AS usageLimitPerCustomer,
+            is_active AS isActive
+        FROM coupons
+        WHERE coupon_code = #{couponCode}
+          AND is_active = TRUE
+          AND starts_at &lt;= #{now}
+          AND expires_at &gt;= #{now}
+    </select>
+
+    <!-- 会員の特定クーポン利用回数を取得 -->
+    <select id="selectCustomerCouponUsageCount" resultType="java.lang.Integer">
+        SELECT usage_count
+        FROM customer_coupon_usages
+        WHERE customer_id = #{memberId}
+          AND coupon_id = #{couponId}
+    </select>
+
+    <!-- 会員のクーポン利用実績をUPSERT（インクリメント） -->
+    <insert id="upsertCustomerCouponUsage">
+        INSERT INTO customer_coupon_usages (customer_id, coupon_id, usage_count, last_used_at)
+        VALUES (#{memberId}, #{couponId}, 1, #{now})
+        ON CONFLICT (customer_id, coupon_id)
+        DO UPDATE SET 
+            usage_count = customer_coupon_usages.usage_count + 1,
+            last_used_at = EXCLUDED.last_used_at
+    </insert>    
 </mapper>
 
 
