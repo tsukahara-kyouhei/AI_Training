@@ -40,7 +40,8 @@ import org.springframework.util.StringUtils;
 /**
  * 注文確定と購入履歴参照を扱うサービス。
  *
- * <p>注文情報入力画面の初期化、注文確定時の受注保存、
+ * <p>
+ * 注文情報入力画面の初期化、注文確定時の受注保存、
  * 注文番号採番、注文完了メール送信予約、購入履歴取得をここに集約する。
  */
 @Service
@@ -72,17 +73,17 @@ public class OrderService {
     /**
      * 注文サービスを生成する。
      *
-     * @param orderRepository 受注リポジトリ
-     * @param objectMapper JSONシリアライザ
+     * @param orderRepository         受注リポジトリ
+     * @param objectMapper            JSONシリアライザ
      * @param notificationMailService 注文完了メール送信サービス
-     * @param appClock 注文日時生成に使う Clock
-     * @param messageSource 利用者向けメッセージ取得元
+     * @param appClock                注文日時生成に使う Clock
+     * @param messageSource           利用者向けメッセージ取得元
      */
     public OrderService(OrderRepository orderRepository,
-                        ObjectMapper objectMapper,
-                        NotificationMailService notificationMailService,
-                        Clock appClock,
-                        MessageSource messageSource) {
+            ObjectMapper objectMapper,
+            NotificationMailService notificationMailService,
+            Clock appClock,
+            MessageSource messageSource) {
         this.orderRepository = orderRepository;
         this.objectMapper = objectMapper;
         this.notificationMailService = notificationMailService;
@@ -93,7 +94,8 @@ public class OrderService {
     /**
      * 注文情報入力画面の初期フォームを生成する。
      *
-     * <p>ログイン会員の場合は会員情報とデフォルトお届け先情報を初期値へ反映する。
+     * <p>
+     * ログイン会員の場合は会員情報とデフォルトお届け先情報を初期値へ反映する。
      *
      * @param member ログイン会員
      * @return 初期フォーム
@@ -133,12 +135,13 @@ public class OrderService {
     /**
      * カート内容と入力フォームから注文を確定する。
      *
-     * <p>入力値正規化、業務バリデーション、在庫再確認、注文番号採番、
+     * <p>
+     * 入力値正規化、業務バリデーション、在庫再確認、注文番号採番、
      * 注文・注文明細・ステータス履歴保存、注文完了メール送信予約を順に行う。
      *
      * @param memberId ログイン会員ID。ゲスト時は {@code null}
-     * @param rawForm 注文情報入力フォーム
-     * @param cart 注文対象カート
+     * @param rawForm  注文情報入力フォーム
+     * @param cart     注文対象カート
      * @return 発行した注文番号
      */
     @Transactional
@@ -227,8 +230,7 @@ public class OrderService {
                     line.colorName(),
                     line.quantity(),
                     line.unitPrice(),
-                    lineSubtotal
-            ));
+                    lineSubtotal));
         }
 
         Map<String, Object> statusParams = new LinkedHashMap<>();
@@ -254,9 +256,9 @@ public class OrderService {
                 cart.summary().assemblyFeeTotal(),
                 cart.summary().shippingFee(),
                 cart.summary().taxAmount(),
+                cart.summary().couponDiscountAmount(),
                 cart.summary().totalAmount(),
-                List.copyOf(mailOrderItems)
-        );
+                List.copyOf(mailOrderItems));
         sendOrderCompleteMailAfterCommit(mailPayload, orderNumber, memberId);
         log.info("event={} memberId={} orderId={} orderNumber={} itemCount={}",
                 LogEvent.ORDER_PLACE_END.value(),
@@ -270,16 +272,17 @@ public class OrderService {
     /**
      * 注文完了メールをコミット後に送るよう登録する。
      *
-     * <p>DB保存が失敗した注文に対してメールだけ送ることを避けるため、
+     * <p>
+     * DB保存が失敗した注文に対してメールだけ送ることを避けるため、
      * トランザクション成功後のフックで送信する。
      *
-     * @param payload 注文完了メール情報
+     * @param payload     注文完了メール情報
      * @param orderNumber 注文番号
-     * @param memberId 会員ID
+     * @param memberId    会員ID
      */
     private void sendOrderCompleteMailAfterCommit(OrderCompleteMailPayload payload,
-                                                  String orderNumber,
-                                                  Long memberId) {
+            String orderNumber,
+            Long memberId) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             log.error("event={} orderNumber={} memberId={} reason=transaction_synchronization_not_active",
                     LogEvent.ORDER_PLACE_REJECTED.value(),
@@ -312,7 +315,7 @@ public class OrderService {
      * 会員の購入履歴一覧を取得する。
      *
      * @param memberId 会員ID
-     * @param page ページ番号
+     * @param page     ページ番号
      * @return 購入履歴ページ
      */
     public MemberOrderHistoryPage findMemberOrderHistories(long memberId, int page) {
@@ -323,7 +326,7 @@ public class OrderService {
     /**
      * 会員の注文詳細を取得する。
      *
-     * @param memberId 会員ID
+     * @param memberId    会員ID
      * @param orderNumber 注文番号
      * @return 注文詳細
      */
@@ -337,7 +340,7 @@ public class OrderService {
     /**
      * 再購入用に注文内商品を取得する。
      *
-     * @param memberId 会員ID
+     * @param memberId    会員ID
      * @param orderNumber 注文番号
      * @return 再購入対象商品一覧
      */
@@ -367,7 +370,8 @@ public class OrderService {
     /**
      * 支払方法に応じた支払案内JSONを生成する。
      *
-     * <p>現時点ではコンビニ決済のみ案内情報を保持し、
+     * <p>
+     * 現時点ではコンビニ決済のみ案内情報を保持し、
      * 他決済では {@code null} を返す。
      *
      * @param paymentMethod 支払方法
@@ -460,6 +464,3 @@ public class OrderService {
         return messages.getMessage(code, args);
     }
 }
-
-
-

@@ -20,6 +20,7 @@
 組立・設置費: {assembly_fee_total}円
 送料: {shipping_fee}円
 消費税: {tax_amount}円
+割引額: -{coupon_discount_amount}円
 合計: {total_amount}円（税込）
 
 お問い合わせ先:

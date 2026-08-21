@@ -31,7 +31,8 @@ import org.springframework.util.StringUtils;
 /**
  * 顧客向け通知メールを送信するサービス。
  *
- * <p>会員登録完了メールと注文完了メールを対象とし、
+ * <p>
+ * 会員登録完了メールと注文完了メールを対象とし、
  * 一時的な送信失敗時は一定回数まで遅延再送する。
  */
 @Service
@@ -43,10 +44,10 @@ public class NotificationMailService {
     private static final List<Duration> RETRY_DELAYS = List.of(
             Duration.ofSeconds(10),
             Duration.ofMinutes(1),
-            Duration.ofMinutes(5)
-    );
+            Duration.ofMinutes(5));
     /** 注文メール本文に記載する日時フォーマット。 */
-    private static final DateTimeFormatter ORDER_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter ORDER_DATETIME_FORMATTER = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /** 実メール送信を担当する MailSender。 */
     private final JavaMailSender mailSender;
@@ -68,17 +69,17 @@ public class NotificationMailService {
     /**
      * 通知メールサービスを生成する。
      *
-     * @param mailSender メール送信コンポーネント
-     * @param mailRetryScheduler 再送スケジューラ
-     * @param appProperties 独自アプリ設定
+     * @param mailSender           メール送信コンポーネント
+     * @param mailRetryScheduler   再送スケジューラ
+     * @param appProperties        独自アプリ設定
      * @param mailTemplateRenderer 件名・本文テンプレートレンダラ
-     * @param appClock 再送時刻計算に使う Clock
+     * @param appClock             再送時刻計算に使う Clock
      */
     public NotificationMailService(JavaMailSender mailSender,
-                                   @Qualifier("mailRetryScheduler") TaskScheduler mailRetryScheduler,
-                                   AppProperties appProperties,
-                                   MailTemplateRenderer mailTemplateRenderer,
-                                   Clock appClock) {
+            @Qualifier("mailRetryScheduler") TaskScheduler mailRetryScheduler,
+            AppProperties appProperties,
+            MailTemplateRenderer mailTemplateRenderer,
+            Clock appClock) {
         this.mailSender = mailSender;
         this.mailRetryScheduler = mailRetryScheduler;
         this.fromAddress = appProperties.getMail().getFrom();
@@ -114,8 +115,7 @@ public class NotificationMailService {
         }
         String subject = mailTemplateRenderer.renderSubject(
                 "order-complete.subject",
-                Map.of("order_number", nullToDash(payload.orderNumber()))
-        );
+                Map.of("order_number", nullToDash(payload.orderNumber())));
         String body = buildOrderCompleteBody(payload);
         sendWithRetry("order-complete", payload.customerEmail(), subject, body);
     }
@@ -124,9 +124,9 @@ public class NotificationMailService {
      * 宛先が有効な場合だけ再送付きメール送信を開始する。
      *
      * @param mailType メール種別
-     * @param to 宛先メールアドレス
-     * @param subject 件名
-     * @param body 本文
+     * @param to       宛先メールアドレス
+     * @param subject  件名
+     * @param body     本文
      */
     private void sendWithRetry(String mailType, String to, String subject, String body) {
         if (!StringUtils.hasText(to)) {
@@ -141,10 +141,10 @@ public class NotificationMailService {
     /**
      * メール送信を実行し、失敗時は再送回数上限まで遅延再試行する。
      *
-     * @param mailType メール種別
-     * @param to 宛先メールアドレス
-     * @param subject 件名
-     * @param body 本文
+     * @param mailType     メール種別
+     * @param to           宛先メールアドレス
+     * @param subject      件名
+     * @param body         本文
      * @param failureCount これまでの失敗回数
      */
     private void sendAttempt(String mailType, String to, String subject, String body, int failureCount) {
@@ -180,17 +180,16 @@ public class NotificationMailService {
                     ex);
             mailRetryScheduler.schedule(
                     () -> sendAttempt(mailType, to, subject, body, failureCount + 1),
-                    nextAttemptAt
-            );
+                    nextAttemptAt);
         }
     }
 
     /**
      * テキストメールを1通送信する。
      *
-     * @param to 宛先メールアドレス
+     * @param to      宛先メールアドレス
      * @param subject 件名
-     * @param body 本文
+     * @param body    本文
      * @throws MessagingException メール構築に失敗した場合
      */
     private void sendPlainTextMail(String to, String subject, String body) throws MessagingException {
@@ -245,6 +244,7 @@ public class NotificationMailService {
         variables.put("assembly_fee_total", MoneyFormatter.formatYen(payload.assemblyFeeTotal()));
         variables.put("shipping_fee", MoneyFormatter.formatYen(payload.shippingFee()));
         variables.put("tax_amount", MoneyFormatter.formatYen(payload.taxAmount()));
+        variables.put("coupon_discount_amount", MoneyFormatter.formatYen(payload.couponDiscountAmount()));
         variables.put("total_amount", MoneyFormatter.formatYen(payload.totalAmount()));
         variables.put("contact_email", contactEmail);
         return mailTemplateRenderer.renderBody("order-complete-body", variables);
@@ -368,5 +368,3 @@ public class NotificationMailService {
     }
 
 }
-
-

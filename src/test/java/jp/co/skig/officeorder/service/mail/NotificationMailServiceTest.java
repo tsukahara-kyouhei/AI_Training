@@ -75,6 +75,7 @@ class NotificationMailServiceTest {
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
+                BigDecimal.ZERO, // couponDiscountAmount
                 BigDecimal.ZERO,
                 List.of());
         assertDoesNotThrow(() -> service.sendOrderCompleteMail(payload));
@@ -118,6 +119,7 @@ class NotificationMailServiceTest {
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
+                BigDecimal.ZERO, // couponDiscountAmount
                 BigDecimal.ZERO,
                 List.of());
 
