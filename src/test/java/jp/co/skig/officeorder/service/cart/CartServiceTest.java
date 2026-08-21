@@ -25,6 +25,7 @@ import jp.co.skig.officeorder.model.cart.CartProductSnapshot;
 import jp.co.skig.officeorder.model.cart.CartView;
 import jp.co.skig.officeorder.repository.CartCookieStore;
 import jp.co.skig.officeorder.repository.CartRepository;
+import jp.co.skig.officeorder.repository.OrderRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceTest {
@@ -34,6 +35,9 @@ class CartServiceTest {
 
     @Mock
     private CartRepository cartRepository;
+
+    @Mock
+    private OrderRepository orderRepository;
 
     @Mock
     private MessageSource messageSource;
@@ -51,6 +55,7 @@ class CartServiceTest {
         service = new CartService(
                 cartCookieStore,
                 cartRepository,
+                orderRepository,
                 messageSource);
     }
 

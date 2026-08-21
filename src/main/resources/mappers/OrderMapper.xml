@@ -378,7 +378,7 @@
         LIMIT 1
     </select>
 <!-- 指定コードの有効なクーポンを取得 -->
-    <select id="selectActiveCouponByCode" resultType="jp.co.skig.officeorder.model.order.CouponForm">
+    <select id="selectActiveCouponByCode" resultType="jp.co.skig.officeorder.model.coupon.CouponForm">
         SELECT 
             coupon_id AS couponId,
             coupon_code AS couponCode,
