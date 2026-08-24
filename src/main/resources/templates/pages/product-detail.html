@@ -129,6 +129,13 @@
                                         <span data-pd-cart-btn-text th:text="${detail.outOfStock ? '入荷待ち' : 'カートに入れる'}">カートに入れる</span>
                                     </button>
                                 </form>
+                        <!-- ▼▼▼ ここから追加 ▼▼▼ -->
+                                 <div th:if="${canWriteReview}" style="margin-top: 12px; width: 100%;">
+                                     <a href="#review-form" class="btn" style="display: block; text-align: center; background-color: #2563eb; color: #fff; padding: 10px 16px; border-radius: 4px; font-weight: bold; text-decoration: none;">
+                                         レビューを書く
+                                     </a>
+                                 </div>
+<!-- ▲▲▲ ここまで追加 ▲▲▲ -->
                                 <form class="pd-fav-form" th:action="@{/products/{productId}/favorite(productId=${detail.productId})}" method="post">
                                     <input type="hidden" name="redirect" th:value="${detailPagePath}">
                                     <input type="hidden" name="stock" value="out" th:if="${detail.outOfStock}">
@@ -212,7 +219,7 @@
 
                             <div style="margin-bottom: 16px;">
                                 <label style="display: block; font-weight: bold; margin-bottom: 4px;">コメント</label>
-                                <textarea name="comment" rows="4" maxlength="1000" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="商品の感想や使用感を入力してください"></textarea>
+                                <textarea name="content" rows="4" maxlength="1000" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="商品の感想や使用感を入力してください"></textarea>
                             </div>
 
                             <button type="submit" class="btn" style="background-color: #2563eb; color: #fff; padding: 10px 24px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">

@@ -7,7 +7,7 @@ spring:
     password: office_order
   sql:
     init:
-      mode: never
+      mode: always
   thymeleaf:
     cache: false
   mail:

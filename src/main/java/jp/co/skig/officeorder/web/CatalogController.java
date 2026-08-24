@@ -320,6 +320,9 @@ public class CatalogController {
         Long memberId = currentMember.map(MemberSessionUser::memberId).orElse(null);
         boolean canWriteReview = productReviewService.canWriteReview(memberId, productId);
 
+        // ★ ここに1行追加
+        log.info("【DEBUG】 memberId: {}, productId: {}, canWriteReview: {}", memberId, productId, canWriteReview);
+
         model.addAttribute("detail", detail);
         model.addAttribute("categoryLabel", resolveCategoryLabel(detail.categoryId()));
         model.addAttribute("isFavorite", isFavorite);
