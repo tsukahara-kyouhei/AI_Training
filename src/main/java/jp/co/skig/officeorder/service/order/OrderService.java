@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import jp.co.skig.officeorder.model.cart.CartLineView;
 import jp.co.skig.officeorder.model.cart.CartView;
 import jp.co.skig.officeorder.logging.LogEvent;
