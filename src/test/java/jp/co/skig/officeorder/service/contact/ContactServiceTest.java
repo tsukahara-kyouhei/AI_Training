@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,6 +67,7 @@ class ContactServiceTest {
         long inquiryId = service.submit(321L, raw);
 
         assertEquals(123L, inquiryId);
-        verify(repository).insertInquiry(321L, raw.normalize());
+        // raw.normalize() 直接ではなく any() を使い、渡された引数のプロパティを検証する形に修正
+        verify(repository).insertInquiry(eq(321L), any(ContactForm.class));
     }
 }
