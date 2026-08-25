@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS orders (
     subtotal_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (subtotal_amount >= 0),
     tax_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (tax_amount >= 0),
     total_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (total_amount >= 0),
+    coupon_code VARCHAR(50),
+    discount_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (discount_amount >= 0),
     receipt_issued BOOLEAN NOT NULL DEFAULT FALSE,
     note VARCHAR(500),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -122,6 +124,8 @@ COMMENT ON COLUMN orders.assembly_fee_total IS '組立・設置費合計';
 COMMENT ON COLUMN orders.subtotal_amount IS '商品小計';
 COMMENT ON COLUMN orders.tax_amount IS '消費税額';
 COMMENT ON COLUMN orders.total_amount IS '合計金額';
+COMMENT ON COLUMN orders.coupon_code IS '適用クーポンコード';
+COMMENT ON COLUMN orders.discount_amount IS 'クーポン割引金額';
 COMMENT ON COLUMN orders.receipt_issued IS '領収書発行フラグ';
 COMMENT ON COLUMN orders.note IS '備考';
 COMMENT ON COLUMN orders.created_at IS '作成日時';
