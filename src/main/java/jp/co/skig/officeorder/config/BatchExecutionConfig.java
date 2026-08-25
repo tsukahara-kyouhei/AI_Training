@@ -1,7 +1,6 @@
 package jp.co.skig.officeorder.config;
 
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.support.SimpleJobOperator;
@@ -43,14 +42,14 @@ public class BatchExecutionConfig {
     /**
      * 非同期ジョブランチャを生成する。
      *
-     * @param jobRepository ジョブリポジトリ
+     * @param jobRepository        ジョブリポジトリ
      * @param batchJobTaskExecutor バッチ実行用TaskExecutor
      * @return JobLauncher
      * @throws Exception 初期化失敗時
      */
     @Bean(name = "asyncJobLauncher")
     public JobLauncher asyncJobLauncher(JobRepository jobRepository,
-                                        @Qualifier("batchJobTaskExecutor") TaskExecutor batchJobTaskExecutor) throws Exception {
+            @Qualifier("batchJobTaskExecutor") TaskExecutor batchJobTaskExecutor) throws Exception {
         TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
         jobLauncher.setJobRepository(jobRepository);
         jobLauncher.setTaskExecutor(batchJobTaskExecutor);
@@ -61,23 +60,18 @@ public class BatchExecutionConfig {
     /**
      * 非同期実行前提の JobOperator を生成する。
      *
-     * @param asyncJobLauncher 非同期ジョブランチャ
      * @param jobRepository ジョブリポジトリ
-     * @param jobExplorer ジョブ参照API
-     * @param jobRegistry ジョブレジストリ
+     * @param jobRegistry   ジョブレジストリ
      * @return JobOperator
      * @throws Exception 初期化失敗時
      */
     @Bean(name = "asyncJobOperator")
     @Primary
-    public JobOperator asyncJobOperator(@Qualifier("asyncJobLauncher") JobLauncher asyncJobLauncher,
-                                        JobRepository jobRepository,
-                                        JobExplorer jobExplorer,
-                                        JobRegistry jobRegistry) throws Exception {
+    public JobOperator asyncJobOperator(JobRepository jobRepository,
+            JobRegistry jobRegistry) throws Exception {
         SimpleJobOperator jobOperator = new SimpleJobOperator();
-        jobOperator.setJobLauncher(asyncJobLauncher);
+        // JobLauncher のセットは不要になったため削除！
         jobOperator.setJobRepository(jobRepository);
-        jobOperator.setJobExplorer(jobExplorer);
         jobOperator.setJobRegistry(jobRegistry);
         jobOperator.afterPropertiesSet();
         return jobOperator;

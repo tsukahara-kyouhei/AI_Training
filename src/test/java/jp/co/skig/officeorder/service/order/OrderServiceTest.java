@@ -46,7 +46,7 @@ class OrderServiceTest {
         clock = Clock.fixed(Instant.parse("2025-01-01T12:00:00Z"), ZoneId.of("UTC"));
         when(messageSource.getMessage(any(String.class), any(Object[].class), any(java.util.Locale.class)))
                 .thenReturn("message");
-        service = new OrderService(orderRepository, new com.fasterxml.jackson.databind.ObjectMapper(),
+        service = new OrderService(orderRepository, new tools.jackson.databind.ObjectMapper(),
                 notificationMailService, clock, messageSource);
     }
 
