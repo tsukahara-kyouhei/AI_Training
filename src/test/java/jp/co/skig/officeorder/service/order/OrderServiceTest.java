@@ -724,6 +724,7 @@ class OrderServiceTest {
                 BigDecimal.valueOf(10000),
                 BigDecimal.valueOf(3000),
                 BigDecimal.valueOf(500),
+                BigDecimal.ZERO,
                 BigDecimal.valueOf(1350),
                 BigDecimal.valueOf(14850));
     }

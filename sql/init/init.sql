@@ -14,4 +14,5 @@
 \ir seed/products.sql
 \ir seed/members.sql
 \ir seed/orders.sql
+\ir seed/coupons.sql
 \ir seed/content.sql

@@ -98,12 +98,44 @@
                 </section>
 
                 <aside class="summary" aria-label="金額">
+                    <!-- ★ クーポン入力エリア（カートに商品がある場合のみ表示） -->
+                    <div class="card" style="margin-bottom:16px;" th:if="${!isCartEmpty}">
+                        <div class="card__pad">
+                            <p style="font-weight:bold; margin:0 0 8px 0; font-size:14px;">クーポンコード</p>
+                            
+                            <!-- クーポンエラー/成功メッセージ -->
+                            <div class="error" th:if="${couponError}" th:text="${couponError}" style="margin-bottom:8px;"></div>
+                            <div class="help" th:if="${couponSuccess}" th:text="${couponSuccess}" style="margin-bottom:8px; color:#2e7d32;"></div>
+
+                            <!-- クーポン適用フォーム -->
+                            <form th:action="@{/cart/coupon/apply}" method="post" style="display:flex; gap:8px;">
+                                <input type="text" name="couponCode" placeholder="コードを入力" th:value="${appliedCouponCode}" style="flex:1; padding:6px 8px; border:1px solid #ccc; border-radius:4px;" required>
+                                <button class="btn btn--cart-update" type="submit">適用</button>
+                            </form>
+
+                            <!-- クーポン適用中の解除ボタン -->
+                            <div th:if="${appliedCouponCode != null and !appliedCouponCode.isBlank()}" style="margin-top:8px; text-align:right;">
+                                <form th:action="@{/cart/coupon/remove}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn--ghost" style="padding:2px 8px; font-size:12px;">クーポンを解除</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 注文サマリー -->
                     <div class="card">
                         <div class="card__pad">
                             <div class="summary__rows">
                                 <div class="summary__row"><span>商品小計</span><strong th:text="${cart.summary.productSubtotalText + '円'}">36,400円</strong></div>
                                 <div class="summary__row"><span>組立・設置費</span><strong th:text="${cart.summary.assemblyFeeTotalText + '円'}">3,000円</strong></div>
                                 <div class="summary__row"><span>送料</span><strong th:text="${cart.summary.shippingFeeText + '円'}">0円</strong></div>
+                                
+                                <!-- ★ クーポン割引額の表示（適用中のみ） -->
+                                <div class="summary__row" th:if="${cart.summary.hasDiscount()}">
+                                    <span style="color:#d9534f;">クーポン値引き</span>
+                                    <strong style="color:#d9534f;" th:text="${'-' + cart.summary.discountAmountText + '円'}">-1,000円</strong>
+                                </div>
+
                                 <div class="summary__row"><span>消費税</span><strong th:text="${cart.summary.taxAmountText + '円'}">3,940円</strong></div>
                                 <div class="summary__row summary__total"><span>合計（税込）</span><strong style="font-size:18px;" th:text="${cart.summary.totalAmountText + '円'}">43,340円</strong></div>
                             </div>

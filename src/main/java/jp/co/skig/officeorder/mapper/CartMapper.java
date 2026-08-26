@@ -25,5 +25,3 @@ public interface CartMapper {
      */
     BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);
 }
-
-

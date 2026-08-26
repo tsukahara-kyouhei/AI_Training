@@ -11,6 +11,7 @@ public record CartSummaryView(
         BigDecimal productSubtotal,
         BigDecimal assemblyFeeTotal,
         BigDecimal shippingFee,
+        BigDecimal discountAmount,
         BigDecimal taxAmount,
         BigDecimal totalAmount
 ) {
@@ -33,6 +34,20 @@ public record CartSummaryView(
      */
     public String shippingFeeText() {
         return MoneyFormatter.formatYen(shippingFee);
+    }
+
+    /**
+     * クーポン割引額を画面表示用に整形する。
+     */
+    public String discountAmountText() {
+        return MoneyFormatter.formatYen(discountAmount);
+    }
+
+    /**
+     * 割引が適用されているかを判定する。
+     */
+    public boolean hasDiscount() {
+        return discountAmount != null && discountAmount.compareTo(BigDecimal.ZERO) > 0;
     }
 
     /**
