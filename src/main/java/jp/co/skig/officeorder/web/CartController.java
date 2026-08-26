@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jp.co.skig.officeorder.service.coupon.CouponService;
 
 import java.util.Optional;
 import java.util.List;
@@ -61,6 +62,8 @@ public class CartController {
     private final MemberService memberService;
     /** 注文サービス。 */
     private final OrderService orderService;
+    /** クーポン関連サービス。 */
+    private final CouponService couponService;
     /** 利用者向けメッセージ取得ヘルパ。 */
     private final MessageSourceAccessor messages;
 
@@ -79,12 +82,14 @@ public class CartController {
                           LoginEmailCookieService loginEmailCookieService,
                           MemberService memberService,
                           OrderService orderService,
+                          CouponService couponService, // ★追加
                           MessageSource messageSource) {
         this.cartService = cartService;
         this.memberSessionService = memberSessionService;
         this.loginEmailCookieService = loginEmailCookieService;
         this.memberService = memberService;
         this.orderService = orderService;
+        this.couponService = couponService; // ★追加
         this.messages = new MessageSourceAccessor(messageSource);
     }
 
@@ -202,6 +207,41 @@ public class CartController {
     public String clearCart(HttpServletRequest request,
                             HttpServletResponse response) {
         cartService.clear(request, response);
+        return "redirect:/cart";
+    }
+
+    /**
+     * カートにクーポンを適用する。
+     *
+     * @param couponCode クーポンコード
+     * @param request 現在リクエスト
+     * @param response 現在レスポンス
+     * @param session 現在セッション
+     * @param redirectAttributes フラッシュ属性
+     * @return カート画面へのリダイレクト
+     */
+    @PostMapping("/cart/coupon")
+    public String applyCoupon(@RequestParam("couponCode") String couponCode,
+                              HttpServletRequest request,
+                              HttpServletResponse response,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        CartView cart = cartService.getCart(request, response);
+        if (cart.isEmpty()) {
+            return "redirect:/cart";
+        }
+
+        int discount = couponService.calculateDiscount(couponCode, cart.summary().productSubtotal().intValue());
+        if (discount > 0) {
+            session.setAttribute("appliedCouponCode", couponCode);
+            session.setAttribute("discountAmount", discount);
+            redirectAttributes.addFlashAttribute("cartMessage", "クーポンが適用されました！");
+        } else {
+            session.removeAttribute("appliedCouponCode");
+            session.removeAttribute("discountAmount");
+            redirectAttributes.addFlashAttribute("cartError", "無効なクーポンコードか、適用条件を満たしていません。");
+        }
+
         return "redirect:/cart";
     }
 
