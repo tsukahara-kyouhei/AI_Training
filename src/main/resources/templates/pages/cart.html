@@ -109,6 +109,14 @@
                                 <div class="summary__row"><span>組立・設置費</span><strong th:text="${cart.summary.assemblyFeeTotalText + '円'}">3,000円</strong></div>
                                 <div class="summary__row"><span>送料</span><strong th:text="${cart.summary.shippingFeeText + '円'}">0円</strong></div>
                                 <div class="summary__row"><span>消費税</span><strong th:text="${cart.summary.taxAmountText + '円'}">3,940円</strong></div>
+                                <!-- ★ここからクーポンフォーム追加 -->
+                                <div style="margin: 12px 0; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+                                    <form th:action="@{/cart/coupon}" method="post" style="display: flex; gap: 6px;">
+                                        <input type="text" name="couponCode" placeholder="クーポンコード" required style="flex: 1; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                                        <button type="submit" class="btn" style="padding: 6px 12px; font-size: 13px;">適用</button>
+                                    </form>
+                                </div>
+                                <!-- ★ここまで -->
                                 <div class="summary__row summary__total"><span>合計（税込）</span><strong style="font-size:18px;" th:text="${cart.summary.totalAmountText + '円'}">43,340円</strong></div>
                             </div>
                             <div class="actions" style="margin-top:14px;">
