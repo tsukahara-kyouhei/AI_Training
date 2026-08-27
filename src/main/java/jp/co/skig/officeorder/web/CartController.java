@@ -98,16 +98,37 @@ public class CartController {
      *
      * @param request 現在リクエスト
      * @param response 現在レスポンス
+     * @param session 現在セッション
      * @param model 画面モデル
      * @return カート画面
      */
     @GetMapping("/cart")
     public String cart(HttpServletRequest request,
                        HttpServletResponse response,
+                       HttpSession session, // ★ session を追加
                        Model model) {
         CartView cart = cartService.getCart(request, response);
         model.addAttribute("cart", cart);
         model.addAttribute("isCartEmpty", cart.isEmpty());
+
+        // ★ セッションからクーポン情報を取得
+        String appliedCouponCode = (String) session.getAttribute("appliedCouponCode");
+        Integer discountAmount = (Integer) session.getAttribute("discountAmount");
+
+        if (discountAmount != null && discountAmount > 0) {
+            model.addAttribute("appliedCouponCode", appliedCouponCode);
+            model.addAttribute("discountAmount", discountAmount);
+
+            // 元の合計額（totalAmount）から割引額を引く（マイナスにならないよう Math.max を使用）
+            long originalTotal = cart.summary().totalAmount().longValue();
+            long finalTotal = Math.max(0, originalTotal - discountAmount);
+
+            model.addAttribute("finalTotal", finalTotal);
+        } else {
+            model.addAttribute("discountAmount", 0);
+            model.addAttribute("finalTotal", cart.summary().totalAmount().longValue());
+        }
+
         return "pages/cart";
     }
 
@@ -371,6 +392,25 @@ public class CartController {
         model.addAttribute("checkoutForm", sessionForm);
         model.addAttribute("cart", cart);
         model.addAttribute("checkoutConfirmToken", token);
+
+        // ★ ここから追加：セッションからクーポン情報を取得し、割引後合計金額を計算してモデルに登録
+        String appliedCouponCode = (String) session.getAttribute("appliedCouponCode");
+        Integer discountAmount = (Integer) session.getAttribute("discountAmount");
+
+        if (discountAmount != null && discountAmount > 0) {
+            model.addAttribute("appliedCouponCode", appliedCouponCode);
+            model.addAttribute("discountAmount", discountAmount);
+
+            long originalTotal = cart.summary().totalAmount().longValue();
+            long finalTotal = Math.max(0, originalTotal - discountAmount);
+
+            model.addAttribute("finalTotal", finalTotal);
+        } else {
+            model.addAttribute("discountAmount", 0);
+            model.addAttribute("finalTotal", cart.summary().totalAmount().longValue());
+        }
+        // ★ ここまで追加
+
         return "pages/checkout-confirm";
     }
 
@@ -473,6 +513,10 @@ public class CartController {
         }
         session.removeAttribute(CHECKOUT_FORM_SESSION_KEY);
         session.removeAttribute(CHECKOUT_CONFIRM_TOKEN_SESSION_KEY);
+
+        // ★ クーポン情報をセッションから削除する処理を追加
+        session.removeAttribute("appliedCouponCode");
+        session.removeAttribute("discountAmount");
     }
 
     /**
