@@ -238,9 +238,16 @@ public class ProductRepository {
 
         ProductVariantView selectedVariant = selectVariant(variants, forceOutOfStock);
         BigDecimal taxRate = findCurrentTaxRatePercent(now);
-        BigDecimal priceIncludingTax = selectedVariant.unitPrice()
-                .multiply(BigDecimal.ONE.add(taxRate.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)))
-                .setScale(0, RoundingMode.DOWN);
+        BigDecimal priceIncludingTax = selectedVariant.unitPrice();
+        BigDecimal priceExcludingTax = priceIncludingTax
+                // .multiply(BigDecimal.ONE.add(taxRate.divide(BigDecimal.valueOf(100), 6,
+                // RoundingMode.HALF_UP)))
+                // .setScale(0, RoundingMode.DOWN);
+                .divide(
+                        BigDecimal.ONE.add(
+                                taxRate.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)),
+                        0,
+                        RoundingMode.DOWN);
         BigDecimal assemblyFee = product.assemblyAvailable()
                 ? product.assemblyFee()
                 : BigDecimal.ZERO;
@@ -266,8 +273,8 @@ public class ProductRepository {
                 product.variationGroupId(),
                 product.variationName(),
                 taxRate,
-                selectedVariant.unitPrice(),
-                MoneyFormatter.formatYen(selectedVariant.unitPrice()),
+                priceExcludingTax,
+                MoneyFormatter.formatYen(priceExcludingTax),
                 priceIncludingTax,
                 MoneyFormatter.formatYen(priceIncludingTax),
                 assemblyFee,
