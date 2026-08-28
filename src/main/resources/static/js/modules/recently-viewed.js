@@ -125,7 +125,7 @@
     price.className = "product-price";
     const priceValue = document.createElement("span");
     priceValue.className = "price";
-    priceValue.textContent = item?.priceText || "0";
+    priceValue.textContent = item?.taxIncludedPriceText || "0";
     price.appendChild(priceValue);
     price.append("円（税込）");
     pad.appendChild(price);
