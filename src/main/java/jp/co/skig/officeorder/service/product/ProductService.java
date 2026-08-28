@@ -312,6 +312,3 @@ public class ProductService {
         return ALLOWED_PAGE_SIZES[0];
     }
 }
-
-
-

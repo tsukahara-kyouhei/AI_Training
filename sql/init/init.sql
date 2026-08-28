@@ -6,6 +6,7 @@
 \ir schema/members.sql
 \ir schema/orders.sql
 \ir schema/coupons.sql
+\ir schema/reviews.sql
 \ir schema/spring-batch-metadata.sql
 \ir schema/content.sql
 \ir schema/batch.sql

@@ -1,190 +1,304 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{fragments/layout/head :: head('商品詳細 | OFFICE ORDER', 'product')}"></head>
+
 <body>
-<div class="page">
-    <div th:replace="~{fragments/layout/header :: header}"></div>
-    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+    <div class="page">
+        <div th:replace="~{fragments/layout/header :: header}"></div>
+        <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
 
-    <main class="main">
-        <div class="container">
-            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb(${detail != null ? 'トップ > ' + categoryLabel + ' > ' + detail.productName : 'トップ > 商品詳細'})}"></div>
+        <main class="main">
+            <div class="container">
+                <div
+                    th:replace="~{fragments/common/breadcrumb :: breadcrumb(${detail != null ? 'トップ > ' + categoryLabel + ' > ' + detail.productName : 'トップ > 商品詳細'})}">
+                </div>
 
-            <section class="pd-top"
-                     aria-label="商品概要"
-                     th:if="${detail != null}"
-                     th:attr="data-recently-viewed-product-id=${detail.productId}">
-                <div class="pd-layout">
-                    <div class="pd-gallery">
-                        <div class="pd-main-image">
-                            <button class="pd-main-nav pd-main-nav--prev" type="button" aria-label="前の画像">
-                                <span class="material-icons" aria-hidden="true">chevron_left</span>
-                            </button>
-                            <img class="pd-main-photo"
-                                 data-pd-main-image
-                                 th:src="@{|/images/products/${detail.selectedVariant.productCode}.png|}"
-                                 th:alt="${detail.productName}">
-                            <button class="pd-main-nav pd-main-nav--next" type="button" aria-label="次の画像">
-                                <span class="material-icons" aria-hidden="true">chevron_right</span>
-                            </button>
-                        </div>
+                <section class="pd-top" aria-label="商品概要" th:if="${detail != null}"
+                    th:attr="data-recently-viewed-product-id=${detail.productId}">
+                    <div class="pd-layout">
+                        <div class="pd-gallery">
+                            <div class="pd-main-image">
+                                <button class="pd-main-nav pd-main-nav--prev" type="button" aria-label="前の画像">
+                                    <span class="material-icons" aria-hidden="true">chevron_left</span>
+                                </button>
+                                <img class="pd-main-photo" data-pd-main-image
+                                    th:src="@{|/images/products/${detail.selectedVariant.productCode}.png|}"
+                                    th:alt="${detail.productName}">
+                                <button class="pd-main-nav pd-main-nav--next" type="button" aria-label="次の画像">
+                                    <span class="material-icons" aria-hidden="true">chevron_right</span>
+                                </button>
+                            </div>
 
-                        <div class="pd-sub-grid">
-                            <button class="pd-sub-item" type="button"
+                            <div class="pd-sub-grid">
+                                <button class="pd-sub-item" type="button"
                                     th:classappend="${variant.productVariantId == detail.selectedVariant.productVariantId} ? ' is-selected'"
                                     th:data-image-src="@{|/images/products/${variant.productCode}.png|}"
                                     th:data-image-alt="${detail.productName + ' - ' + variant.colorName}"
-                                    aria-label="サムネイル"
-                                    th:each="variant, iterStat : ${detail.variants}">
-                                <img class="pd-sub-photo"
-                                     th:src="@{|/images/products/${variant.productCode}.png|}"
-                                     th:alt="${variant.colorName + ' サムネイル'}"
-                                     loading="lazy">
-                            </button>
+                                    aria-label="サムネイル" th:each="variant, iterStat : ${detail.variants}">
+                                    <img class="pd-sub-photo" th:src="@{|/images/products/${variant.productCode}.png|}"
+                                        th:alt="${variant.colorName + ' サムネイル'}" loading="lazy">
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="pd-summary"
-                         th:attr="data-pd-tax-rate=${detail.taxRatePercent},
+                        <div class="pd-summary" th:attr="data-pd-tax-rate=${detail.taxRatePercent},
                                   data-pd-product-name=${detail.productName},
                                   data-pd-assembly-fee=${detail.selectedAssemblyFee}">
-                        <h1 class="pd-title" th:text="${detail.productName}">デスク 04 - 平机 - 幅140cmx奥行70cm</h1>
+                            <h1 class="pd-title" th:text="${detail.productName}">デスク 04 - 平机 - 幅140cmx奥行70cm</h1>
 
-                        <p class="pd-price-line">
-                            <span class="pd-price-label">販売価格</span>
-                            <strong class="pd-price-main" data-pd-price-excl th:text="${detail.selectedPriceExcludingTaxText}">78,300</strong><span class="pd-price-unit">円</span>
-                            <span class="pd-tax-note">（税込 <strong data-pd-price-incl th:text="${detail.selectedPriceIncludingTaxText + ' 円'}">86,130 円</strong>）</span>
-                        </p>
+                            <p class="pd-price-line">
+                                <span class="pd-price-label">販売価格</span>
+                                <strong class="pd-price-main" data-pd-price-excl
+                                    th:text="${detail.selectedPriceExcludingTaxText}">78,300</strong><span
+                                    class="pd-price-unit">円</span>
+                                <span class="pd-tax-note">（税込 <strong data-pd-price-incl
+                                        th:text="${detail.selectedPriceIncludingTaxText + ' 円'}">86,130
+                                        円</strong>）</span>
+                            </p>
 
-                        <p class="pd-install-line">
-                            <span>組立・設置費</span>
-                            <span data-pd-assembly-text
-                                  th:text="${detail.selectedAssemblyFee.signum() > 0 ? '+' + detail.selectedAssemblyFeeText + '円(税込)' : 'お届けのみ'}">+4,400円(税込)</span>
-                        </p>
+                            <p class="pd-install-line">
+                                <span>組立・設置費</span>
+                                <span data-pd-assembly-text
+                                    th:text="${detail.selectedAssemblyFee.signum() > 0 ? '+' + detail.selectedAssemblyFeeText + '円(税込)' : 'お届けのみ'}">+4,400円(税込)</span>
+                            </p>
 
-                        <div class="pd-description" th:text="${detail.description}">
-                            商品紹介テキスト
-                        </div>
+                            <div class="pd-description" th:text="${detail.description}">
+                                商品紹介テキスト
+                            </div>
 
-                        <section class="pd-color-section" aria-label="カラー選択">
-                            <h2 class="pd-heading">カラー</h2>
-                            <div class="pd-color-grid">
-                                <label class="pd-color-card"
-                                       data-pd-variant-card
-                                       th:each="variant : ${detail.variants}"
-                                       th:attr="data-variant-id=${variant.productVariantId},
+                            <section class="pd-color-section" aria-label="カラー選択">
+                                <h2 class="pd-heading">カラー</h2>
+                                <div class="pd-color-grid">
+                                    <label class="pd-color-card" data-pd-variant-card
+                                        th:each="variant : ${detail.variants}" th:attr="data-variant-id=${variant.productVariantId},
                                                 data-product-code=${variant.productCode},
                                                data-color-name=${variant.colorName},
                                                data-unit-price=${variant.unitPrice},
                                                data-unit-price-text=${variant.unitPriceText},
                                                 data-stock-quantity=${variant.stockQuantity}"
-                                       th:classappend="${variant.productVariantId == detail.selectedVariant.productVariantId} ? ' is-selected'">
-                                    <input type="radio"
-                                           name="color"
-                                           th:value="${variant.productVariantId}"
-                                           th:checked="${variant.productVariantId == detail.selectedVariant.productVariantId}">
-                                    <img class="pd-color-thumb"
-                                         th:src="@{|/images/products/${variant.productCode}.png|}"
-                                         th:alt="${variant.colorName}"
-                                         loading="lazy">
-                                    <p class="pd-color-name" th:text="${variant.colorName}">白(BN)</p>
-                                    <p class="pd-color-price" th:text="${variant.unitPriceText + '円(税抜)'}">78,300円(税抜)</p>
-                                    <p class="pd-color-stock" th:text="${'在庫: ' + variant.stockQuantity}">在庫: 4</p>
-                                </label>
-                            </div>
-                        </section>
-
-                        <div class="pd-buy-box">
-                            <div class="pd-buy-head">
-                                <img class="pd-buy-thumb"
-                                     data-pd-buy-image
-                                     th:src="@{|/images/products/${detail.selectedVariant.productCode}.png|}"
-                                     th:alt="${detail.productName}">
-                                <div class="pd-buy-meta">
-                                    <div class="pd-buy-meta-row"><span>カラー</span><strong data-pd-buy-color th:text="${detail.selectedVariant.colorName}">白(BN)</strong></div>
-                                    <div class="pd-buy-meta-row"><span>商品コード</span><strong data-pd-buy-code th:text="${detail.selectedVariant.productCode}">436-508</strong></div>
-                                    <div class="pd-buy-meta-row"><span>在庫数</span><strong data-pd-buy-stock th:text="${detail.selectedVariant.stockQuantity}">4</strong></div>
+                                        th:classappend="${variant.productVariantId == detail.selectedVariant.productVariantId} ? ' is-selected'">
+                                        <input type="radio" name="color" th:value="${variant.productVariantId}"
+                                            th:checked="${variant.productVariantId == detail.selectedVariant.productVariantId}">
+                                        <img class="pd-color-thumb"
+                                            th:src="@{|/images/products/${variant.productCode}.png|}"
+                                            th:alt="${variant.colorName}" loading="lazy">
+                                        <p class="pd-color-name" th:text="${variant.colorName}">白(BN)</p>
+                                        <p class="pd-color-price" th:text="${variant.unitPriceText + '円(税抜)'}">
+                                            78,300円(税抜)</p>
+                                        <p class="pd-color-stock" th:text="${'在庫: ' + variant.stockQuantity}">在庫: 4</p>
+                                    </label>
                                 </div>
-                            </div>
+                            </section>
 
-                            <p class="pd-total-line">
-                                税込 <strong data-pd-buy-price-incl th:text="${detail.selectedPriceIncludingTaxText + '円'}">86,130円</strong>
-                                <span data-pd-buy-assembly
-                                      th:text="${detail.selectedAssemblyFee.signum() > 0 ? '+' + detail.selectedAssemblyFeeText + '円(税込)' : 'お届けのみ'}">+4,400円(税込)</span>
-                            </p>
-
-                            <div class="pd-buy-actions">
-                                <form class="pd-cart-form" th:action="@{/cart/items}" method="post">
-                                    <input type="hidden" name="productVariantId" data-pd-cart-variant-id th:value="${detail.selectedVariant.productVariantId}">
-                                    <input type="hidden" name="redirect" th:value="${detailPagePath}">
-                                    <select name="quantity" aria-label="数量">
-                                        <option selected>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                    </select>
-                                    <button class="btn pd-cart-btn" data-pd-cart-btn type="submit" th:disabled="${detail.outOfStock}">
-                                        <span class="material-icons" aria-hidden="true">shopping_cart</span>
-                                        <span data-pd-cart-btn-text th:text="${detail.outOfStock ? '入荷待ち' : 'カートに入れる'}">カートに入れる</span>
-                                    </button>
-                                </form>
-                                <form class="pd-fav-form" th:action="@{/products/{productId}/favorite(productId=${detail.productId})}" method="post">
-                                    <input type="hidden" name="redirect" th:value="${detailPagePath}">
-                                    <input type="hidden" name="stock" value="out" th:if="${detail.outOfStock}">
-                                    <button class="pd-fav-circle" th:classappend="${isFavorite} ? ' is-on'" type="submit" aria-label="お気に入り">
-                                        <span class="material-icons" aria-hidden="true" th:text="${isFavorite ? 'favorite' : 'favorite_border'}">favorite</span>
-                                    </button>
-                                </form>
-                            </div>
-                            <div class="error" th:if="${favoriteLimitError}" th:text="${favoriteLimitError}" style="margin-top:8px;"></div>
-                            <div class="help" th:if="${cartMessage}" th:text="${cartMessage}" style="margin-top:8px;"></div>
-                            <div class="error" th:if="${cartError}" th:text="${cartError}" style="margin-top:8px;"></div>
-
-                            <a class="pd-inline-link" href="/contact">商品についてのお問い合わせ</a>
-                            <a class="pd-guide-link" href="/guide">ご利用ガイドはこちら</a>
-                        </div>
-
-                        <section class="pd-series"
-                                 aria-label="シリーズバリエーション"
-                                 th:if="${detail.hasVariation and detail.seriesLinks != null and !#lists.isEmpty(detail.seriesLinks)}">
-                            <h2 class="pd-heading">シリーズバリエーション</h2>
-                            <div class="pd-series-group">
-                                <div class="pd-series-tags">
-                                    <a class="pd-series-tag"
-                                       th:each="seriesLink : ${detail.seriesLinks}"
-                                       th:classappend="${seriesLink.active} ? ' is-active'"
-                                       th:href="@{/products/{productId}(productId=${seriesLink.productId})}"
-                                       th:text="${seriesLink.productName}">幅120×奥行70cm(ホワイト脚)</a>
+                            <div class="pd-buy-box">
+                                <div class="pd-buy-head">
+                                    <img class="pd-buy-thumb" data-pd-buy-image
+                                        th:src="@{|/images/products/${detail.selectedVariant.productCode}.png|}"
+                                        th:alt="${detail.productName}">
+                                    <div class="pd-buy-meta">
+                                        <div class="pd-buy-meta-row"><span>カラー</span><strong data-pd-buy-color
+                                                th:text="${detail.selectedVariant.colorName}">白(BN)</strong></div>
+                                        <div class="pd-buy-meta-row"><span>商品コード</span><strong data-pd-buy-code
+                                                th:text="${detail.selectedVariant.productCode}">436-508</strong></div>
+                                        <div class="pd-buy-meta-row"><span>在庫数</span><strong data-pd-buy-stock
+                                                th:text="${detail.selectedVariant.stockQuantity}">4</strong></div>
+                                    </div>
                                 </div>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-            </section>
 
-            <section class="section" aria-label="おすすめ関連商品" th:if="${detail != null}">
-                <div class="section__head">
-                    <h2 class="section__title">おすすめ関連商品</h2>
-                </div>
-                <div class="grid grid--4">
-                    <div class="card" th:if="${detail.relatedProducts == null or #lists.isEmpty(detail.relatedProducts)}">
-                        <div class="card__pad">
-                            <p class="muted" style="margin:0;">おすすめ関連商品はありません。</p>
+                                <p class="pd-total-line">
+                                    税込 <strong data-pd-buy-price-incl
+                                        th:text="${detail.selectedPriceIncludingTaxText + '円'}">86,130円</strong>
+                                    <span data-pd-buy-assembly
+                                        th:text="${detail.selectedAssemblyFee.signum() > 0 ? '+' + detail.selectedAssemblyFeeText + '円(税込)' : 'お届けのみ'}">+4,400円(税込)</span>
+                                </p>
+
+                                <div class="pd-buy-actions">
+                                    <form class="pd-cart-form" th:action="@{/cart/items}" method="post">
+                                        <input type="hidden" name="productVariantId" data-pd-cart-variant-id
+                                            th:value="${detail.selectedVariant.productVariantId}">
+                                        <input type="hidden" name="redirect" th:value="${detailPagePath}">
+                                        <select name="quantity" aria-label="数量">
+                                            <option selected>1</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                        </select>
+                                        <button class="btn pd-cart-btn" data-pd-cart-btn type="submit"
+                                            th:disabled="${detail.outOfStock}">
+                                            <span class="material-icons" aria-hidden="true">shopping_cart</span>
+                                            <span data-pd-cart-btn-text
+                                                th:text="${detail.outOfStock ? '入荷待ち' : 'カートに入れる'}">カートに入れる</span>
+                                        </button>
+                                    </form>
+                                    <form class="pd-fav-form"
+                                        th:action="@{/products/{productId}/favorite(productId=${detail.productId})}"
+                                        method="post">
+                                        <input type="hidden" name="redirect" th:value="${detailPagePath}">
+                                        <input type="hidden" name="stock" value="out" th:if="${detail.outOfStock}">
+                                        <button class="pd-fav-circle" th:classappend="${isFavorite} ? ' is-on'"
+                                            type="submit" aria-label="お気に入り">
+                                            <span class="material-icons" aria-hidden="true"
+                                                th:text="${isFavorite ? 'favorite' : 'favorite_border'}">favorite</span>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="error" th:if="${favoriteLimitError}" th:text="${favoriteLimitError}"
+                                    style="margin-top:8px;"></div>
+                                <div class="help" th:if="${cartMessage}" th:text="${cartMessage}"
+                                    style="margin-top:8px;"></div>
+                                <div class="error" th:if="${cartError}" th:text="${cartError}" style="margin-top:8px;">
+                                </div>
+
+                                <a class="pd-inline-link" href="/contact">商品についてのお問い合わせ</a>
+                                <a class="pd-guide-link" href="/guide">ご利用ガイドはこちら</a>
+                            </div>
+
+                            <section class="pd-series" aria-label="シリーズバリエーション"
+                                th:if="${detail.hasVariation and detail.seriesLinks != null and !#lists.isEmpty(detail.seriesLinks)}">
+                                <h2 class="pd-heading">シリーズバリエーション</h2>
+                                <div class="pd-series-group">
+                                    <div class="pd-series-tags">
+                                        <a class="pd-series-tag" th:each="seriesLink : ${detail.seriesLinks}"
+                                            th:classappend="${seriesLink.active} ? ' is-active'"
+                                            th:href="@{/products/{productId}(productId=${seriesLink.productId})}"
+                                            th:text="${seriesLink.productName}">幅120×奥行70cm(ホワイト脚)</a>
+                                    </div>
+                                </div>
+                            </section>
                         </div>
                     </div>
-                    <th:block th:each="product : ${detail.relatedProducts}">
-                        <div th:replace="~{fragments/common/product-card :: productCardByView(${product})}"></div>
-                    </th:block>
-                </div>
-            </section>
+                </section>
 
-        </div>
-    </main>
+                <section class="section" aria-label="おすすめ関連商品" th:if="${detail != null}">
+                    <div class="section__head">
+                        <h2 class="section__title">おすすめ関連商品</h2>
+                    </div>
+                    <div class="grid grid--4">
+                        <div class="card"
+                            th:if="${detail.relatedProducts == null or #lists.isEmpty(detail.relatedProducts)}">
+                            <div class="card__pad">
+                                <p class="muted" style="margin:0;">おすすめ関連商品はありません。</p>
+                            </div>
+                        </div>
+                        <th:block th:each="product : ${detail.relatedProducts}">
+                            <div th:replace="~{fragments/common/product-card :: productCardByView(${product})}"></div>
+                        </th:block>
+                    </div>
+                </section>
 
-    <div th:replace="~{fragments/layout/footer :: footer}"></div>
-</div>
+                <section class="section" aria-label="商品レビュー" th:if="${detail != null}">
+                    <div class="section__head">
+                        <h2 class="section__title">商品レビュー</h2>
+                    </div>
 
-<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+                    <div th:if="${detail.reviews == null or #lists.isEmpty(detail.reviews)}">
+                        <p class="muted">まだレビューはありません。</p>
+                    </div>
+
+                    <div th:each="review : ${detail.reviews}" class="review-item">
+                        <div>
+                            <strong th:text="${'評価 ' + review.rating + ' / 5'}">評価 5 / 5</strong>
+                        </div>
+
+                        <h3 th:if="${review.title != null and !#strings.isEmpty(review.title)}"
+                            th:text="${review.title}">
+                            レビュータイトル
+                        </h3>
+
+                        <p th:text="${review.body}">
+                            レビュー本文
+                        </p>
+
+                        <p class="muted" th:text="${#temporals.format(review.createdAt, 'yyyy/MM/dd HH:mm')}">
+                            2026/08/27 10:00
+                        </p>
+                    </div>
+                </section>
+
+                <section class="section" aria-label="レビュー投稿" th:if="${memberReview == null}">
+                    <div class="section__head">
+                        <h2 class="section__title">レビューを投稿する</h2>
+                    </div>
+
+                    <form th:action="@{/products/{productId}/reviews(productId=${detail.productId})}" method="post">
+
+                        <div>
+                            <label for="review-rating">評価</label>
+                            <select id="review-rating" name="rating" required>
+                                <option value="">選択してください</option>
+                                <option value="5">5</option>
+                                <option value="4">4</option>
+                                <option value="3">3</option>
+                                <option value="2">2</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="review-title">タイトル</label>
+                            <input id="review-title" type="text" name="title" maxlength="100">
+                        </div>
+
+                        <div>
+                            <label for="review-body">レビュー本文</label>
+                            <textarea id="review-body" name="body" required></textarea>
+                        </div>
+
+                        <button type="submit">レビューを投稿する</button>
+                    </form>
+
+                    <p class="error" th:if="${reviewError}" th:text="${reviewError}">
+                        レビューの入力内容を確認してください。
+                    </p>
+                </section>
+
+                <section class="section" aria-label="レビュー更新" th:if="${memberReview != null}">
+                    <div class="section__head">
+                        <h2 class="section__title">自分のレビューを編集する</h2>
+                    </div>
+
+                    <form th:action="@{/products/{productId}/reviews/update(productId=${detail.productId})}"
+                        method="post">
+
+                        <div>
+                            <label for="review-update-rating">評価</label>
+                            <select id="review-update-rating" name="rating" required>
+                                <option value="5" th:selected="${memberReview.rating == 5}">5</option>
+                                <option value="4" th:selected="${memberReview.rating == 4}">4</option>
+                                <option value="3" th:selected="${memberReview.rating == 3}">3</option>
+                                <option value="2" th:selected="${memberReview.rating == 2}">2</option>
+                                <option value="1" th:selected="${memberReview.rating == 1}">1</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="review-update-title">タイトル</label>
+                            <input id="review-update-title" type="text" name="title" maxlength="100"
+                                th:value="${memberReview.title}">
+                        </div>
+
+                        <div>
+                            <label for="review-update-body">レビュー本文</label>
+                            <textarea id="review-update-body" name="body" required
+                                th:text="${memberReview.body}"></textarea>
+                        </div>
+
+                        <button type="submit">レビューを更新する</button>
+                    </form>
+
+                    <p class="error" th:if="${reviewError}" th:text="${reviewError}">
+                        レビューの入力内容を確認してください。
+                    </p>
+                </section>
+            </div>
+        </main>
+
+        <div th:replace="~{fragments/layout/footer :: footer}"></div>
+    </div>
+
+    <th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
 </body>
+
 </html>

@@ -368,6 +368,19 @@
         ORDER BY oi.order_item_id ASC
     </select>
 
+    <select id="existsPurchasedProduct" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM orders o
+            JOIN order_items oi
+                ON oi.order_id = o.order_id
+            JOIN product_variants pv
+                ON pv.product_code = oi.product_code
+            WHERE o.member_id = #{memberId}
+            AND pv.product_id = #{productId}
+        )
+    </select>
+
     <select id="selectCurrentTaxRatePercent" resultType="java.math.BigDecimal">
         SELECT tax_rate_percent
         FROM tax_rates

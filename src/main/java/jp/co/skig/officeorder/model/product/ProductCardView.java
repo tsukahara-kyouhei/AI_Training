@@ -1,5 +1,6 @@
 package jp.co.skig.officeorder.model.product;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -12,7 +13,9 @@ public record ProductCardView(
         List<String> colorCodes,
         String productCode,
         boolean inStock,
-        String detailUrl
+        String detailUrl,
+        BigDecimal averageRating,
+        long reviewCount
 ) {
 }
 

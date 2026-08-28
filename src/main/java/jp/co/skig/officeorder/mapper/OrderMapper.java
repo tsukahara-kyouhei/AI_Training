@@ -62,32 +62,32 @@ public interface OrderMapper {
      * 会員の購入履歴一覧をページ単位で取得する。
      */
     List<MemberOrderHistoryMapperRow> selectMemberOrders(@Param("memberId") long memberId,
-                                                         @Param("limit") int limit,
-                                                         @Param("offset") int offset);
+            @Param("limit") int limit,
+            @Param("offset") int offset);
 
     /**
      * 注文詳細のヘッダ部と金額サマリーを取得する。
      */
     MemberOrderDetailMapperRow selectMemberOrderDetail(@Param("memberId") long memberId,
-                                                       @Param("orderNumber") String orderNumber);
+            @Param("orderNumber") String orderNumber);
 
     /**
      * 注文のステータス履歴を時系列で取得する。
      */
     List<MemberOrderStatusHistoryMapperRow> selectMemberOrderStatusHistories(@Param("memberId") long memberId,
-                                                                             @Param("orderNumber") String orderNumber);
+            @Param("orderNumber") String orderNumber);
 
     /**
      * 注文詳細の明細行を取得する。
      */
     List<MemberOrderItemMapperRow> selectMemberOrderItems(@Param("memberId") long memberId,
-                                                          @Param("orderNumber") String orderNumber);
+            @Param("orderNumber") String orderNumber);
 
     /**
      * 再購入時にカートへ積み直すための注文明細情報を取得する。
      */
     List<OrderReorderItemMapperRow> selectMemberReorderItems(@Param("memberId") long memberId,
-                                                              @Param("orderNumber") String orderNumber);
+            @Param("orderNumber") String orderNumber);
 
     /**
      * 指定時点で有効な消費税率を取得する。
@@ -98,13 +98,12 @@ public interface OrderMapper {
      * 指定されたクーポンコードと現在時刻をもとに、有効なクーポンを取得する。
      *
      * @param couponCode クーポンコード
-     * @param now 現在時刻
+     * @param now        現在時刻
      * @return クーポンDTO
      */
     CouponForm selectActiveCouponByCode(
-        @Param("couponCode") String couponCode, 
-        @Param("now") OffsetDateTime now
-    );
+            @Param("couponCode") String couponCode,
+            @Param("now") OffsetDateTime now);
 
     /**
      * 会員の特定クーポン利用回数を取得する。
@@ -114,22 +113,25 @@ public interface OrderMapper {
      * @return 利用回数
      */
     Integer selectCustomerCouponUsageCount(
-        @Param("memberId") long memberId, 
-        @Param("couponId") long couponId
-    );
+            @Param("memberId") long memberId,
+            @Param("couponId") long couponId);
 
     /**
      * 会員のクーポン利用実績をインクリメント（初回はINSERT）する。
      *
      * @param memberId 会員ID
      * @param couponId クーポンID
-     * @param now 現在時刻
+     * @param now      現在時刻
      */
     void upsertCustomerCouponUsage(
-        @Param("memberId") long memberId, 
-        @Param("couponId") long couponId, 
-        @Param("now") OffsetDateTime now
-    );
+            @Param("memberId") long memberId,
+            @Param("couponId") long couponId,
+            @Param("now") OffsetDateTime now);
+
+    /**
+     * 会員が指定した商品を購入したことがあるか確認する。
+     */
+    boolean existsPurchasedProduct(
+            @Param("memberId") long memberId,
+            @Param("productId") long productId);
 }
-
-

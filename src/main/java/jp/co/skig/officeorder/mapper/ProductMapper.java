@@ -11,6 +11,7 @@ import jp.co.skig.officeorder.mapper.row.ProductFilterColorOptionMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductFilterOptionMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductListMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductRankedMapperRow;
+import jp.co.skig.officeorder.mapper.row.ProductReviewMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductSeriesLinkMapperRow;
 import jp.co.skig.officeorder.mapper.row.ProductVariantMapperRow;
 import org.apache.ibatis.annotations.Mapper;
@@ -36,7 +37,7 @@ public interface ProductMapper {
      * 商品IDを指定して、トップ表示や関連商品表示に必要な商品行を取得する。
      */
     List<ProductListMapperRow> selectProductsByIds(@Param("productIds") List<Long> productIds,
-                                                   @Param("now") OffsetDateTime now);
+            @Param("now") OffsetDateTime now);
 
     /**
      * 一覧カードに表示するカラーコードを商品単位で取得する。
@@ -52,7 +53,7 @@ public interface ProductMapper {
      * 商品詳細画面のヘッダ部に必要な商品基本情報を取得する。
      */
     ProductDetailMapperRow selectProductDetail(@Param("productId") long productId,
-                                               @Param("now") OffsetDateTime now);
+            @Param("now") OffsetDateTime now);
 
     /**
      * 商品詳細で選択可能なカラー別バリアントを取得する。
@@ -63,13 +64,13 @@ public interface ProductMapper {
      * 同一バリエーショングループの商品リンクを取得する。
      */
     List<ProductSeriesLinkMapperRow> selectSeriesLinks(@Param("variationGroupId") long variationGroupId,
-                                                       @Param("now") OffsetDateTime now);
+            @Param("now") OffsetDateTime now);
 
     /**
      * 保存済みのおすすめ関連商品を取得する。
      */
     List<ProductRankedMapperRow> selectRecommendedProducts(@Param("sourceProductId") long sourceProductId,
-                                                           @Param("limit") int limit);
+            @Param("limit") int limit);
 
     /**
      * 一覧絞り込みで使用するカラー選択肢を取得する。
@@ -115,6 +116,10 @@ public interface ProductMapper {
      * 指定時点で有効な消費税率を取得する。
      */
     BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);
+
+    /**
+     * 商品詳細に表示する公開済みレビューを最新順で取得する。
+     */
+    List<ProductReviewMapperRow> selectProductReviews(
+            @Param("productId") long productId);
 }
-
-

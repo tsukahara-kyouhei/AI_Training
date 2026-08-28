@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="jp.co.skig.officeorder.mapper.ReviewMapper">
+
+    <resultMap id="ProductReviewRowMap"
+               type="jp.co.skig.officeorder.mapper.row.ProductReviewMapperRow">
+
+        <constructor>
+            <idArg column="review_id" javaType="long"/>
+            <arg column="member_id" javaType="long"/>
+            <arg column="product_id" javaType="long"/>
+            <arg column="rating" javaType="int"/>
+            <arg column="title" javaType="string"/>
+            <arg column="body" javaType="string"/>
+            <arg column="published" javaType="boolean"/>
+            <arg column="created_at"
+                 javaType="java.time.OffsetDateTime"/>
+            <arg column="updated_at"
+                 javaType="java.time.OffsetDateTime"/>
+        </constructor>
+
+    </resultMap>
+
+
+    <resultMap id="ProductReviewSummaryRowMap"
+               type="jp.co.skig.officeorder.mapper.row.ProductReviewSummaryMapperRow">
+
+        <constructor>
+            <arg column="review_count" javaType="long"/>
+            <arg column="average_rating"
+                 javaType="java.math.BigDecimal"/>
+        </constructor>
+
+    </resultMap>
+
+
+    <!-- 商品のレビュー平均評価・件数 -->
+    <select id="selectReviewSummary"
+            resultMap="ProductReviewSummaryRowMap">
+
+        SELECT
+            COUNT(*) AS review_count,
+            AVG(rating) AS average_rating
+        FROM product_reviews
+        WHERE product_id = #{productId}
+          AND is_published = TRUE
+
+    </select>
+
+
+    <!-- 商品の公開レビュー一覧 -->
+    <select id="selectProductReviews"
+            resultMap="ProductReviewRowMap">
+
+        SELECT
+            review_id,
+            member_id,
+            product_id,
+            rating,
+            title,
+            body,
+            is_published AS published,
+            created_at,
+            updated_at
+        FROM product_reviews
+        WHERE product_id = #{productId}
+          AND is_published = TRUE
+        ORDER BY created_at DESC, review_id DESC
+
+    </select>
+
+
+    <!-- 会員自身のレビュー -->
+    <select id="selectMemberReview"
+            resultMap="ProductReviewRowMap">
+
+        SELECT
+            review_id,
+            member_id,
+            product_id,
+            rating,
+            title,
+            body,
+            is_published AS published,
+            created_at,
+            updated_at
+        FROM product_reviews
+        WHERE member_id = #{memberId}
+          AND product_id = #{productId}
+
+    </select>
+
+
+    <!-- 会員が対象商品を購入したことがあるか -->
+    <select id="existsPurchasedProduct"
+            resultType="boolean">
+
+        SELECT EXISTS (
+            SELECT 1
+            FROM orders o
+            JOIN order_items oi
+                ON oi.order_id = o.order_id
+            JOIN product_variants pv
+                ON pv.product_code = oi.product_code
+            WHERE o.member_id = #{memberId}
+              AND pv.product_id = #{productId}
+        )
+
+    </select>
+
+
+    <!-- レビュー新規登録 -->
+    <insert id="insertReview">
+
+        INSERT INTO product_reviews (
+            member_id,
+            product_id,
+            rating,
+            title,
+            body,
+            is_published,
+            created_at,
+            updated_at
+        )
+        VALUES (
+            #{memberId},
+            #{productId},
+            #{rating},
+            #{title},
+            #{body},
+            TRUE,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+
+    </insert>
+
+
+    <!-- レビュー更新 -->
+    <update id="updateReview">
+
+        UPDATE product_reviews
+        SET
+            rating = #{rating},
+            title = #{title},
+            body = #{body},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE member_id = #{memberId}
+          AND product_id = #{productId}
+
+    </update>
+
+</mapper>

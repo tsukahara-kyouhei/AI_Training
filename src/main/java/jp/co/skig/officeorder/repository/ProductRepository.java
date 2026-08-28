@@ -31,6 +31,7 @@ import jp.co.skig.officeorder.model.product.ProductCategory;
 import jp.co.skig.officeorder.model.product.ProductCategoryFilter;
 import jp.co.skig.officeorder.model.product.ProductDetailView;
 import jp.co.skig.officeorder.model.product.ProductListPage;
+import jp.co.skig.officeorder.model.product.ProductReviewView;
 import jp.co.skig.officeorder.model.product.ProductSearchCondition;
 import jp.co.skig.officeorder.model.product.ProductSeriesLinkView;
 import jp.co.skig.officeorder.model.product.ProductSort;
@@ -246,6 +247,15 @@ public class ProductRepository {
 
         List<ProductSeriesLinkView> seriesLinks = findSeriesLinks(product.productId(), product.variationGroupId(), now);
         List<ProductCardView> relatedProducts = findRecommendedProducts(product.productId(), 4);
+        List<ProductReviewView> reviews = productMapper.selectProductReviews(productId).stream()
+                .map(row -> new ProductReviewView(
+                        row.reviewId(),
+                        row.memberId(),
+                        row.rating(),
+                        row.title(),
+                        row.body(),
+                        row.createdAt()))
+                .toList();
 
         ProductDetailView detail = new ProductDetailView(
                 product.productId(),
@@ -266,7 +276,10 @@ public class ProductRepository {
                 variants,
                 seriesLinks,
                 relatedProducts,
-                selectedVariant.stockQuantity() <= 0 || forceOutOfStock);
+                selectedVariant.stockQuantity() <= 0 || forceOutOfStock,
+                product.averageRating(),
+                product.reviewCount(),
+                reviews);
         return Optional.of(detail);
     }
 
@@ -556,7 +569,9 @@ public class ProductRepository {
                 colors,
                 row.productCode(),
                 inStock,
-                detailUrl);
+                detailUrl,
+                row.averageRating(),
+                row.reviewCount());
     }
 
     /**
@@ -571,7 +586,9 @@ public class ProductRepository {
                 row.productName(),
                 row.minPrice(),
                 row.maxStock(),
-                row.productCode());
+                row.productCode(),
+                row.averageRating(),
+                row.reviewCount());
     }
 
     /**
