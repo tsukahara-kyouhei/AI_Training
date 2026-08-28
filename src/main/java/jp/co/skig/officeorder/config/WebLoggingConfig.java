@@ -8,6 +8,7 @@ import jp.co.skig.officeorder.web.auth.MemberSessionService;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -29,7 +30,7 @@ public class WebLoggingConfig implements WebMvcConfigurer {
      * @param memberService 会員サービス
      * @param memberSessionService 会員セッションサービス
      */
-    public WebLoggingConfig(MemberService memberService,
+    public WebLoggingConfig(@Lazy MemberService memberService,
                             MemberSessionService memberSessionService) {
         this.memberService = memberService;
         this.memberSessionService = memberSessionService;

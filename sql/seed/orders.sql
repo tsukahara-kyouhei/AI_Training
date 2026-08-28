@@ -7,7 +7,7 @@ INSERT INTO orders (
     shipping_prefecture, shipping_city, shipping_address_line, shipping_floor,
     shipping_has_elevator, payment_method, shipping_method,
     subtotal_amount, tax_amount, total_amount
-) VALUES (
+) OVERRIDING SYSTEM VALUE VALUES (
     999, 'ORD-TEST-999', 'completed', 'member', 'personal',
     1, 'テスト', '太郎', 'テスト', 'タロウ', 'test@example.com',
     '09012345678', '1000001', '東京都', '千代田区', '千代田1-1', 1, true,
