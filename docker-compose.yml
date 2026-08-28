@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: office_order
       POSTGRES_PASSWORD: office_order
     volumes:
-      - office-order-postgres-data:/var/lib/postgresql/data
+      - office-order-postgres-data:/var/lib/postgresql
       - ./sql/init/init.sql:/docker-entrypoint-initdb.d/00-init.sql
       - ./sql/schema:/docker-entrypoint-initdb.d/schema
       - ./sql/seed:/docker-entrypoint-initdb.d/seed

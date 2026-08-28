@@ -7,7 +7,7 @@ import java.util.List;
  * 商品詳細画面全体の表示に必要な情報を束ねたモデル。
  */
 public record ProductDetailView(
-        long productId,
+        Long productId,
         String productName,
         String description,
         String categoryId,
@@ -25,7 +25,7 @@ public record ProductDetailView(
         List<ProductVariantView> variants,
         List<ProductSeriesLinkView> seriesLinks,
         List<ProductCardView> relatedProducts,
-        boolean outOfStock
+        Boolean outOfStock
 ) {
 }
 
