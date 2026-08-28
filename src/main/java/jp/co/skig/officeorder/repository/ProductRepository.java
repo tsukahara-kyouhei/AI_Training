@@ -527,10 +527,15 @@ public class ProductRepository {
     private ProductCardView toCard(ProductListMapperRow row, List<String> colors) {
         boolean inStock = row.maxStock() > 0;
         String detailUrl = "/products/" + row.productId() + (inStock ? "" : "?stock=out");
+        BigDecimal taxRate = findCurrentTaxRatePercent(appTimeProvider.nowOffsetDateTime());
+        BigDecimal taxIncludedPrice = row.minPrice()
+                .multiply(BigDecimal.ONE.add(taxRate.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)))
+                .setScale(0, RoundingMode.DOWN);
         return new ProductCardView(
                 row.productId(),
                 row.productName(),
                 MoneyFormatter.formatYen(row.minPrice()),
+                MoneyFormatter.formatYen(taxIncludedPrice),
                 colors,
                 row.productCode(),
                 inStock,
