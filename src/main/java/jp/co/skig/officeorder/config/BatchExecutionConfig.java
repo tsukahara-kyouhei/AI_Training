@@ -1,10 +1,11 @@
 package jp.co.skig.officeorder.config;
 
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.repository.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.support.SimpleJobOperator;
+import org.springframework.batch.core.launch.support.JobOperatorFactoryBean;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -74,12 +75,12 @@ public class BatchExecutionConfig {
                                         JobRepository jobRepository,
                                         JobExplorer jobExplorer,
                                         JobRegistry jobRegistry) throws Exception {
-        SimpleJobOperator jobOperator = new SimpleJobOperator();
-        jobOperator.setJobLauncher(asyncJobLauncher);
-        jobOperator.setJobRepository(jobRepository);
-        jobOperator.setJobExplorer(jobExplorer);
-        jobOperator.setJobRegistry(jobRegistry);
-        jobOperator.afterPropertiesSet();
-        return jobOperator;
+        JobOperatorFactoryBean factory = new JobOperatorFactoryBean();
+        factory.setJobRepository(jobRepository);
+        factory.setJobRegistry(jobRegistry);
+        factory.setTaskExecutor(batchJobTaskExecutor());
+        factory.setTransactionManager(null);
+        factory.afterPropertiesSet();
+        return factory.getObject();
     }
 }
