@@ -17,7 +17,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 /**
  * Spring Batch の非同期実行基盤を定義する設定。
  */
-@Configuration
+// @Configuration
 @EnableScheduling
 public class BatchExecutionConfig {
 

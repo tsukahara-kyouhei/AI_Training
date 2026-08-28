@@ -8,8 +8,9 @@ services:
       POSTGRES_DB: office_order
       POSTGRES_USER: office_order
       POSTGRES_PASSWORD: office_order
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - office-order-postgres-data:/var/lib/postgresql/data
+      - office-order-postgres-data-v18:/var/lib/postgresql/data
       - ./sql/init/init.sql:/docker-entrypoint-initdb.d/00-init.sql
       - ./sql/schema:/docker-entrypoint-initdb.d/schema
       - ./sql/seed:/docker-entrypoint-initdb.d/seed
@@ -41,5 +42,5 @@ services:
       ENGINE_con1: postgres@dbgate-plugin-postgres
 
 volumes:
-  office-order-postgres-data:
+  office-order-postgres-data-v18:
   office-order-dbgate-data:

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * Web共通のMDC設定と会員有効性検証を登録する設定。
@@ -26,11 +27,11 @@ public class WebLoggingConfig implements WebMvcConfigurer {
     /**
      * Webログ設定を生成する。
      *
-     * @param memberService 会員サービス
+     * @param memberService        会員サービス
      * @param memberSessionService 会員セッションサービス
      */
-    public WebLoggingConfig(MemberService memberService,
-                            MemberSessionService memberSessionService) {
+    public WebLoggingConfig(@Lazy MemberService memberService,
+            MemberSessionService memberSessionService) {
         this.memberService = memberService;
         this.memberSessionService = memberSessionService;
     }
