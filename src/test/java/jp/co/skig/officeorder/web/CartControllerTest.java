@@ -31,101 +31,101 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc(addFilters = false)
 class CartControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockitoBean
-    private CartService cartService;
+        @MockitoBean
+        private CartService cartService;
 
-    @MockitoBean
-    private MemberSessionService memberSessionService;
+        @MockitoBean
+        private MemberSessionService memberSessionService;
 
-    @MockitoBean
-    private LoginEmailCookieService loginEmailCookieService;
+        @MockitoBean
+        private LoginEmailCookieService loginEmailCookieService;
 
-    @MockitoBean
-    private MemberService memberService;
+        @MockitoBean
+        private MemberService memberService;
 
-    @MockitoBean
-    private OrderService orderService;
+        @MockitoBean
+        private OrderService orderService;
 
-    @MockitoBean
-    private AnnouncementService announcementService;
+        @MockitoBean
+        private AnnouncementService announcementService;
 
-    @Test
-    void updateItemTreatsCheckedAssemblyOptionAsTrueWhenHiddenAndCheckboxValuesAreBothSent() throws Exception {
-        mockMvc.perform(post("/cart/items/42/update")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .param("quantity", "2")
-                .param("assemblyRequested", "false")
-                .param("assemblyRequested", "true"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/cart"));
+        @Test
+        void updateItemTreatsCheckedAssemblyOptionAsTrueWhenHiddenAndCheckboxValuesAreBothSent() throws Exception {
+                mockMvc.perform(post("/cart/items/42/update")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .param("quantity", "2")
+                                .param("assemblyRequested", "false")
+                                .param("assemblyRequested", "true"))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(redirectedUrl("/cart"));
 
-        verify(cartService).updateItem(any(), any(), eq(42L), eq(2), eq(true));
-    }
+                verify(cartService).updateItem(any(), any(), eq(42L), eq(2), eq(true));
+        }
 
-    @Test
-    void applyCoupon_正常系_クーポンを適用してカートへリダイレクトする() throws Exception {
+        @Test
+        void applyCoupon_正常系_クーポンを適用してカートへリダイレクトする() throws Exception {
 
-        CartView cart = mock(CartView.class);
+                CartView cart = mock(CartView.class);
 
-        when(cartService.getCart(any(), any()))
-                .thenReturn(cart);
+                when(cartService.getCart(any(), any()))
+                                .thenReturn(cart);
 
-        mockMvc.perform(post("/cart/coupon/apply")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .param("couponCode", "SAVE1000"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/cart"))
-                .andExpect(flash().attribute(
-                        "couponSuccess",
-                        "クーポンを適用しました。"));
+                mockMvc.perform(post("/cart/coupon/apply")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .param("couponCode", "SAVE1000"))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(redirectedUrl("/cart"))
+                                .andExpect(flash().attribute(
+                                                "couponSuccess",
+                                                "クーポンを適用しました。"));
 
-        verify(cartService).getCart(any(), any());
+                verify(cartService).getCart(any(), any());
 
-        verify(cartService).applyCoupon(
-                eq("SAVE1000"),
-                eq(cart),
-                any(),
-                any());
-    }
+                verify(cartService).applyCoupon(
+                                eq("SAVE1000"),
+                                eq(cart),
+                                any(),
+                                any());
+        }
 
-    @Test
-    void applyCoupon_異常系_クーポン適用に失敗した場合はエラーメッセージを表示する() throws Exception {
+        @Test
+        void applyCoupon_異常系_クーポン適用に失敗した場合はエラーメッセージを表示する() throws Exception {
 
-        CartView cart = mock(CartView.class);
+                CartView cart = mock(CartView.class);
 
-        when(cartService.getCart(any(), any()))
-                .thenReturn(cart);
+                when(cartService.getCart(any(), any()))
+                                .thenReturn(cart);
 
-        doThrow(new IllegalArgumentException("無効なクーポンコード、または期限切れです。"))
-                .when(cartService)
-                .applyCoupon(
-                        anyString(),
-                        eq(cart),
-                        any(),
-                        any());
+                doThrow(new IllegalArgumentException("無効なクーポンコード、または期限切れです。"))
+                                .when(cartService)
+                                .applyCoupon(
+                                                anyString(),
+                                                eq(cart),
+                                                any(),
+                                                any());
 
-        mockMvc.perform(post("/cart/coupon/apply")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .param("couponCode", "INVALID"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/cart"))
-                .andExpect(flash().attribute(
-                        "couponError",
-                        "無効なクーポンコード、または期限切れです。"));
-    }
+                mockMvc.perform(post("/cart/coupon/apply")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .param("couponCode", "INVALID"))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(redirectedUrl("/cart"))
+                                .andExpect(flash().attribute(
+                                                "couponError",
+                                                "無効なクーポンコード、または期限切れです。"));
+        }
 
-    @Test
-    void removeCoupon_正常系_クーポンを解除してカートへリダイレクトする() throws Exception {
+        @Test
+        void removeCoupon_正常系_クーポンを解除してカートへリダイレクトする() throws Exception {
 
-        mockMvc.perform(post("/cart/coupon/remove")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/cart"))
-                .andExpect(flash().attribute(
-                        "couponSuccess",
-                        "クーポンを解除しました。"));
-    }
+                mockMvc.perform(post("/cart/coupon/remove")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(redirectedUrl("/cart"))
+                                .andExpect(flash().attribute(
+                                                "couponSuccess",
+                                                "クーポンを解除しました。"));
+        }
 }

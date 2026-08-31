@@ -1,8 +1,10 @@
 package jp.co.skig.officeorder.config;
 
+import org.springframework.batch.core.configuration.JobLocator;
 //import org.springframework.batch.core.configuration.JobRegistry;
 //import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.launch.support.JobOperatorFactoryBean;
 import org.springframework.batch.core.launch.support.TaskExecutorJobOperator;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,7 +40,7 @@ public class BatchExecutionConfig {
         return executor;
     }
 
-    /**
+    /*
      * 非同期実行用の JobOperator を生成する。
      *
      * @param jobRepository        ジョブリポジトリ
@@ -46,17 +48,29 @@ public class BatchExecutionConfig {
      * @return JobOperator
      * @throws Exception 初期化失敗時
      */
+    /* 
     @Bean(name = "asyncJobOperator")
     @Primary
     public JobOperator asyncJobOperator(
             JobRepository jobRepository,
             @Qualifier("batchJobTaskExecutor") TaskExecutor batchJobTaskExecutor) throws Exception {
+    */
+        /*
+         * TaskExecutorJobOperator jobOperator = new TaskExecutorJobOperator();
+         * jobOperator.setJobRepository(jobRepository);
+         * jobOperator.setTaskExecutor(batchJobTaskExecutor);
+         * jobOperator.afterPropertiesSet();
+         * 
+         * 
+         * return jobOperator;
+         */
+        /* 
+        JobOperatorFactoryBean factory = new JobOperatorFactoryBean();
+        factory.setJobRepository(jobRepository);
+        factory.setTaskExecutor(batchJobTaskExecutor);
+        factory.afterPropertiesSet();
 
-        TaskExecutorJobOperator jobOperator = new TaskExecutorJobOperator();
-        jobOperator.setJobRepository(jobRepository);
-        jobOperator.setTaskExecutor(batchJobTaskExecutor);
-        jobOperator.afterPropertiesSet();
-
-        return jobOperator;
+        return factory.getObject();
     }
+        */
 }

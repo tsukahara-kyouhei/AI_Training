@@ -5,7 +5,7 @@ import java.time.OffsetDateTime;
 public record ProductReviewView(
         long reviewId,
         long memberId,
-        int rating,
+        Integer rating,
         String title,
         String body,
         OffsetDateTime createdAt) {

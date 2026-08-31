@@ -10,6 +10,7 @@ import jp.co.skig.officeorder.logging.RequestIdMdcFilter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.boot.webmvc.error.ErrorController;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Controller;
@@ -24,8 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * 最低限の情報だけで応答を返せるようにしている。
  */
 @Controller
-@RequestMapping("${server.error.path:${error.path:/error}}")
-public class AppErrorController {
+@RequestMapping("${server.web.error.path:${error.path:/error}}")
+public class AppErrorController implements ErrorController {
 
     /** 利用者向けメッセージ取得ヘルパ。 */
     private final MessageSourceAccessor messages;
