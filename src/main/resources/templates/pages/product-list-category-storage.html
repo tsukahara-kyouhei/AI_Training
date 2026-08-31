@@ -1,198 +1,222 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{fragments/layout/head :: head('カテゴリ別商品一覧（収納家具） | OFFICE ORDER', '')}"></head>
+
 <body>
-<div class="page">
-    <div th:replace="~{fragments/layout/header :: header}"></div>
-    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+    <div class="page">
+        <div th:replace="~{fragments/layout/header :: header}"></div>
+        <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
 
-    <main class="main">
-        <div class="container">
-            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > 収納家具')}"></div>
-            <h1 class="page-title">収納家具</h1>
+        <main class="main">
+            <div class="container">
+                <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > 収納家具')}"></div>
+                <h1 class="page-title">収納家具</h1>
 
-            <div class="only-mobile">
-                <div class="toolbar">
-                    <div class="toolbar__group"><span class="badge" th:text="'全 ' + ${totalCount != null ? totalCount : 0} + ' 件'">全 0 件</span></div>
-                    <div class="toolbar__group"><button class="btn" type="button" data-modal-open="modal-filters-storage">条件で絞り込む</button></div>
+                <div class="only-mobile">
+                    <div class="toolbar">
+                        <div class="toolbar__group"><span class="badge"
+                                th:text="'全 ' + ${totalCount != null ? totalCount : 0} + ' 件'">全 0 件</span></div>
+                        <div class="toolbar__group"><button class="btn" type="button"
+                                data-modal-open="modal-filters-storage">条件で絞り込む</button></div>
+                    </div>
+                </div>
+
+                <div class="layout-2col">
+                    <aside class="sidebar only-desktop" aria-label="条件で絞り込む（収納家具）">
+                        <div class="card">
+                            <div class="card__pad">
+                                <p class="footer__title" style="margin:0 0 10px;">条件で絞り込む</p>
+                                <form class="form form--filters" method="get" th:action="@{/categories/storages}">
+                                    <input type="hidden" name="sort"
+                                        th:value="${sortValue != null ? sortValue : 'recommended'}">
+                                    <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 15}">
+                                    <input type="hidden" name="page" value="1">
+
+                                    <div class="field">
+                                        <label class="check-item"><input type="checkbox" name="inStockOnly" value="true"
+                                                th:checked="${inStockOnly}"> 在庫有のみ表示</label>
+                                    </div>
+                                    <div class="field">
+                                        <label>価格帯（税込）</label>
+                                        <div class="price-band-list">
+                                            <label class="check-item"><input type="checkbox" name="priceBand" value="1"
+                                                    th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(1)}">
+                                                ～20,000円</label>
+                                            <label class="check-item"><input type="checkbox" name="priceBand" value="2"
+                                                    th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(2)}">
+                                                20,000円～40,000円</label>
+                                            <label class="check-item"><input type="checkbox" name="priceBand" value="3"
+                                                    th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(3)}">
+                                                40,000円～60,000円</label>
+                                            <label class="check-item"><input type="checkbox" name="priceBand" value="4"
+                                                    th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(4)}">
+                                                60,000円～80,000円</label>
+                                            <label class="check-item"><input type="checkbox" name="priceBand" value="5"
+                                                    th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(5)}">
+                                                80,000円～100,000円</label>
+                                            <label class="check-item"><input type="checkbox" name="priceBand" value="6"
+                                                    th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(6)}">
+                                                100,000円～</label>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <label>カラー</label>
+                                        <div class="color-palette">
+                                            <label class="color-option" th:each="colorOption : ${colorFilterOptions}"
+                                                th:title="${colorOption.label}">
+                                                <input type="checkbox" name="color" th:value="${colorOption.key}"
+                                                    th:checked="${selectedColorKeys != null and selectedColorKeys.contains(colorOption.key)}"
+                                                    th:aria-label="${colorOption.label}">
+                                                <span class="color-option__swatch"
+                                                    th:style="'background:' + ${colorOption.colorCode}"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <hr style="border:none; border-top:1px solid var(--border); margin:6px 0;">
+
+                                    <div class="field">
+                                        <label>用途</label>
+                                        <div class="checklist">
+                                            <label class="check-item" th:each="option : ${storageUsageOptions}">
+                                                <input type="checkbox" name="storageUsage" th:value="${option.id}"
+                                                    th:checked="${storageUsageIds != null and storageUsageIds.contains(option.id)}">
+                                                <span th:text="${option.label}">小物収納</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <label>テイスト</label>
+                                        <div class="checklist">
+                                            <label class="check-item" th:each="option : ${storageTasteOptions}">
+                                                <input type="checkbox" name="storageTaste" th:value="${option.id}"
+                                                    th:checked="${storageTasteIds != null and storageTasteIds.contains(option.id)}">
+                                                <span th:text="${option.label}">ベーシック</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="actions actions--stack">
+                                        <button class="btn btn--primary" type="submit">検索</button>
+                                        <a class="btn" th:href="@{/categories/storages}">リセット</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <section aria-label="収納家具一覧">
+                        <div class="only-desktop">
+                            <div class="toolbar">
+                                <div class="toolbar__group"><span class="badge"
+                                        th:text="'全 ' + ${totalCount != null ? totalCount : 0} + ' 件'">全 0 件</span>
+                                </div>
+                                <form class="toolbar__group" method="get" th:action="@{/categories/storages}">
+                                    <input type="hidden" name="inStockOnly" value="true" th:if="${inStockOnly}">
+                                    <input type="hidden" name="priceBand" th:each="band : ${selectedPriceBandIds}"
+                                        th:value="${band}">
+                                    <input type="hidden" name="color" th:each="key : ${selectedColorKeys}"
+                                        th:value="${key}">
+                                    <input type="hidden" name="storageUsage" th:each="id : ${storageUsageIds}"
+                                        th:value="${id}">
+                                    <input type="hidden" name="storageTaste" th:each="id : ${storageTasteIds}"
+                                        th:value="${id}">
+                                    <input type="hidden" name="page" value="1">
+                                    <label class="badge">並び順
+                                        <select name="sort" aria-label="並び順" onchange="this.form.submit()">
+                                            <option value="recommended" th:selected="${sortValue == 'recommended'}">
+                                                おすすめ順</option>
+                                            <option value="newest" th:selected="${sortValue == 'newest'}">新しい順</option>
+                                            <option value="price_asc" th:selected="${sortValue == 'price_asc'}">価格が安い順
+                                            </option>
+                                            <option value="price_desc" th:selected="${sortValue == 'price_desc'}">価格が高い順
+                                            </option>
+                                        </select>
+                                    </label>
+                                    <label class="badge">表示件数
+                                        <select name="size" aria-label="表示件数" onchange="this.form.submit()">
+                                            <option value="15" th:selected="${pageSize == 15}">15</option>
+                                            <option value="30" th:selected="${pageSize == 30}">30</option>
+                                            <option value="60" th:selected="${pageSize == 60}">60</option>
+                                        </select>
+                                    </label>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card" th:if="${products == null or #lists.isEmpty(products)}">
+                            <div class="card__pad">
+                                <p class="muted" style="margin:0;">該当する商品は見つかりませんでした。</p>
+                            </div>
+                        </div>
+                        <div class="grid grid--3" th:if="${products != null and !#lists.isEmpty(products)}">
+                            <th:block th:each="product : ${products}">
+                                <div th:replace="~{fragments/common/product-card :: productCardByView(${product})}">
+                                </div>
+                            </th:block>
+                        </div>
+
+                        <nav aria-label="ページネーション"
+                            style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;"
+                            th:if="${totalPages != null and totalPages > 1}"
+                            th:with="windowStart=${currentPage > 2 ? currentPage - 1 : 2}, windowEnd=${currentPage < totalPages - 1 ? currentPage + 1 : totalPages - 1}">
+                            <a class="btn btn--ghost" th:if="${currentPage > 1}"
+                                th:href="@{/categories/storages(page=${currentPage - 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}">前へ</a>
+                            <span class="btn btn--ghost" style="opacity:.55; cursor:not-allowed;"
+                                th:if="${currentPage <= 1}">前へ</span>
+
+                            <a class="btn btn--ghost" th:if="${currentPage != 1}"
+                                th:href="@{/categories/storages(page=1,size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}">1</a>
+                            <span class="btn btn--ghost is-disabled" th:if="${currentPage == 1}">1</span>
+
+                            <span class="muted" th:if="${windowStart > 2}">...</span>
+
+                            <th:block th:if="${totalPages > 2 and windowStart <= windowEnd}">
+                                <th:block th:each="p : ${#numbers.sequence(windowStart, windowEnd)}">
+                                    <a class="btn btn--ghost" th:if="${p != currentPage}"
+                                        th:href="@{/categories/storages(page=${p},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}"
+                                        th:text="${p}">2</a>
+                                    <span class="btn btn--ghost is-disabled" th:if="${p == currentPage}"
+                                        th:text="${p}">2</span>
+                                </th:block>
+                            </th:block>
+
+                            <span class="muted" th:if="${windowEnd < totalPages - 1}">...</span>
+
+                            <a class="btn btn--ghost" th:if="${totalPages > 1 and currentPage != totalPages}"
+                                th:href="@{/categories/storages(page=${totalPages},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}"
+                                th:text="${totalPages}">99</a>
+                            <span class="btn btn--ghost is-disabled"
+                                th:if="${totalPages > 1 and currentPage == totalPages}"
+                                th:text="${totalPages}">99</span>
+
+                            <a class="btn btn--ghost" th:if="${currentPage < totalPages}"
+                                th:href="@{/categories/storages(page=${currentPage + 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}">次へ</a>
+                            <span class="btn btn--ghost" style="opacity:.55; cursor:not-allowed;"
+                                th:if="${currentPage >= totalPages}">次へ</span>
+                        </nav>
+                    </section>
                 </div>
             </div>
+        </main>
 
-            <div class="layout-2col">
-                <aside class="sidebar only-desktop" aria-label="条件で絞り込む（収納家具）">
-                    <div class="card">
-                        <div class="card__pad">
-                            <p class="footer__title" style="margin:0 0 10px;">条件で絞り込む</p>
-                            <form class="form form--filters" method="get" th:action="@{/categories/storages}">
-                                <input type="hidden" name="sort" th:value="${sortValue != null ? sortValue : 'recommended'}">
-                                <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 15}">
-                                <input type="hidden" name="page" value="1">
+        <div th:replace="~{fragments/layout/footer :: footer}"></div>
+    </div>
 
-                                <div class="field">
-                                    <label class="check-item"><input type="checkbox" name="inStockOnly" value="true" th:checked="${inStockOnly}"> 在庫有のみ表示</label>
-                                </div>
-                                <div class="field">
-                                    <label>価格帯（税込）</label>
-                                    <div class="price-band-list">
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="1" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(1)}"> ～20,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="2" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(2)}"> 20,000円～40,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="3" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(3)}"> 40,000円～60,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="4" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(4)}"> 60,000円～80,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="5" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(5)}"> 80,000円～100,000円</label>
-                                        <label class="check-item"><input type="checkbox" name="priceBand" value="6" th:checked="${selectedPriceBandIds != null and selectedPriceBandIds.contains(6)}"> 100,000円～</label>
-                                    </div>
-                                </div>
-                                <div class="field">
-                                    <label>カラー</label>
-                                    <div class="color-palette">
-                                        <label class="color-option" th:each="colorOption : ${colorFilterOptions}" th:title="${colorOption.label}">
-                                            <input type="checkbox"
-                                                   name="color"
-                                                   th:value="${colorOption.key}"
-                                                   th:checked="${selectedColorKeys != null and selectedColorKeys.contains(colorOption.key)}"
-                                                   th:aria-label="${colorOption.label}">
-                                            <span class="color-option__swatch" th:style="'background:' + ${colorOption.colorCode}"></span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <hr style="border:none; border-top:1px solid var(--border); margin:6px 0;">
-
-                                <div class="field">
-                                    <label>用途</label>
-                                    <div class="checklist">
-                                        <label class="check-item" th:each="option : ${storageUsageOptions}">
-                                            <input type="checkbox"
-                                                   name="storageUsage"
-                                                   th:value="${option.id}"
-                                                   th:checked="${storageUsageIds != null and storageUsageIds.contains(option.id)}">
-                                            <span th:text="${option.label}">小物収納</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="field">
-                                    <label>テイスト</label>
-                                    <div class="checklist">
-                                        <label class="check-item" th:each="option : ${storageTasteOptions}">
-                                            <input type="checkbox"
-                                                   name="storageTaste"
-                                                   th:value="${option.id}"
-                                                   th:checked="${storageTasteIds != null and storageTasteIds.contains(option.id)}">
-                                            <span th:text="${option.label}">ベーシック</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="actions actions--stack">
-                                    <button class="btn btn--primary" type="submit">検索</button>
-                                    <a class="btn" th:href="@{/categories/storages}">リセット</a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </aside>
-
-                <section aria-label="収納家具一覧">
-                    <div class="only-desktop">
-                        <div class="toolbar">
-                            <div class="toolbar__group"><span class="badge" th:text="'全 ' + ${totalCount != null ? totalCount : 0} + ' 件'">全 0 件</span></div>
-                            <form class="toolbar__group" method="get" th:action="@{/categories/storages}">
-                                <input type="hidden" name="inStockOnly" value="true" th:if="${inStockOnly}">
-                                <input type="hidden" name="priceBand" th:each="band : ${selectedPriceBandIds}" th:value="${band}">
-                                <input type="hidden" name="color" th:each="key : ${selectedColorKeys}" th:value="${key}">
-                                <input type="hidden" name="storageUsage" th:each="id : ${storageUsageIds}" th:value="${id}">
-                                <input type="hidden" name="storageTaste" th:each="id : ${storageTasteIds}" th:value="${id}">
-                                <input type="hidden" name="page" value="1">
-                                <label class="badge">並び順
-                                    <select name="sort" aria-label="並び順" onchange="this.form.submit()">
-                                        <option value="recommended" th:selected="${sortValue == 'recommended'}">おすすめ順</option>
-                                        <option value="newest" th:selected="${sortValue == 'newest'}">新しい順</option>
-                                        <option value="price_asc" th:selected="${sortValue == 'price_asc'}">価格が安い順</option>
-                                        <option value="price_desc" th:selected="${sortValue == 'price_desc'}">価格が高い順</option>
-                                    </select>
-                                </label>
-                                <label class="badge">表示件数
-                                    <select name="size" aria-label="表示件数" onchange="this.form.submit()">
-                                        <option value="15" th:selected="${pageSize == 15}">15</option>
-                                        <option value="30" th:selected="${pageSize == 30}">30</option>
-                                        <option value="60" th:selected="${pageSize == 60}">60</option>
-                                    </select>
-                                </label>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="card" th:if="${products == null or #lists.isEmpty(products)}">
-                        <div class="card__pad">
-                            <p class="muted" style="margin:0;">該当する商品は見つかりませんでした。</p>
-                        </div>
-                    </div>
-                    <div class="grid grid--3" th:if="${products != null and !#lists.isEmpty(products)}">
-                        <th:block th:each="product : ${products}">
-                            <div th:replace="~{fragments/common/product-card :: productCardByView(${product})}"></div>
-                        </th:block>
-                    </div>
-
-                    <nav aria-label="ページネーション" style="display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px;"
-                         th:if="${totalPages != null and totalPages > 1}"
-                         th:with="windowStart=${currentPage > 2 ? currentPage - 1 : 2}, windowEnd=${currentPage < totalPages - 1 ? currentPage + 1 : totalPages - 1}">
-                        <a class="btn btn--ghost"
-                           th:if="${currentPage > 1}"
-                           th:href="@{/categories/storages(page=${currentPage - 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}">前へ</a>
-                        <span class="btn btn--ghost" style="opacity:.55; cursor:not-allowed;" th:if="${currentPage <= 1}">前へ</span>
-
-                        <a class="btn btn--ghost"
-                           th:if="${currentPage != 1}"
-                           th:href="@{/categories/storages(page=1,size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}">1</a>
-                        <span class="btn btn--ghost is-disabled" th:if="${currentPage == 1}">1</span>
-
-                        <span class="muted" th:if="${windowStart > 2}">...</span>
-
-                        <th:block th:if="${totalPages > 2 and windowStart <= windowEnd}">
-                            <th:block th:each="p : ${#numbers.sequence(windowStart, windowEnd)}">
-                                <a class="btn btn--ghost"
-                                   th:if="${p != currentPage}"
-                                   th:href="@{/categories/storages(page=${p},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}"
-                                   th:text="${p}">2</a>
-                                <span class="btn btn--ghost is-disabled" th:if="${p == currentPage}" th:text="${p}">2</span>
-                            </th:block>
-                        </th:block>
-
-                        <span class="muted" th:if="${windowEnd < totalPages - 1}">...</span>
-
-                        <a class="btn btn--ghost"
-                           th:if="${totalPages > 1 and currentPage != totalPages}"
-                           th:href="@{/categories/storages(page=${totalPages},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}"
-                           th:text="${totalPages}">99</a>
-                        <span class="btn btn--ghost is-disabled"
-                              th:if="${totalPages > 1 and currentPage == totalPages}"
-                              th:text="${totalPages}">99</span>
-
-                        <a class="btn btn--ghost"
-                           th:if="${currentPage < totalPages}"
-                           th:href="@{/categories/storages(page=${currentPage + 1},size=${pageSize},sort=${sortValue},inStockOnly=${inStockOnly ? 'true' : null},priceBand=${selectedPriceBandIds},color=${selectedColorKeys},storageUsage=${storageUsageIds},storageTaste=${storageTasteIds})}">次へ</a>
-                        <span class="btn btn--ghost" style="opacity:.55; cursor:not-allowed;" th:if="${currentPage >= totalPages}">次へ</span>
-                    </nav>
-                </section>
+    <div class="modal" id="modal-filters-storage" data-modal hidden aria-hidden="true">
+        <div class="modal__panel" role="dialog" aria-modal="true" aria-label="条件で絞り込む（収納家具）">
+            <div class="modal__head">
+                <p class="modal__title">条件で絞り込む（収納家具）</p>
+                <button class="btn btn--ghost" type="button" data-modal-close="modal-filters-storage">閉じる</button>
+            </div>
+            <div class="modal__body">
+                <p class="muted" style="margin:0;">モバイルでは現在、簡易版の絞り込みUIを表示しています。</p>
             </div>
         </div>
-    </main>
-
-    <div th:replace="~{fragments/layout/footer :: footer}"></div>
-</div>
-
-<div class="modal" id="modal-filters-storage" data-modal hidden aria-hidden="true">
-    <div class="modal__panel" role="dialog" aria-modal="true" aria-label="条件で絞り込む（収納家具）">
-        <div class="modal__head">
-            <p class="modal__title">条件で絞り込む（収納家具）</p>
-            <button class="btn btn--ghost" type="button" data-modal-close="modal-filters-storage">閉じる</button>
-        </div>
-        <div class="modal__body">
-            <p class="muted" style="margin:0;">モバイルでは現在、簡易版の絞り込みUIを表示しています。</p>
-        </div>
     </div>
-</div>
 
-<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+    <th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
 </body>
+
 </html>

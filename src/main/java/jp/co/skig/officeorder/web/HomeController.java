@@ -20,11 +20,11 @@ public class HomeController {
     /**
      * ホームControllerを生成する。
      *
-     * @param productService 商品サービス
+     * @param productService      商品サービス
      * @param announcementService お知らせサービス
      */
     public HomeController(ProductService productService,
-                          AnnouncementService announcementService) {
+            AnnouncementService announcementService) {
         this.productService = productService;
         this.announcementService = announcementService;
     }

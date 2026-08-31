@@ -27,8 +27,7 @@ class ProductFilterOptionServiceTest {
                 List.of(),
                 List.of(new CategoryFilterOption(2, "カジュアル")),
                 List.of(),
-                List.of(new CategoryFilterOption(3, "シンプル"))
-        );
+                List.of(new CategoryFilterOption(3, "シンプル")));
 
         ProductCategoryFilter filter = service.buildSearchFilter(List.of(1), List.of(2), List.of(3), optionsBundle);
 

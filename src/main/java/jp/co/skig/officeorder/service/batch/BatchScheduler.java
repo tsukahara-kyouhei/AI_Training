@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 /**
  * 集計系バッチの起動トリガを束ねるスケジューラ。
  *
- * <p>サーバー起動時と毎時0分の定期実行をここで受け、
+ * <p>
+ * サーバー起動時と毎時0分の定期実行をここで受け、
  * 実際の起動判定や二重起動防止は {@link BatchExecutionService} に委譲する。
  */
 @Component
@@ -42,4 +43,3 @@ public class BatchScheduler {
         batchExecutionService.runScheduledHourlyJobs();
     }
 }
-

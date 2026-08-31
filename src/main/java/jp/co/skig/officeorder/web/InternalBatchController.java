@@ -47,10 +47,10 @@ public class InternalBatchController {
      * 内部バッチAPI Controllerを生成する。
      *
      * @param batchExecutionService バッチ実行制御サービス
-     * @param messageSource 利用者向けメッセージ取得元
+     * @param messageSource         利用者向けメッセージ取得元
      */
     public InternalBatchController(BatchExecutionService batchExecutionService,
-                                   MessageSource messageSource) {
+            MessageSource messageSource) {
         this.batchExecutionService = batchExecutionService;
         this.messages = new MessageSourceAccessor(messageSource);
     }
@@ -69,12 +69,12 @@ public class InternalBatchController {
      * 指定ジョブの実行履歴を返す。
      *
      * @param jobName ジョブ名
-     * @param limit 返却件数上限
+     * @param limit   返却件数上限
      * @return 実行履歴またはエラー応答
      */
     @GetMapping("/jobs/{jobName}/executions")
     public ResponseEntity<?> listExecutions(@PathVariable("jobName") String jobName,
-                                            @RequestParam(name = "limit", defaultValue = "20") int limit) {
+            @RequestParam(name = "limit", defaultValue = "20") int limit) {
         try {
             List<BatchExecutionSummaryResponse> response = batchExecutionService.listExecutions(jobName, limit);
             return ResponseEntity.ok(response);
@@ -169,4 +169,3 @@ public class InternalBatchController {
         return messages.getMessage(code, args);
     }
 }
-

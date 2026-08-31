@@ -27,7 +27,8 @@ import org.springframework.stereotype.Service;
 /**
  * 集計系バッチの起動・停止・実行状況参照を扱うサービス。
  *
- * <p>内製のバッチ管理画面やスケジューラから呼ばれ、
+ * <p>
+ * 内製のバッチ管理画面やスケジューラから呼ばれ、
  * サポート対象ジョブ名の検証、二重起動防止、実行履歴の整形を一箇所で行う。
  */
 @Service
@@ -38,8 +39,7 @@ public class BatchExecutionService {
     /** このシステムから起動可能なジョブ名一覧。 */
     private static final Set<String> SUPPORTED_JOB_NAMES = Set.of(
             BatchJobNames.POPULAR_RANKING,
-            BatchJobNames.RECOMMENDED_RELATED
-    );
+            BatchJobNames.RECOMMENDED_RELATED);
 
     /** Spring Batch の起動・停止API。 */
     private final JobOperator jobOperator;
@@ -53,15 +53,15 @@ public class BatchExecutionService {
     /**
      * バッチ実行制御サービスを生成する。
      *
-     * @param jobOperator ジョブ起動・停止API
-     * @param jobExplorer ジョブ実行状況参照API
-     * @param appClock 応答時刻の基準となる Clock
+     * @param jobOperator   ジョブ起動・停止API
+     * @param jobExplorer   ジョブ実行状況参照API
+     * @param appClock      応答時刻の基準となる Clock
      * @param messageSource 利用者向けメッセージ取得元
      */
     public BatchExecutionService(JobOperator jobOperator,
-                                 JobExplorer jobExplorer,
-                                 Clock appClock,
-                                 MessageSource messageSource) {
+            JobExplorer jobExplorer,
+            Clock appClock,
+            MessageSource messageSource) {
         this.jobOperator = jobOperator;
         this.jobExplorer = jobExplorer;
         this.appClock = appClock;
@@ -84,8 +84,7 @@ public class BatchExecutionService {
                     latest == null ? null : latest.getStatus().name(),
                     latest == null ? null : String.valueOf(latest.getId()),
                     latest == null ? null : toOffsetDateTime(latest.getStartTime()),
-                    latest == null ? null : toOffsetDateTime(latest.getEndTime())
-            ));
+                    latest == null ? null : toOffsetDateTime(latest.getEndTime())));
         }
         jobs.sort(Comparator.comparing(BatchJobSummaryResponse::jobName));
         return jobs;
@@ -95,7 +94,7 @@ public class BatchExecutionService {
      * 指定ジョブの実行履歴を新しい順で返す。
      *
      * @param jobName 対象ジョブ名
-     * @param limit 返却件数上限
+     * @param limit   返却件数上限
      * @return 実行履歴一覧
      */
     public List<BatchExecutionSummaryResponse> listExecutions(String jobName, int limit) {
@@ -161,14 +160,14 @@ public class BatchExecutionService {
         return new BatchExecutionStopAcceptedResponse(
                 String.valueOf(executionId),
                 OffsetDateTime.now(appClock),
-                message("flash.batch.stopAccepted")
-        );
+                message("flash.batch.stopAccepted"));
     }
 
     /**
      * 指定トリガでサポート対象ジョブを順に起動する。
      *
-     * <p>ジョブ単位の起動失敗は他ジョブに波及させず、ログのみ残して継続する。
+     * <p>
+     * ジョブ単位の起動失敗は他ジョブに波及させず、ログのみ残して継続する。
      *
      * @param trigger 起動種別
      */
@@ -198,7 +197,8 @@ public class BatchExecutionService {
     /**
      * ジョブ名とトリガ種別を付けてジョブ起動を受け付ける。
      *
-     * <p>実行中判定を通過した場合のみ Spring Batch に起動要求を渡す。
+     * <p>
+     * 実行中判定を通過した場合のみ Spring Batch に起動要求を渡す。
      *
      * @param jobName 起動対象ジョブ名
      * @param trigger 起動種別
@@ -225,15 +225,14 @@ public class BatchExecutionService {
                 String.valueOf(executionId),
                 jobName,
                 acceptedAt,
-                message("flash.batch.startAccepted")
-        );
+                message("flash.batch.startAccepted"));
     }
 
     /**
      * 指定ジョブの実行履歴を読み込み、作成日時降順に並べる。
      *
      * @param jobName 対象ジョブ名
-     * @param limit 取得対象のジョブインスタンス件数
+     * @param limit   取得対象のジョブインスタンス件数
      * @return 並び替え済みの実行履歴
      */
     private List<JobExecution> loadExecutions(String jobName, int limit) {
@@ -244,8 +243,7 @@ public class BatchExecutionService {
         }
         executions.sort(Comparator.comparing(
                 JobExecution::getCreateTime,
-                Comparator.nullsLast(Comparator.reverseOrder())
-        ));
+                Comparator.nullsLast(Comparator.reverseOrder())));
         return executions;
     }
 
@@ -278,8 +276,7 @@ public class BatchExecutionService {
                 toOffsetDateTime(execution.getCreateTime()),
                 toOffsetDateTime(execution.getStartTime()),
                 toOffsetDateTime(execution.getEndTime()),
-                execution.getJobParameters().getString("trigger")
-        );
+                execution.getJobParameters().getString("trigger"));
     }
 
     /**
@@ -309,7 +306,8 @@ public class BatchExecutionService {
     /**
      * Spring Batch 起動用パラメータを生成する。
      *
-     * <p>requestedAt を付与して同一ジョブの再実行時にも別実行として扱えるようにする。
+     * <p>
+     * requestedAt を付与して同一ジョブの再実行時にも別実行として扱えるようにする。
      *
      * @param trigger 起動種別
      * @return 起動パラメータ
@@ -332,5 +330,3 @@ public class BatchExecutionService {
         return messages.getMessage(code, args);
     }
 }
-
-

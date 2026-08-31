@@ -45,13 +45,13 @@ public class MemberRegistrationController {
     /**
      * 会員登録Controllerを生成する。
      *
-     * @param memberService 会員サービス
-     * @param memberSessionService 会員セッションサービス
+     * @param memberService           会員サービス
+     * @param memberSessionService    会員セッションサービス
      * @param notificationMailService 通知メールサービス
      */
     public MemberRegistrationController(MemberService memberService,
-                                        MemberSessionService memberSessionService,
-                                        NotificationMailService notificationMailService) {
+            MemberSessionService memberSessionService,
+            NotificationMailService notificationMailService) {
         this.memberService = memberService;
         this.memberSessionService = memberSessionService;
         this.notificationMailService = notificationMailService;
@@ -60,7 +60,7 @@ public class MemberRegistrationController {
     /**
      * 会員登録入力画面を表示する。
      *
-     * @param model 画面モデル
+     * @param model   画面モデル
      * @param session 現在セッション
      * @return 会員登録入力画面
      */
@@ -75,17 +75,17 @@ public class MemberRegistrationController {
     /**
      * 会員登録入力内容を確認画面へ送る。
      *
-     * @param rawForm 入力フォーム
+     * @param rawForm       入力フォーム
      * @param bindingResult バリデーション結果
-     * @param model 画面モデル
-     * @param session 現在セッション
+     * @param model         画面モデル
+     * @param session       現在セッション
      * @return 遷移先
      */
     @PostMapping("/members/register/confirm")
     public String confirm(@Valid @ModelAttribute("registerForm") MemberRegisterForm rawForm,
-                          BindingResult bindingResult,
-                          Model model,
-                          HttpSession session) {
+            BindingResult bindingResult,
+            Model model,
+            HttpSession session) {
         MemberRegisterForm form = rawForm.normalize();
         validateConditionalRules(form, bindingResult);
         if (!bindingResult.hasFieldErrors("email") && memberService.existsByEmail(form.getEmail())) {
@@ -105,17 +105,17 @@ public class MemberRegistrationController {
     /**
      * 会員登録を確定し、ログイン状態へ遷移させる。
      *
-     * @param request 現在リクエスト
-     * @param session 現在セッション
-     * @param model 画面モデル
+     * @param request            現在リクエスト
+     * @param session            現在セッション
+     * @param model              画面モデル
      * @param redirectAttributes リダイレクトメッセージ格納先
      * @return 遷移先
      */
     @PostMapping("/members/register")
     public String register(HttpServletRequest request,
-                           HttpSession session,
-                           Model model,
-                           RedirectAttributes redirectAttributes) {
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         Optional<MemberRegisterForm> pending = pendingForm(session);
         if (pending.isEmpty()) {
             return "redirect:/members/register";
@@ -159,7 +159,7 @@ public class MemberRegistrationController {
     /**
      * 会員種別に応じた入力必須条件を追加で検証する。
      *
-     * @param form 正規化済みフォーム
+     * @param form          正規化済みフォーム
      * @param bindingResult 検証結果
      */
     private void validateConditionalRules(MemberRegisterForm form, BindingResult bindingResult) {

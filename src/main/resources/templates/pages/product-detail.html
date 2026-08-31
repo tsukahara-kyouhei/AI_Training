@@ -87,7 +87,8 @@
                                         <p class="pd-color-name" th:text="${variant.colorName}">白(BN)</p>
                                         <p class="pd-color-price" th:text="${variant.unitPriceText + '円（税込)'}">
                                             78,300円（税込）</p>
-                                        <p class="pd-color-tax-note" th:text="${'(税抜 ' + variant.unitPriceExcludingTaxText + '円)'}">
+                                        <p class="pd-color-tax-note"
+                                            th:text="${'(税抜 ' + variant.unitPriceExcludingTaxText + '円)'}">
                                             （税抜 71,181円）</p>
                                         <p class="pd-color-stock" th:text="${'在庫: ' + variant.stockQuantity}">在庫: 4</p>
                                     </label>

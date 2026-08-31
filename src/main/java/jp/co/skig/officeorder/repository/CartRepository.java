@@ -24,7 +24,7 @@ public class CartRepository {
     /**
      * カートリポジトリを生成する。
      *
-     * @param cartMapper カートMapper
+     * @param cartMapper      カートMapper
      * @param appTimeProvider 共通時刻プロバイダ
      */
     public CartRepository(CartMapper cartMapper, AppTimeProvider appTimeProvider) {
@@ -44,8 +44,7 @@ public class CartRepository {
         }
         List<CartProductSnapshot> rows = cartMapper.selectCartProductSnapshots(
                 productVariantIds,
-                appTimeProvider.nowOffsetDateTime()
-        );
+                appTimeProvider.nowOffsetDateTime());
         Map<Long, CartProductSnapshot> snapshots = new HashMap<>();
         for (CartProductSnapshot snapshot : rows) {
             snapshots.put(snapshot.productVariantId(), snapshot);
@@ -63,7 +62,3 @@ public class CartRepository {
         return taxRate == null ? BigDecimal.TEN : taxRate;
     }
 }
-
-
-
-

@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 /**
  * 静的アセットの最終更新日時を返すThymeleaf補助コンポーネント。
  *
- * <p>CSS/JSのURLへクエリ文字列でバージョンを付け、ブラウザキャッシュの取り違えを防ぐ。
+ * <p>
+ * CSS/JSのURLへクエリ文字列でバージョンを付け、ブラウザキャッシュの取り違えを防ぐ。
  */
 @Component("assetVersion")
 public class AssetVersionResolver {

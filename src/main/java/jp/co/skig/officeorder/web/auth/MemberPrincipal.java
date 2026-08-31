@@ -26,17 +26,17 @@ public class MemberPrincipal implements UserDetails {
     /**
      * 会員principalを生成する。
      *
-     * @param memberId 会員ID
-     * @param email メールアドレス
-     * @param lastName 姓
-     * @param firstName 名
+     * @param memberId     会員ID
+     * @param email        メールアドレス
+     * @param lastName     姓
+     * @param firstName    名
      * @param passwordHash ハッシュ化済みパスワード
      */
     public MemberPrincipal(long memberId,
-                           String email,
-                           String lastName,
-                           String firstName,
-                           String passwordHash) {
+            String email,
+            String lastName,
+            String firstName,
+            String passwordHash) {
         this.memberId = memberId;
         this.email = email;
         this.lastName = lastName;

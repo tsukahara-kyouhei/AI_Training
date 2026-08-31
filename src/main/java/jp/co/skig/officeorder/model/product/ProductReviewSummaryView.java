@@ -4,5 +4,5 @@ import java.math.BigDecimal;
 
 public record ProductReviewSummaryView(
         BigDecimal averageRating,
-        long reviewCount) {
+        Long reviewCount) {
 }

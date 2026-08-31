@@ -14,7 +14,8 @@ import org.springframework.util.StringUtils;
 /**
  * ログイン画面のメールアドレス入力補助Cookieを扱うサービス。
  *
- * <p>「次回から入力を省略する」が選択された場合にメールアドレスだけをCookieへ保存し、
+ * <p>
+ * 「次回から入力を省略する」が選択された場合にメールアドレスだけをCookieへ保存し、
  * 次回のログイン画面・購入方法選択画面へ初期表示する。
  */
 @Service
@@ -48,9 +49,9 @@ public class LoginEmailCookieService {
     /**
      * メールアドレスをCookieへ保存する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param email 保存対象メールアドレス
+     * @param email    保存対象メールアドレス
      */
     public void rememberEmail(HttpServletRequest request, HttpServletResponse response, String email) {
         Cookie cookie = new Cookie(COOKIE_NAME, URLEncoder.encode(email.trim(), StandardCharsets.UTF_8));
@@ -64,7 +65,7 @@ public class LoginEmailCookieService {
     /**
      * 記憶済みメールアドレスCookieを削除する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
      */
     public void clearRememberedEmail(HttpServletRequest request, HttpServletResponse response) {

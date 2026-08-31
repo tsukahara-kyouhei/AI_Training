@@ -45,687 +45,687 @@ import jp.co.skig.officeorder.service.mail.NotificationMailService;
 
 class OrderServiceTest {
 
-    private OrderRepository orderRepository;
-    private ObjectMapper objectMapper;
-    private NotificationMailService notificationMailService;
-    private Clock appClock;
-    private MessageSource messageSource;
-    private OrderService service;
+        private OrderRepository orderRepository;
+        private ObjectMapper objectMapper;
+        private NotificationMailService notificationMailService;
+        private Clock appClock;
+        private MessageSource messageSource;
+        private OrderService service;
 
-    @BeforeEach
-    void setUp() {
-        orderRepository = mock(OrderRepository.class);
-        objectMapper = mock(ObjectMapper.class);
-        notificationMailService = mock(NotificationMailService.class);
-        messageSource = mock(MessageSource.class);
+        @BeforeEach
+        void setUp() {
+                orderRepository = mock(OrderRepository.class);
+                objectMapper = mock(ObjectMapper.class);
+                notificationMailService = mock(NotificationMailService.class);
+                messageSource = mock(MessageSource.class);
 
-        appClock = Clock.fixed(
-                Instant.parse("2026-08-17T10:00:00Z"),
-                ZoneOffset.UTC);
+                appClock = Clock.fixed(
+                                Instant.parse("2026-08-17T10:00:00Z"),
+                                ZoneOffset.UTC);
 
-        service = new OrderService(
-                orderRepository,
-                objectMapper,
-                notificationMailService,
-                appClock,
-                messageSource);
+                service = new OrderService(
+                                orderRepository,
+                                objectMapper,
+                                notificationMailService,
+                                appClock,
+                                messageSource);
 
-        when(messageSource.getMessage(
-                anyString(),
-                any(),
-                any(Locale.class))).thenReturn("message");
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (TransactionSynchronizationManager.isSynchronizationActive()) {
-            TransactionSynchronizationManager.clearSynchronization();
+                when(messageSource.getMessage(
+                                anyString(),
+                                any(),
+                                any(Locale.class))).thenReturn("message");
         }
-    }
-
-    // =========================================================
-    // createInitialForm
-    // =========================================================
-
-    @Test
-    void createInitialForm_正常系_未ログインなら空フォームを返す() {
-        CheckoutInputForm result = service.createInitialForm(Optional.empty());
-
-        assertThat(result).isNotNull();
-        assertThat(result.getPersonalOrCorporate())
-                .isEqualTo("personal");
-
-        verify(orderRepository, never())
-                .findCheckoutMemberPrefill(any(Long.class));
-    }
-
-    @Test
-    void createInitialForm_正常系_会員情報が存在しないなら空フォームを返す() {
-        MemberSessionUser member = new MemberSessionUser(
-                1L,
-                "test@example.com",
-                "山田",
-                "太郎");
-
-        when(orderRepository.findCheckoutMemberPrefill(1L))
-                .thenReturn(Optional.empty());
-
-        CheckoutInputForm result = service.createInitialForm(Optional.of(member));
-
-        assertThat(result).isNotNull();
-        assertThat(result.getPersonalOrCorporate())
-                .isEqualTo("personal");
-
-        verify(orderRepository)
-                .findCheckoutMemberPrefill(1L);
-    }
-
-    @Test
-    void createInitialForm_正常系_会員情報をフォームへ設定する() {
-        MemberSessionUser member = new MemberSessionUser(
-                1L,
-                "test@example.com",
-                "山田",
-                "太郎");
-
-        CheckoutMemberPrefill prefill = new CheckoutMemberPrefill(
-                "personal",
-                "山田",
-                "太郎",
-                "ヤマダ",
-                "タロウ",
-                "株式会社サンプル",
-                "営業部",
-                "test@example.com",
-                "090-1234-5678",
-                "03-1234-5678",
-                "1234567",
-                "東京都",
-                "渋谷区",
-                "1-1-1",
-                5,
-                true);
-
-        when(orderRepository.findCheckoutMemberPrefill(1L))
-                .thenReturn(Optional.of(prefill));
-
-        CheckoutInputForm result = service.createInitialForm(Optional.of(member));
-
-        assertThat(result.getPersonalOrCorporate())
-                .isEqualTo("personal");
-        assertThat(result.getLastName())
-                .isEqualTo("山田");
-        assertThat(result.getFirstName())
-                .isEqualTo("太郎");
-        assertThat(result.getLastNameKana())
-                .isEqualTo("ヤマダ");
-        assertThat(result.getFirstNameKana())
-                .isEqualTo("タロウ");
-        assertThat(result.getCompanyName())
-                .isEqualTo("株式会社サンプル");
-        assertThat(result.getDepartmentName())
-                .isEqualTo("営業部");
-        assertThat(result.getEmail())
-                .isEqualTo("test@example.com");
-        assertThat(result.getDaytimePhone())
-                .isEqualTo("090-1234-5678");
-        assertThat(result.getFax())
-                .isEqualTo("03-1234-5678");
-        assertThat(result.getPostalCodePart1())
-                .isEqualTo("123");
-        assertThat(result.getPostalCodePart2())
-                .isEqualTo("4567");
-        assertThat(result.getPrefecture())
-                .isEqualTo("東京都");
-        assertThat(result.getCity())
-                .isEqualTo("渋谷区");
-        assertThat(result.getAddressLine())
-                .isEqualTo("1-1-1");
-        assertThat(result.getDeliveryFloor())
-                .isEqualTo("5");
-        assertThat(result.getHasElevator())
-                .isTrue();
-    }
-
-    // =========================================================
-    // placeOrder
-    // =========================================================
-
-    @Test
-    void placeOrder_異常系_カートがnullなら例外を送出する() {
-        CheckoutInputForm form = createValidForm();
-
-        assertThatThrownBy(() -> service.placeOrder(1L, form, null))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        verify(orderRepository, never())
-                .insertOrder(anyMap());
-    }
-
-    @Test
-    void placeOrder_異常系_空カートなら例外を送出する() {
-        CheckoutInputForm form = createValidForm();
-
-        CartView cart = new CartView(
-                List.of(),
-                0,
-                0,
-                createSummary());
-
-        assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        verify(orderRepository, never())
-                .insertOrder(anyMap());
-    }
-
-    @Test
-    void placeOrder_異常系_法人で会社名が未入力なら例外を送出する() {
-        CheckoutInputForm form = createValidForm();
-        form.setPersonalOrCorporate("corporate");
-        form.setCompanyName(" ");
-
-        CartView cart = createCart();
-
-        assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        verify(orderRepository, never())
-                .insertOrder(anyMap());
-    }
-
-    @Test
-    void placeOrder_異常系_在庫が0なら例外を送出する() {
-        CheckoutInputForm form = createValidForm();
-
-        CartLineView line = new CartLineView(
-                1L,
-                10L,
-                "ワークデスク",
-                "P0001-C01",
-                "ホワイト",
-                BigDecimal.valueOf(10000),
-                0,
-                false,
-                BigDecimal.ZERO,
-                false,
-                1,
-                "/products/1");
-
-        CartView cart = createCart(line);
-
-        assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        verify(orderRepository, never())
-                .insertOrder(anyMap());
-    }
-
-    @Test
-    void placeOrder_異常系_注文数量が在庫数量を超えるなら例外を送出する() {
-        CheckoutInputForm form = createValidForm();
-
-        CartLineView line = new CartLineView(
-                1L,
-                10L,
-                "ワークデスク",
-                "P0001-C01",
-                "ホワイト",
-                BigDecimal.valueOf(10000),
-                2,
-                false,
-                BigDecimal.ZERO,
-                false,
-                3,
-                "/products/1");
-
-        CartView cart = createCart(line);
-
-        assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        verify(orderRepository, never())
-                .insertOrder(anyMap());
-    }
-
-    @Test
-    void placeOrder_異常系_階数が未入力なら例外を送出する() {
-        CheckoutInputForm form = createValidForm();
-        form.setDeliveryFloor(" ");
-
-        CartView cart = createCart();
-
-        assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        verify(orderRepository, never())
-                .insertOrder(anyMap());
-    }
-
-    @Test
-    void placeOrder_異常系_階数が数値以外なら例外を送出する() {
-        CheckoutInputForm form = createValidForm();
-        form.setDeliveryFloor("abc");
-
-        CartView cart = createCart();
-
-        assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        verify(orderRepository, never())
-                .insertOrder(anyMap());
-    }
-
-    @Test
-    void placeOrder_異常系_注文番号連番が上限を超えるなら例外を送出する()
-            throws Exception {
-
-        CheckoutInputForm form = createValidForm();
-
-        CartLineView line = new CartLineView(
-                1L,
-                10L,
-                "ワークデスク",
-                "P0001-C01",
-                "ホワイト",
-                BigDecimal.valueOf(10000),
-                10,
-                true,
-                BigDecimal.valueOf(3000),
-                true,
-                2,
-                "/products/1");
-
-        CartView cart = createCart(line);
-
-        when(orderRepository.findCurrentTaxRatePercent())
-                .thenReturn(BigDecimal.TEN);
-
-        when(orderRepository.nextOrderSequence(any(LocalDate.class)))
-                .thenReturn(1_000_000);
-
-        assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
-                .isInstanceOf(IllegalStateException.class);
-
-        verify(orderRepository, never())
-                .insertOrder(anyMap());
-    }
-
-    @Test
-    void placeOrder_正常系_注文を登録して注文番号を返す()
-            throws Exception {
-
-        CheckoutInputForm form = createValidForm();
-
-        CartLineView line = new CartLineView(
-                1L,
-                10L,
-                "ワークデスク",
-                "P0001-C01",
-                "ホワイト",
-                BigDecimal.valueOf(10000),
-                10,
-                true,
-                BigDecimal.valueOf(3000),
-                true,
-                2,
-                "/products/1");
-
-        CartView cart = createCart(line);
-
-        when(orderRepository.findCurrentTaxRatePercent())
-                .thenReturn(BigDecimal.TEN);
-
-        when(orderRepository.nextOrderSequence(
-                LocalDate.of(2026, 8, 17)))
-                .thenReturn(1);
-
-        when(orderRepository.insertOrder(anyMap()))
-                .thenReturn(100L);
-
-        TransactionSynchronizationManager.initSynchronization();
-
-        String result = service.placeOrder(1L, form, cart);
-
-        assertThat(result)
-                .isEqualTo("ORD20260817-000001");
-
-        verify(orderRepository)
-                .insertOrder(anyMap());
-
-        verify(orderRepository)
-                .insertOrderItem(anyMap());
-
-        verify(orderRepository)
-                .insertOrderStatusHistory(anyMap());
-
-        verify(orderRepository)
-                .findCurrentTaxRatePercent();
 
-        verify(orderRepository)
-                .nextOrderSequence(LocalDate.of(2026, 8, 17));
-
-        assertThat(
-                TransactionSynchronizationManager
-                        .getSynchronizations())
-                .hasSize(1);
-    }
+        @AfterEach
+        void tearDown() {
+                if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                        TransactionSynchronizationManager.clearSynchronization();
+                }
+        }
+
+        // =========================================================
+        // createInitialForm
+        // =========================================================
+
+        @Test
+        void createInitialForm_正常系_未ログインなら空フォームを返す() {
+                CheckoutInputForm result = service.createInitialForm(Optional.empty());
+
+                assertThat(result).isNotNull();
+                assertThat(result.getPersonalOrCorporate())
+                                .isEqualTo("personal");
+
+                verify(orderRepository, never())
+                                .findCheckoutMemberPrefill(any(Long.class));
+        }
+
+        @Test
+        void createInitialForm_正常系_会員情報が存在しないなら空フォームを返す() {
+                MemberSessionUser member = new MemberSessionUser(
+                                1L,
+                                "test@example.com",
+                                "山田",
+                                "太郎");
+
+                when(orderRepository.findCheckoutMemberPrefill(1L))
+                                .thenReturn(Optional.empty());
+
+                CheckoutInputForm result = service.createInitialForm(Optional.of(member));
+
+                assertThat(result).isNotNull();
+                assertThat(result.getPersonalOrCorporate())
+                                .isEqualTo("personal");
+
+                verify(orderRepository)
+                                .findCheckoutMemberPrefill(1L);
+        }
+
+        @Test
+        void createInitialForm_正常系_会員情報をフォームへ設定する() {
+                MemberSessionUser member = new MemberSessionUser(
+                                1L,
+                                "test@example.com",
+                                "山田",
+                                "太郎");
+
+                CheckoutMemberPrefill prefill = new CheckoutMemberPrefill(
+                                "personal",
+                                "山田",
+                                "太郎",
+                                "ヤマダ",
+                                "タロウ",
+                                "株式会社サンプル",
+                                "営業部",
+                                "test@example.com",
+                                "090-1234-5678",
+                                "03-1234-5678",
+                                "1234567",
+                                "東京都",
+                                "渋谷区",
+                                "1-1-1",
+                                5,
+                                true);
+
+                when(orderRepository.findCheckoutMemberPrefill(1L))
+                                .thenReturn(Optional.of(prefill));
+
+                CheckoutInputForm result = service.createInitialForm(Optional.of(member));
+
+                assertThat(result.getPersonalOrCorporate())
+                                .isEqualTo("personal");
+                assertThat(result.getLastName())
+                                .isEqualTo("山田");
+                assertThat(result.getFirstName())
+                                .isEqualTo("太郎");
+                assertThat(result.getLastNameKana())
+                                .isEqualTo("ヤマダ");
+                assertThat(result.getFirstNameKana())
+                                .isEqualTo("タロウ");
+                assertThat(result.getCompanyName())
+                                .isEqualTo("株式会社サンプル");
+                assertThat(result.getDepartmentName())
+                                .isEqualTo("営業部");
+                assertThat(result.getEmail())
+                                .isEqualTo("test@example.com");
+                assertThat(result.getDaytimePhone())
+                                .isEqualTo("090-1234-5678");
+                assertThat(result.getFax())
+                                .isEqualTo("03-1234-5678");
+                assertThat(result.getPostalCodePart1())
+                                .isEqualTo("123");
+                assertThat(result.getPostalCodePart2())
+                                .isEqualTo("4567");
+                assertThat(result.getPrefecture())
+                                .isEqualTo("東京都");
+                assertThat(result.getCity())
+                                .isEqualTo("渋谷区");
+                assertThat(result.getAddressLine())
+                                .isEqualTo("1-1-1");
+                assertThat(result.getDeliveryFloor())
+                                .isEqualTo("5");
+                assertThat(result.getHasElevator())
+                                .isTrue();
+        }
+
+        // =========================================================
+        // placeOrder
+        // =========================================================
+
+        @Test
+        void placeOrder_異常系_カートがnullなら例外を送出する() {
+                CheckoutInputForm form = createValidForm();
+
+                assertThatThrownBy(() -> service.placeOrder(1L, form, null))
+                                .isInstanceOf(IllegalArgumentException.class);
+
+                verify(orderRepository, never())
+                                .insertOrder(anyMap());
+        }
+
+        @Test
+        void placeOrder_異常系_空カートなら例外を送出する() {
+                CheckoutInputForm form = createValidForm();
+
+                CartView cart = new CartView(
+                                List.of(),
+                                0,
+                                0,
+                                createSummary());
+
+                assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
+                                .isInstanceOf(IllegalArgumentException.class);
+
+                verify(orderRepository, never())
+                                .insertOrder(anyMap());
+        }
+
+        @Test
+        void placeOrder_異常系_法人で会社名が未入力なら例外を送出する() {
+                CheckoutInputForm form = createValidForm();
+                form.setPersonalOrCorporate("corporate");
+                form.setCompanyName(" ");
+
+                CartView cart = createCart();
+
+                assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
+                                .isInstanceOf(IllegalArgumentException.class);
+
+                verify(orderRepository, never())
+                                .insertOrder(anyMap());
+        }
+
+        @Test
+        void placeOrder_異常系_在庫が0なら例外を送出する() {
+                CheckoutInputForm form = createValidForm();
+
+                CartLineView line = new CartLineView(
+                                1L,
+                                10L,
+                                "ワークデスク",
+                                "P0001-C01",
+                                "ホワイト",
+                                BigDecimal.valueOf(10000),
+                                0,
+                                false,
+                                BigDecimal.ZERO,
+                                false,
+                                1,
+                                "/products/1");
+
+                CartView cart = createCart(line);
+
+                assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
+                                .isInstanceOf(IllegalArgumentException.class);
+
+                verify(orderRepository, never())
+                                .insertOrder(anyMap());
+        }
+
+        @Test
+        void placeOrder_異常系_注文数量が在庫数量を超えるなら例外を送出する() {
+                CheckoutInputForm form = createValidForm();
+
+                CartLineView line = new CartLineView(
+                                1L,
+                                10L,
+                                "ワークデスク",
+                                "P0001-C01",
+                                "ホワイト",
+                                BigDecimal.valueOf(10000),
+                                2,
+                                false,
+                                BigDecimal.ZERO,
+                                false,
+                                3,
+                                "/products/1");
+
+                CartView cart = createCart(line);
+
+                assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
+                                .isInstanceOf(IllegalArgumentException.class);
+
+                verify(orderRepository, never())
+                                .insertOrder(anyMap());
+        }
+
+        @Test
+        void placeOrder_異常系_階数が未入力なら例外を送出する() {
+                CheckoutInputForm form = createValidForm();
+                form.setDeliveryFloor(" ");
+
+                CartView cart = createCart();
+
+                assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
+                                .isInstanceOf(IllegalArgumentException.class);
+
+                verify(orderRepository, never())
+                                .insertOrder(anyMap());
+        }
+
+        @Test
+        void placeOrder_異常系_階数が数値以外なら例外を送出する() {
+                CheckoutInputForm form = createValidForm();
+                form.setDeliveryFloor("abc");
+
+                CartView cart = createCart();
+
+                assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
+                                .isInstanceOf(IllegalArgumentException.class);
+
+                verify(orderRepository, never())
+                                .insertOrder(anyMap());
+        }
+
+        @Test
+        void placeOrder_異常系_注文番号連番が上限を超えるなら例外を送出する()
+                        throws Exception {
+
+                CheckoutInputForm form = createValidForm();
+
+                CartLineView line = new CartLineView(
+                                1L,
+                                10L,
+                                "ワークデスク",
+                                "P0001-C01",
+                                "ホワイト",
+                                BigDecimal.valueOf(10000),
+                                10,
+                                true,
+                                BigDecimal.valueOf(3000),
+                                true,
+                                2,
+                                "/products/1");
+
+                CartView cart = createCart(line);
+
+                when(orderRepository.findCurrentTaxRatePercent())
+                                .thenReturn(BigDecimal.TEN);
+
+                when(orderRepository.nextOrderSequence(any(LocalDate.class)))
+                                .thenReturn(1_000_000);
+
+                assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
+                                .isInstanceOf(IllegalStateException.class);
+
+                verify(orderRepository, never())
+                                .insertOrder(anyMap());
+        }
+
+        @Test
+        void placeOrder_正常系_注文を登録して注文番号を返す()
+                        throws Exception {
+
+                CheckoutInputForm form = createValidForm();
+
+                CartLineView line = new CartLineView(
+                                1L,
+                                10L,
+                                "ワークデスク",
+                                "P0001-C01",
+                                "ホワイト",
+                                BigDecimal.valueOf(10000),
+                                10,
+                                true,
+                                BigDecimal.valueOf(3000),
+                                true,
+                                2,
+                                "/products/1");
+
+                CartView cart = createCart(line);
+
+                when(orderRepository.findCurrentTaxRatePercent())
+                                .thenReturn(BigDecimal.TEN);
+
+                when(orderRepository.nextOrderSequence(
+                                LocalDate.of(2026, 8, 17)))
+                                .thenReturn(1);
+
+                when(orderRepository.insertOrder(anyMap()))
+                                .thenReturn(100L);
+
+                TransactionSynchronizationManager.initSynchronization();
+
+                String result = service.placeOrder(1L, form, cart);
+
+                assertThat(result)
+                                .isEqualTo("ORD20260817-000001");
+
+                verify(orderRepository)
+                                .insertOrder(anyMap());
+
+                verify(orderRepository)
+                                .insertOrderItem(anyMap());
+
+                verify(orderRepository)
+                                .insertOrderStatusHistory(anyMap());
+
+                verify(orderRepository)
+                                .findCurrentTaxRatePercent();
+
+                verify(orderRepository)
+                                .nextOrderSequence(LocalDate.of(2026, 8, 17));
+
+                assertThat(
+                                TransactionSynchronizationManager
+                                                .getSynchronizations())
+                                .hasSize(1);
+        }
+
+        @Test
+        void placeOrder_正常系_組立希望の場合は組立費を明細へ設定する()
+                        throws Exception {
+
+                CheckoutInputForm form = createValidForm();
+
+                CartLineView line = new CartLineView(
+                                1L,
+                                10L,
+                                "ワークデスク",
+                                "P0001-C01",
+                                "ホワイト",
+                                BigDecimal.valueOf(10000),
+                                10,
+                                true,
+                                BigDecimal.valueOf(3000),
+                                true,
+                                2,
+                                "/products/1");
+
+                CartView cart = createCart(line);
+
+                when(orderRepository.findCurrentTaxRatePercent())
+                                .thenReturn(BigDecimal.TEN);
+
+                when(orderRepository.nextOrderSequence(any(LocalDate.class)))
+                                .thenReturn(1);
+
+                when(orderRepository.insertOrder(anyMap()))
+                                .thenReturn(100L);
+
+                TransactionSynchronizationManager.initSynchronization();
+
+                service.placeOrder(1L, form, cart);
+
+                ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+                verify(orderRepository)
+                                .insertOrderItem(captor.capture());
+
+                Map<String, Object> itemParams = captor.getValue();
+
+                assertThat(itemParams.get("assemblyAvailable"))
+                                .isEqualTo(true);
+
+                assertThat(itemParams.get("assemblyFee"))
+                                .isEqualTo(BigDecimal.valueOf(3000));
+        }
+
+        @Test
+        void placeOrder_正常系_組立希望なしの場合は組立費を0円にする()
+                        throws Exception {
 
-    @Test
-    void placeOrder_正常系_組立希望の場合は組立費を明細へ設定する()
-            throws Exception {
-
-        CheckoutInputForm form = createValidForm();
-
-        CartLineView line = new CartLineView(
-                1L,
-                10L,
-                "ワークデスク",
-                "P0001-C01",
-                "ホワイト",
-                BigDecimal.valueOf(10000),
-                10,
-                true,
-                BigDecimal.valueOf(3000),
-                true,
-                2,
-                "/products/1");
-
-        CartView cart = createCart(line);
-
-        when(orderRepository.findCurrentTaxRatePercent())
-                .thenReturn(BigDecimal.TEN);
-
-        when(orderRepository.nextOrderSequence(any(LocalDate.class)))
-                .thenReturn(1);
-
-        when(orderRepository.insertOrder(anyMap()))
-                .thenReturn(100L);
-
-        TransactionSynchronizationManager.initSynchronization();
-
-        service.placeOrder(1L, form, cart);
-
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
-        verify(orderRepository)
-                .insertOrderItem(captor.capture());
+                CheckoutInputForm form = createValidForm();
 
-        Map<String, Object> itemParams = captor.getValue();
+                CartLineView line = new CartLineView(
+                                1L,
+                                10L,
+                                "ワークデスク",
+                                "P0001-C01",
+                                "ホワイト",
+                                BigDecimal.valueOf(10000),
+                                10,
+                                true,
+                                BigDecimal.valueOf(3000),
+                                false,
+                                2,
+                                "/products/1");
 
-        assertThat(itemParams.get("assemblyAvailable"))
-                .isEqualTo(true);
+                CartView cart = createCart(line);
 
-        assertThat(itemParams.get("assemblyFee"))
-                .isEqualTo(BigDecimal.valueOf(3000));
-    }
+                when(orderRepository.findCurrentTaxRatePercent())
+                                .thenReturn(BigDecimal.TEN);
 
-    @Test
-    void placeOrder_正常系_組立希望なしの場合は組立費を0円にする()
-            throws Exception {
+                when(orderRepository.nextOrderSequence(any(LocalDate.class)))
+                                .thenReturn(1);
 
-        CheckoutInputForm form = createValidForm();
+                when(orderRepository.insertOrder(anyMap()))
+                                .thenReturn(100L);
 
-        CartLineView line = new CartLineView(
-                1L,
-                10L,
-                "ワークデスク",
-                "P0001-C01",
-                "ホワイト",
-                BigDecimal.valueOf(10000),
-                10,
-                true,
-                BigDecimal.valueOf(3000),
-                false,
-                2,
-                "/products/1");
+                TransactionSynchronizationManager.initSynchronization();
 
-        CartView cart = createCart(line);
+                service.placeOrder(1L, form, cart);
 
-        when(orderRepository.findCurrentTaxRatePercent())
-                .thenReturn(BigDecimal.TEN);
+                ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
 
-        when(orderRepository.nextOrderSequence(any(LocalDate.class)))
-                .thenReturn(1);
+                verify(orderRepository)
+                                .insertOrderItem(captor.capture());
 
-        when(orderRepository.insertOrder(anyMap()))
-                .thenReturn(100L);
+                Map<String, Object> itemParams = captor.getValue();
 
-        TransactionSynchronizationManager.initSynchronization();
+                assertThat(itemParams.get("assemblyFee"))
+                                .isEqualTo(BigDecimal.ZERO);
+        }
 
-        service.placeOrder(1L, form, cart);
+        @Test
+        void placeOrder_異常系_トランザクション同期が無効なら例外を送出する() {
 
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+                CheckoutInputForm form = createValidForm();
 
-        verify(orderRepository)
-                .insertOrderItem(captor.capture());
+                CartLineView line = new CartLineView(
+                                1L,
+                                10L,
+                                "ワークデスク",
+                                "P0001-C01",
+                                "ホワイト",
+                                BigDecimal.valueOf(10000),
+                                10,
+                                true,
+                                BigDecimal.valueOf(3000),
+                                true,
+                                2,
+                                "/products/1");
 
-        Map<String, Object> itemParams = captor.getValue();
+                CartView cart = createCart(line);
 
-        assertThat(itemParams.get("assemblyFee"))
-                .isEqualTo(BigDecimal.ZERO);
-    }
+                when(orderRepository.findCurrentTaxRatePercent())
+                                .thenReturn(BigDecimal.TEN);
 
-    @Test
-    void placeOrder_異常系_トランザクション同期が無効なら例外を送出する() {
+                when(orderRepository.nextOrderSequence(any(LocalDate.class)))
+                                .thenReturn(1);
 
-        CheckoutInputForm form = createValidForm();
+                when(orderRepository.insertOrder(anyMap()))
+                                .thenReturn(100L);
 
-        CartLineView line = new CartLineView(
-                1L,
-                10L,
-                "ワークデスク",
-                "P0001-C01",
-                "ホワイト",
-                BigDecimal.valueOf(10000),
-                10,
-                true,
-                BigDecimal.valueOf(3000),
-                true,
-                2,
-                "/products/1");
+                assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
+                                .isInstanceOf(IllegalStateException.class);
+        }
 
-        CartView cart = createCart(line);
+        // =========================================================
+        // findOrderCompleteView
+        // =========================================================
 
-        when(orderRepository.findCurrentTaxRatePercent())
-                .thenReturn(BigDecimal.TEN);
+        @Test
+        void findOrderCompleteView_異常系_注文番号が空なら空を返す() {
 
-        when(orderRepository.nextOrderSequence(any(LocalDate.class)))
-                .thenReturn(1);
+                Optional<OrderCompleteView> result = service.findOrderCompleteView(" ");
 
-        when(orderRepository.insertOrder(anyMap()))
-                .thenReturn(100L);
+                assertThat(result).isEmpty();
 
-        assertThatThrownBy(() -> service.placeOrder(1L, form, cart))
-                .isInstanceOf(IllegalStateException.class);
-    }
+                verify(orderRepository, never())
+                                .findOrderCompleteByOrderNumber(anyString());
+        }
 
-    // =========================================================
-    // findOrderCompleteView
-    // =========================================================
+        @Test
+        void findOrderCompleteView_正常系_注文番号をtrimして検索する() {
 
-    @Test
-    void findOrderCompleteView_異常系_注文番号が空なら空を返す() {
+                OrderCompleteView expected = mock(OrderCompleteView.class);
 
-        Optional<OrderCompleteView> result = service.findOrderCompleteView(" ");
+                when(orderRepository.findOrderCompleteByOrderNumber("ORD001"))
+                                .thenReturn(Optional.of(expected));
 
-        assertThat(result).isEmpty();
+                Optional<OrderCompleteView> result = service.findOrderCompleteView("  ORD001  ");
 
-        verify(orderRepository, never())
-                .findOrderCompleteByOrderNumber(anyString());
-    }
+                assertThat(result)
+                                .contains(expected);
 
-    @Test
-    void findOrderCompleteView_正常系_注文番号をtrimして検索する() {
+                verify(orderRepository)
+                                .findOrderCompleteByOrderNumber("ORD001");
+        }
 
-        OrderCompleteView expected = mock(OrderCompleteView.class);
+        // =========================================================
+        // findMemberOrderHistories
+        // =========================================================
 
-        when(orderRepository.findOrderCompleteByOrderNumber("ORD001"))
-                .thenReturn(Optional.of(expected));
+        @Test
+        void findMemberOrderHistories_正常系_ページ番号0以下を1に補正する() {
 
-        Optional<OrderCompleteView> result = service.findOrderCompleteView("  ORD001  ");
+                MemberOrderHistoryPage expected = mock(MemberOrderHistoryPage.class);
 
-        assertThat(result)
-                .contains(expected);
+                when(orderRepository.findMemberOrders(10L, 1, 10))
+                                .thenReturn(expected);
 
-        verify(orderRepository)
-                .findOrderCompleteByOrderNumber("ORD001");
-    }
+                MemberOrderHistoryPage result = service.findMemberOrderHistories(10L, 0);
 
-    // =========================================================
-    // findMemberOrderHistories
-    // =========================================================
+                assertThat(result)
+                                .isSameAs(expected);
 
-    @Test
-    void findMemberOrderHistories_正常系_ページ番号0以下を1に補正する() {
+                verify(orderRepository)
+                                .findMemberOrders(10L, 1, 10);
+        }
 
-        MemberOrderHistoryPage expected = mock(MemberOrderHistoryPage.class);
+        @Test
+        void findMemberOrderHistories_正常系_指定ページをそのまま渡す() {
 
-        when(orderRepository.findMemberOrders(10L, 1, 10))
-                .thenReturn(expected);
+                MemberOrderHistoryPage expected = mock(MemberOrderHistoryPage.class);
 
-        MemberOrderHistoryPage result = service.findMemberOrderHistories(10L, 0);
+                when(orderRepository.findMemberOrders(10L, 3, 10))
+                                .thenReturn(expected);
 
-        assertThat(result)
-                .isSameAs(expected);
+                MemberOrderHistoryPage result = service.findMemberOrderHistories(10L, 3);
 
-        verify(orderRepository)
-                .findMemberOrders(10L, 1, 10);
-    }
+                assertThat(result)
+                                .isSameAs(expected);
 
-    @Test
-    void findMemberOrderHistories_正常系_指定ページをそのまま渡す() {
+                verify(orderRepository)
+                                .findMemberOrders(10L, 3, 10);
+        }
 
-        MemberOrderHistoryPage expected = mock(MemberOrderHistoryPage.class);
+        // =========================================================
+        // findMemberOrderDetail
+        // =========================================================
 
-        when(orderRepository.findMemberOrders(10L, 3, 10))
-                .thenReturn(expected);
+        @Test
+        void findMemberOrderDetail_異常系_注文番号が空なら空を返す() {
 
-        MemberOrderHistoryPage result = service.findMemberOrderHistories(10L, 3);
+                Optional<MemberOrderDetailView> result = service.findMemberOrderDetail(10L, " ");
 
-        assertThat(result)
-                .isSameAs(expected);
+                assertThat(result).isEmpty();
 
-        verify(orderRepository)
-                .findMemberOrders(10L, 3, 10);
-    }
+                verify(orderRepository, never())
+                                .findMemberOrderDetail(
+                                                any(Long.class),
+                                                anyString());
+        }
 
-    // =========================================================
-    // findMemberOrderDetail
-    // =========================================================
+        @Test
+        void findMemberOrderDetail_正常系_注文番号をtrimして検索する() {
 
-    @Test
-    void findMemberOrderDetail_異常系_注文番号が空なら空を返す() {
+                MemberOrderDetailView expected = mock(MemberOrderDetailView.class);
 
-        Optional<MemberOrderDetailView> result = service.findMemberOrderDetail(10L, " ");
+                when(orderRepository.findMemberOrderDetail(
+                                10L,
+                                "ORD001")).thenReturn(Optional.of(expected));
 
-        assertThat(result).isEmpty();
+                Optional<MemberOrderDetailView> result = service.findMemberOrderDetail(
+                                10L,
+                                " ORD001 ");
 
-        verify(orderRepository, never())
-                .findMemberOrderDetail(
-                        any(Long.class),
-                        anyString());
-    }
+                assertThat(result)
+                                .contains(expected);
 
-    @Test
-    void findMemberOrderDetail_正常系_注文番号をtrimして検索する() {
+                verify(orderRepository)
+                                .findMemberOrderDetail(10L, "ORD001");
+        }
 
-        MemberOrderDetailView expected = mock(MemberOrderDetailView.class);
+        // =========================================================
+        // findReorderItems
+        // =========================================================
 
-        when(orderRepository.findMemberOrderDetail(
-                10L,
-                "ORD001")).thenReturn(Optional.of(expected));
+        @Test
+        void findReorderItems_異常系_注文番号が空なら空リストを返す() {
 
-        Optional<MemberOrderDetailView> result = service.findMemberOrderDetail(
-                10L,
-                " ORD001 ");
+                List<OrderReorderItem> result = service.findReorderItems(10L, " ");
 
-        assertThat(result)
-                .contains(expected);
+                assertThat(result)
+                                .isEmpty();
 
-        verify(orderRepository)
-                .findMemberOrderDetail(10L, "ORD001");
-    }
+                verify(orderRepository, never())
+                                .findReorderItems(
+                                                any(Long.class),
+                                                anyString());
+        }
 
-    // =========================================================
-    // findReorderItems
-    // =========================================================
+        @Test
+        void findReorderItems_正常系_注文番号をtrimして検索する() {
 
-    @Test
-    void findReorderItems_異常系_注文番号が空なら空リストを返す() {
+                List<OrderReorderItem> expected = List.of(mock(OrderReorderItem.class));
 
-        List<OrderReorderItem> result = service.findReorderItems(10L, " ");
+                when(orderRepository.findReorderItems(
+                                10L,
+                                "ORD001")).thenReturn(expected);
 
-        assertThat(result)
-                .isEmpty();
+                List<OrderReorderItem> result = service.findReorderItems(
+                                10L,
+                                " ORD001 ");
 
-        verify(orderRepository, never())
-                .findReorderItems(
-                        any(Long.class),
-                        anyString());
-    }
+                assertThat(result)
+                                .isSameAs(expected);
 
-    @Test
-    void findReorderItems_正常系_注文番号をtrimして検索する() {
+                verify(orderRepository)
+                                .findReorderItems(10L, "ORD001");
+        }
 
-        List<OrderReorderItem> expected = List.of(mock(OrderReorderItem.class));
+        // =========================================================
+        // Test data
+        // =========================================================
 
-        when(orderRepository.findReorderItems(
-                10L,
-                "ORD001")).thenReturn(expected);
+        private CheckoutInputForm createValidForm() {
+                CheckoutInputForm form = new CheckoutInputForm();
 
-        List<OrderReorderItem> result = service.findReorderItems(
-                10L,
-                " ORD001 ");
+                form.setPersonalOrCorporate("personal");
+                form.setLastName("山田");
+                form.setFirstName("太郎");
+                form.setLastNameKana("ヤマダ");
+                form.setFirstNameKana("タロウ");
+                form.setEmail("test@example.com");
+                form.setDaytimePhone("090-1234-5678");
+                form.setPostalCodePart1("123");
+                form.setPostalCodePart2("4567");
+                form.setPrefecture("東京都");
+                form.setCity("渋谷区");
+                form.setAddressLine("1-1-1");
+                form.setDeliveryFloor("5");
+                form.setHasElevator(true);
+                form.setPaymentMethod("bank_transfer");
 
-        assertThat(result)
-                .isSameAs(expected);
+                return form;
+        }
 
-        verify(orderRepository)
-                .findReorderItems(10L, "ORD001");
-    }
+        private CartView createCart(
+                        CartLineView... lines) {
+                return new CartView(
+                                List.of(lines),
+                                lines.length,
+                                lines.length,
+                                createSummary());
+        }
 
-    // =========================================================
-    // Test data
-    // =========================================================
-
-    private CheckoutInputForm createValidForm() {
-        CheckoutInputForm form = new CheckoutInputForm();
-
-        form.setPersonalOrCorporate("personal");
-        form.setLastName("山田");
-        form.setFirstName("太郎");
-        form.setLastNameKana("ヤマダ");
-        form.setFirstNameKana("タロウ");
-        form.setEmail("test@example.com");
-        form.setDaytimePhone("090-1234-5678");
-        form.setPostalCodePart1("123");
-        form.setPostalCodePart2("4567");
-        form.setPrefecture("東京都");
-        form.setCity("渋谷区");
-        form.setAddressLine("1-1-1");
-        form.setDeliveryFloor("5");
-        form.setHasElevator(true);
-        form.setPaymentMethod("bank_transfer");
-
-        return form;
-    }
-
-    private CartView createCart(
-            CartLineView... lines) {
-        return new CartView(
-                List.of(lines),
-                lines.length,
-                lines.length,
-                createSummary());
-    }
-
-    private CartSummaryView createSummary() {
-        return new CartSummaryView(
-                BigDecimal.valueOf(10000),
-                BigDecimal.valueOf(3000),
-                BigDecimal.valueOf(500),
-                BigDecimal.ZERO,
-                BigDecimal.valueOf(1350),
-                BigDecimal.valueOf(14850));
-    }
+        private CartSummaryView createSummary() {
+                return new CartSummaryView(
+                                BigDecimal.valueOf(10000),
+                                BigDecimal.valueOf(3000),
+                                BigDecimal.valueOf(500),
+                                BigDecimal.ZERO,
+                                BigDecimal.valueOf(1350),
+                                BigDecimal.valueOf(14850));
+        }
 }

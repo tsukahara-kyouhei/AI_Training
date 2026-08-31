@@ -18,8 +18,7 @@ public class ProductFilterOptionRepository {
     /** 透明色スウォッチ判定用タイプ名。 */
     private static final String SWATCH_TYPE_TRANSPARENT_PATTERN = "transparent_pattern";
     /** 透明色スウォッチ表示用CSSパターン。 */
-    private static final String TRANSPARENT_COLOR_PATTERN =
-            "repeating-linear-gradient(45deg, #d9d9d9, #d9d9d9 3px, #ffffff 3px, #ffffff 6px)";
+    private static final String TRANSPARENT_COLOR_PATTERN = "repeating-linear-gradient(45deg, #d9d9d9, #d9d9d9 3px, #ffffff 3px, #ffffff 6px)";
 
     /** 商品絞り込み候補SQLを呼び出す Mapper。 */
     private final ProductMapper productMapper;
@@ -142,8 +141,7 @@ public class ProductFilterOptionRepository {
         return new ColorFilterOption(
                 colorId == null ? null : String.valueOf(colorId),
                 colorName,
-                resolveColorSwatch(swatchType, colorCode)
-        );
+                resolveColorSwatch(swatchType, colorCode));
     }
 
     /**
@@ -165,7 +163,7 @@ public class ProductFilterOptionRepository {
      * スウォッチ種別に応じて画面表示用の色表現を返す。
      *
      * @param swatchType スウォッチ種別
-     * @param colorCode 通常色コード
+     * @param colorCode  通常色コード
      * @return 表示用色表現
      */
     private String resolveColorSwatch(String swatchType, String colorCode) {
@@ -175,4 +173,3 @@ public class ProductFilterOptionRepository {
         return colorCode;
     }
 }
-

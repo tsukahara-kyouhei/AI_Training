@@ -31,12 +31,12 @@ public class AuthModelAdvice {
      * 認証状態ModelAdviceを生成する。
      *
      * @param memberSessionService 会員セッションサービス
-     * @param cartService カートサービス
-     * @param announcementService お知らせサービス
+     * @param cartService          カートサービス
+     * @param announcementService  お知らせサービス
      */
     public AuthModelAdvice(MemberSessionService memberSessionService,
-                           CartService cartService,
-                           AnnouncementService announcementService) {
+            CartService cartService,
+            AnnouncementService announcementService) {
         this.memberSessionService = memberSessionService;
         this.cartService = cartService;
         this.announcementService = announcementService;
@@ -45,7 +45,7 @@ public class AuthModelAdvice {
     /**
      * 全画面で使う認証状態・カート件数・ヘッダお知らせを設定する。
      *
-     * @param model 画面モデル
+     * @param model   画面モデル
      * @param request 現在リクエスト
      */
     @ModelAttribute
@@ -64,7 +64,8 @@ public class AuthModelAdvice {
     /**
      * エラーページ描画中か判定する。
      *
-     * <p>エラー描画時は DB や Cookie に依存する共通ヘッダ情報の構築を避け、
+     * <p>
+     * エラー描画時は DB や Cookie に依存する共通ヘッダ情報の構築を避け、
      * システム障害時でも専用エラーページを安定して返せるようにする。
      *
      * @param request 現在リクエスト
@@ -76,4 +77,3 @@ public class AuthModelAdvice {
                 || "/error".equals(request.getRequestURI());
     }
 }
-

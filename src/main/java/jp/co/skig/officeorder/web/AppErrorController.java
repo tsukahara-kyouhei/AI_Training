@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * ブラウザ向けエラーページと API 向け汎用エラー応答を返す Controller。
  *
- * <p>予期しない例外時でもヘッダや DB 依存の共通部品を使わず、
+ * <p>
+ * 予期しない例外時でもヘッダや DB 依存の共通部品を使わず、
  * 最低限の情報だけで応答を返せるようにしている。
  */
 @Controller
@@ -43,9 +44,9 @@ public class AppErrorController implements ErrorController {
     /**
      * エラー内容に応じて HTML 画面または JSON 応答を返す。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param model 画面モデル
+     * @param model    画面モデル
      * @return HTML 表示時はテンプレート名、JSON 応答時は ResponseEntity
      */
     @RequestMapping
@@ -128,7 +129,7 @@ public class AppErrorController implements ErrorController {
     /**
      * JSON 応答本文を組み立てる。
      *
-     * @param request 現在リクエスト
+     * @param request    現在リクエスト
      * @param descriptor エラー表示定義
      * @return JSON 応答本文
      */
@@ -178,10 +179,10 @@ public class AppErrorController implements ErrorController {
     /**
      * エラー画面・API応答に使う表示定義。
      *
-     * @param status HTTP ステータス
-     * @param code エラーコード
-     * @param title 見出し
-     * @param message 補足メッセージ
+     * @param status   HTTP ステータス
+     * @param code     エラーコード
+     * @param title    見出し
+     * @param message  補足メッセージ
      * @param viewName HTML 表示時のテンプレート名
      */
     private record ErrorDescriptor(HttpStatus status, String code, String title, String message, String viewName) {

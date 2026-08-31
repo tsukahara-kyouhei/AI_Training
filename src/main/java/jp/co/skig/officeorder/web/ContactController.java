@@ -40,13 +40,13 @@ public class ContactController {
     /**
      * お問い合わせControllerを生成する。
      *
-     * @param contactService お問い合わせサービス
+     * @param contactService       お問い合わせサービス
      * @param memberSessionService セッション会員サービス
-     * @param messageSource 利用者向けメッセージ取得元
+     * @param messageSource        利用者向けメッセージ取得元
      */
     public ContactController(ContactService contactService,
-                             MemberSessionService memberSessionService,
-                             MessageSource messageSource) {
+            MemberSessionService memberSessionService,
+            MessageSource messageSource) {
         this.contactService = contactService;
         this.memberSessionService = memberSessionService;
         this.messages = new MessageSourceAccessor(messageSource);
@@ -56,7 +56,7 @@ public class ContactController {
      * お問い合わせ画面を表示する。
      *
      * @param session 現在セッション
-     * @param model 画面モデル
+     * @param model   画面モデル
      * @return お問い合わせ画面
      */
     @GetMapping("/contact")
@@ -71,19 +71,19 @@ public class ContactController {
     /**
      * お問い合わせを受け付ける。
      *
-     * @param form 入力フォーム
-     * @param bindingResult バリデーション結果
-     * @param session 現在セッション
+     * @param form               入力フォーム
+     * @param bindingResult      バリデーション結果
+     * @param session            現在セッション
      * @param redirectAttributes リダイレクト時メッセージ格納先
-     * @param model 画面モデル
+     * @param model              画面モデル
      * @return 遷移先
      */
     @PostMapping("/contact")
     public String submit(@Valid @ModelAttribute("contactForm") ContactForm form,
-                         BindingResult bindingResult,
-                         HttpSession session,
-                         RedirectAttributes redirectAttributes,
-                         Model model) {
+            BindingResult bindingResult,
+            HttpSession session,
+            RedirectAttributes redirectAttributes,
+            Model model) {
         if (bindingResult.hasErrors()) {
             log.warn("event={} fieldErrorCount={}",
                     LogEvent.CONTACT_INPUT_INVALID.value(),
@@ -129,5 +129,3 @@ public class ContactController {
         return messages.getMessage(code, args);
     }
 }
-
-

@@ -16,7 +16,8 @@ import org.springframework.stereotype.Repository;
 /**
  * お知らせデータの取得と画面表示用整形を担当するリポジトリ。
  *
- * <p>公開期間内のお知らせ取得に加えて、画面でそのまま使う掲載日表示形式への変換もここで行う。
+ * <p>
+ * 公開期間内のお知らせ取得に加えて、画面でそのまま使う掲載日表示形式への変換もここで行う。
  */
 @Repository
 public class AnnouncementRepository {
@@ -35,10 +36,10 @@ public class AnnouncementRepository {
      * お知らせリポジトリを生成する。
      *
      * @param announcementMapper お知らせMapper
-     * @param appTimeProvider 共通時刻プロバイダ
+     * @param appTimeProvider    共通時刻プロバイダ
      */
     public AnnouncementRepository(AnnouncementMapper announcementMapper,
-                                  AppTimeProvider appTimeProvider) {
+            AppTimeProvider appTimeProvider) {
         this.announcementMapper = announcementMapper;
         this.appTimeProvider = appTimeProvider;
     }
@@ -52,8 +53,7 @@ public class AnnouncementRepository {
     public List<AnnouncementView> findActiveAnnouncements(Integer limit) {
         List<AnnouncementMapperRow> rows = announcementMapper.selectActiveAnnouncements(
                 limit,
-                appTimeProvider.nowOffsetDateTime()
-        );
+                appTimeProvider.nowOffsetDateTime());
         if (rows == null || rows.isEmpty()) {
             return List.of();
         }
@@ -77,14 +77,14 @@ public class AnnouncementRepository {
                 row.title() == null ? "" : row.title(),
                 row.body() == null ? "" : row.body(),
                 dateDisplay,
-                dateIso
-        );
+                dateIso);
     }
 
     /**
      * Mapper返却値を掲載日表示用の {@link LocalDate} へ変換する。
      *
-     * <p>DBドライバ差異により型がぶれても扱えるよう、複数型を許容している。
+     * <p>
+     * DBドライバ差異により型がぶれても扱えるよう、複数型を許容している。
      *
      * @param value 変換対象
      * @return 掲載日
@@ -108,8 +108,3 @@ public class AnnouncementRepository {
         return null;
     }
 }
-
-
-
-
-

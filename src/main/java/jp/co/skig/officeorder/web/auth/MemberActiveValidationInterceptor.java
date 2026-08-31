@@ -28,11 +28,11 @@ public class MemberActiveValidationInterceptor implements HandlerInterceptor {
     /**
      * 会員有効性検証Interceptorを生成する。
      *
-     * @param memberService 会員サービス
+     * @param memberService        会員サービス
      * @param memberSessionService 会員セッションサービス
      */
     public MemberActiveValidationInterceptor(MemberService memberService,
-                                             MemberSessionService memberSessionService) {
+            MemberSessionService memberSessionService) {
         this.memberService = memberService;
         this.memberSessionService = memberSessionService;
     }
@@ -40,14 +40,15 @@ public class MemberActiveValidationInterceptor implements HandlerInterceptor {
     /**
      * 認証済み会員が退会済みなどで無効化されていないかを確認する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param handler ハンドラ
+     * @param handler  ハンドラ
      * @return 処理継続可否
      * @throws Exception リダイレクト失敗時
      */
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null
                 || !authentication.isAuthenticated()

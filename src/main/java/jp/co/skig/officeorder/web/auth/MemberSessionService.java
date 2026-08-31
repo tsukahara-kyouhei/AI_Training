@@ -20,7 +20,8 @@ import org.springframework.stereotype.Service;
 /**
  * Spring Security とアプリ独自会員モデルの橋渡しを行うサービス。
  *
- * <p>現在ログイン会員の取得、登録直後の疑似ログイン、セッション破棄を担当する。
+ * <p>
+ * 現在ログイン会員の取得、登録直後の疑似ログイン、セッション破棄を担当する。
  */
 @Service
 public class MemberSessionService {
@@ -49,15 +50,14 @@ public class MemberSessionService {
                 memberPrincipal.getMemberId(),
                 memberPrincipal.getUsername(),
                 memberPrincipal.getLastName(),
-                memberPrincipal.getFirstName()
-        ));
+                memberPrincipal.getFirstName()));
     }
 
     /**
      * 会員登録直後などにアプリ側からログイン状態を作る。
      *
      * @param request 現在リクエスト
-     * @param member ログインさせる会員
+     * @param member  ログインさせる会員
      */
     public void login(HttpServletRequest request, MemberSessionUser member) {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
@@ -66,14 +66,11 @@ public class MemberSessionService {
                 member.email(),
                 member.lastName(),
                 member.firstName(),
-                ""
-        );
-        UsernamePasswordAuthenticationToken authentication =
-                UsernamePasswordAuthenticationToken.authenticated(
-                        principal,
-                        null,
-                        principal.getAuthorities()
-                );
+                "");
+        UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
+                principal,
+                null,
+                principal.getAuthorities());
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
 
@@ -111,4 +108,3 @@ public class MemberSessionService {
         return AuthRedirectUtils.sanitizeRedirectPath(rawRedirectPath);
     }
 }
-

@@ -64,17 +64,17 @@ public class MyPageController {
     /**
      * マイページControllerを生成する。
      *
-     * @param memberService 会員サービス
-     * @param orderService 注文サービス
-     * @param cartService カートサービス
+     * @param memberService        会員サービス
+     * @param orderService         注文サービス
+     * @param cartService          カートサービス
      * @param memberSessionService 会員セッションサービス
-     * @param messageSource 利用者向けメッセージ取得元
+     * @param messageSource        利用者向けメッセージ取得元
      */
     public MyPageController(MemberService memberService,
-                            OrderService orderService,
-                            CartService cartService,
-                            MemberSessionService memberSessionService,
-                            MessageSource messageSource) {
+            OrderService orderService,
+            CartService cartService,
+            MemberSessionService memberSessionService,
+            MessageSource messageSource) {
         this.memberService = memberService;
         this.orderService = orderService;
         this.cartService = cartService;
@@ -95,8 +95,8 @@ public class MyPageController {
      */
     @GetMapping("/mypage/orders")
     public String orders(@RequestParam(name = "page", defaultValue = "1") int page,
-                         HttpSession session,
-                         Model model) {
+            HttpSession session,
+            Model model) {
         MemberSessionUser member = requireLoginMember(session);
         MemberOrderHistoryPage result = orderService.findMemberOrderHistories(member.memberId(), page);
         int correctedPage = result.page();
@@ -117,10 +117,11 @@ public class MyPageController {
      */
     @GetMapping("/mypage/orders/{orderNumber}")
     public String orderDetail(@PathVariable String orderNumber,
-                              HttpSession session,
-                              Model model) {
+            HttpSession session,
+            Model model) {
         MemberSessionUser member = requireLoginMember(session);
-        Optional<MemberOrderDetailView> orderDetail = orderService.findMemberOrderDetail(member.memberId(), orderNumber);
+        Optional<MemberOrderDetailView> orderDetail = orderService.findMemberOrderDetail(member.memberId(),
+                orderNumber);
         if (orderDetail.isEmpty()) {
             log.warn("event={} memberId={} orderNumber={} reason=not_found",
                     LogEvent.MYPAGE_ORDER_DETAIL_MISSED.value(),
@@ -137,10 +138,10 @@ public class MyPageController {
      */
     @PostMapping("/mypage/orders/{orderNumber}/reorder")
     public String reorder(@PathVariable String orderNumber,
-                          HttpSession session,
-                          HttpServletRequest request,
-                          HttpServletResponse response,
-                          RedirectAttributes redirectAttributes) {
+            HttpSession session,
+            HttpServletRequest request,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
         MemberSessionUser member = requireLoginMember(session);
         if (orderService.findMemberOrderDetail(member.memberId(), orderNumber).isEmpty()) {
             log.warn("event={} memberId={} orderNumber={} reason=not_found",
@@ -164,8 +165,7 @@ public class MyPageController {
                         response,
                         item.productVariantId(),
                         item.quantity(),
-                        item.assemblyRequested()
-                );
+                        item.assemblyRequested());
                 addedCount++;
             } catch (IllegalArgumentException ex) {
                 failedProductCodes.add(item.productCode() == null ? "-" : item.productCode());
@@ -179,8 +179,7 @@ public class MyPageController {
         if (!failedProductCodes.isEmpty()) {
             redirectAttributes.addFlashAttribute(
                     "cartError",
-                    message("flash.mypage.reorder.partialFailure", String.join(", ", failedProductCodes))
-            );
+                    message("flash.mypage.reorder.partialFailure", String.join(", ", failedProductCodes)));
         }
         return "redirect:/cart";
     }
@@ -190,8 +189,8 @@ public class MyPageController {
      */
     @GetMapping("/mypage/favorites")
     public String favorites(@RequestParam(name = "page", defaultValue = "1") int page,
-                            HttpSession session,
-                            Model model) {
+            HttpSession session,
+            Model model) {
         MemberSessionUser member = requireLoginMember(session);
         MemberFavoritePage result = memberService.findFavorites(member.memberId(), page);
         int correctedPage = result.page();
@@ -229,10 +228,10 @@ public class MyPageController {
      */
     @PostMapping("/mypage/profile")
     public String updateProfile(@Valid @ModelAttribute("profileForm") MemberProfileEditForm rawForm,
-                                BindingResult bindingResult,
-                                HttpSession session,
-                                HttpServletRequest request,
-                                RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult,
+            HttpSession session,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
         MemberSessionUser member = requireLoginMember(session);
         MemberProfileEditForm form = rawForm.normalize();
         validateProfileFormForMemberType(form, bindingResult);
@@ -260,8 +259,8 @@ public class MyPageController {
      */
     @GetMapping("/mypage/addresses")
     public String addresses(@RequestParam(name = "page", defaultValue = "1") int page,
-                            HttpSession session,
-                            Model model) {
+            HttpSession session,
+            Model model) {
         MemberSessionUser member = requireLoginMember(session);
         MemberAdditionalAddressPage result = memberService.findAdditionalAddresses(member.memberId(), page);
         int correctedPage = result.page();
@@ -306,10 +305,11 @@ public class MyPageController {
      */
     @GetMapping("/mypage/addresses/{memberAddressId}/edit")
     public String addressEditForm(@PathVariable long memberAddressId,
-                                  HttpSession session,
-                                  Model model) {
+            HttpSession session,
+            Model model) {
         MemberSessionUser member = requireLoginMember(session);
-        Optional<MemberAdditionalAddressView> address = memberService.findAdditionalAddressById(member.memberId(), memberAddressId);
+        Optional<MemberAdditionalAddressView> address = memberService.findAdditionalAddressById(member.memberId(),
+                memberAddressId);
         if (address.isEmpty()) {
             log.warn("event={} memberId={} memberAddressId={} reason=not_found",
                     LogEvent.MEMBER_ADDRESS_UPDATE_MISSED.value(),
@@ -329,10 +329,10 @@ public class MyPageController {
      */
     @PostMapping("/mypage/addresses")
     public String createAddress(@Valid @ModelAttribute("addressForm") MemberAdditionalAddressForm rawForm,
-                                BindingResult bindingResult,
-                                HttpSession session,
-                                Model model,
-                                RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult,
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes) {
         MemberSessionUser member = requireLoginMember(session);
         MemberAdditionalAddressForm normalizedForm = rawForm.normalize();
         validateAddressFormForMemberType(member.memberId(), normalizedForm, bindingResult);
@@ -361,10 +361,10 @@ public class MyPageController {
      */
     @PostMapping("/mypage/addresses/{memberAddressId}")
     public String updateAddress(@PathVariable long memberAddressId,
-                                @Valid @ModelAttribute("addressForm") MemberAdditionalAddressForm rawForm,
-                                BindingResult bindingResult,
-                                HttpSession session,
-                                Model model) {
+            @Valid @ModelAttribute("addressForm") MemberAdditionalAddressForm rawForm,
+            BindingResult bindingResult,
+            HttpSession session,
+            Model model) {
         MemberSessionUser member = requireLoginMember(session);
         if (memberService.findAdditionalAddressById(member.memberId(), memberAddressId).isEmpty()) {
             log.warn("event={} memberId={} memberAddressId={} reason=not_found",
@@ -400,7 +400,7 @@ public class MyPageController {
      */
     @PostMapping("/mypage/addresses/{memberAddressId}/delete")
     public String deleteAddress(@PathVariable long memberAddressId,
-                                HttpSession session) {
+            HttpSession session) {
         MemberSessionUser member = requireLoginMember(session);
         memberService.deleteAdditionalAddress(member.memberId(), memberAddressId);
         return "redirect:/mypage/addresses";
@@ -441,8 +441,8 @@ public class MyPageController {
      * 追加お届け先入力の法人必須条件を検証する。
      */
     private void validateAddressFormForMemberType(long memberId,
-                                                  MemberAdditionalAddressForm form,
-                                                  BindingResult bindingResult) {
+            MemberAdditionalAddressForm form,
+            BindingResult bindingResult) {
         MemberType memberType = memberService.findMemberTypeById(memberId);
         if (memberType == MemberType.CORPORATE && (form.getCompanyName() == null || form.getCompanyName().isBlank())) {
             bindingResult.rejectValue("companyName", "validation.companyName.corporateRequired");
@@ -453,7 +453,7 @@ public class MyPageController {
      * 会員情報変更入力の法人必須条件を検証する。
      */
     private void validateProfileFormForMemberType(MemberProfileEditForm form,
-                                                  BindingResult bindingResult) {
+            BindingResult bindingResult) {
         if (form.isCorporate() && (form.getCompanyName() == null || form.getCompanyName().isBlank())) {
             bindingResult.rejectValue("companyName", "validation.companyName.corporateRequired");
         }

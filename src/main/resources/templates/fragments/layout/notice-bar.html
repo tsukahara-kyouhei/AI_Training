@@ -1,28 +1,26 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<body>
-<div class="notice-bar" th:fragment="noticeBar" data-notice-rotator>
-    <div class="container notice-bar__inner">
-        <span class="notice-bar__date"
-              data-notice-date
-              th:text="${headerAnnouncements == null or #lists.isEmpty(headerAnnouncements) ? '-' : headerAnnouncements[0].publishedDateDisplay}">
-            2026/02/13
-        </span>
-        <a class="notice-bar__text"
-           href="/announcements"
-           data-notice-text
-           th:text="${headerAnnouncements == null or #lists.isEmpty(headerAnnouncements) ? '現在お知らせはありません。' : headerAnnouncements[0].title}">
-            配送遅延のお知らせ
-        </a>
-        <a class="notice-bar__more" href="/announcements">お知らせ一覧</a>
-    </div>
 
-    <ul hidden aria-hidden="true" th:if="${headerAnnouncements != null and !#lists.isEmpty(headerAnnouncements)}">
-        <li th:each="notice : ${headerAnnouncements}"
-            data-notice-item
-            th:attr="data-notice-date=${notice.publishedDateDisplay},data-notice-title=${notice.title}">
-        </li>
-    </ul>
-</div>
+<body>
+    <div class="notice-bar" th:fragment="noticeBar" data-notice-rotator>
+        <div class="container notice-bar__inner">
+            <span class="notice-bar__date" data-notice-date
+                th:text="${headerAnnouncements == null or #lists.isEmpty(headerAnnouncements) ? '-' : headerAnnouncements[0].publishedDateDisplay}">
+                2026/02/13
+            </span>
+            <a class="notice-bar__text" href="/announcements" data-notice-text
+                th:text="${headerAnnouncements == null or #lists.isEmpty(headerAnnouncements) ? '現在お知らせはありません。' : headerAnnouncements[0].title}">
+                配送遅延のお知らせ
+            </a>
+            <a class="notice-bar__more" href="/announcements">お知らせ一覧</a>
+        </div>
+
+        <ul hidden aria-hidden="true" th:if="${headerAnnouncements != null and !#lists.isEmpty(headerAnnouncements)}">
+            <li th:each="notice : ${headerAnnouncements}" data-notice-item
+                th:attr="data-notice-date=${notice.publishedDateDisplay},data-notice-title=${notice.title}">
+            </li>
+        </ul>
+    </div>
 </body>
+
 </html>

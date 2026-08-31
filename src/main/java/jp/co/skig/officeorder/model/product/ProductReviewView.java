@@ -3,8 +3,8 @@ package jp.co.skig.officeorder.model.product;
 import java.time.OffsetDateTime;
 
 public record ProductReviewView(
-        long reviewId,
-        long memberId,
+        Long reviewId,
+        Long memberId,
         Integer rating,
         String title,
         String body,

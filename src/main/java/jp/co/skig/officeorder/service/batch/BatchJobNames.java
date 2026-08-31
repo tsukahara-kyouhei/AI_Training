@@ -3,7 +3,8 @@ package jp.co.skig.officeorder.service.batch;
 /**
  * 本システムで扱う集計系バッチジョブ名の定義。
  *
- * <p>Scheduler、設定クラス、実行APIで同じ文字列を共有するため、
+ * <p>
+ * Scheduler、設定クラス、実行APIで同じ文字列を共有するため、
  * 定数に集約している。
  */
 public final class BatchJobNames {

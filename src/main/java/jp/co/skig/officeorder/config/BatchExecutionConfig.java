@@ -43,34 +43,40 @@ public class BatchExecutionConfig {
     /*
      * 非同期実行用の JobOperator を生成する。
      *
-     * @param jobRepository        ジョブリポジトリ
+     * @param jobRepository ジョブリポジトリ
+     * 
      * @param batchJobTaskExecutor バッチ実行用TaskExecutor
+     * 
      * @return JobOperator
+     * 
      * @throws Exception 初期化失敗時
      */
-    /* 
-    @Bean(name = "asyncJobOperator")
-    @Primary
-    public JobOperator asyncJobOperator(
-            JobRepository jobRepository,
-            @Qualifier("batchJobTaskExecutor") TaskExecutor batchJobTaskExecutor) throws Exception {
-    */
-        /*
-         * TaskExecutorJobOperator jobOperator = new TaskExecutorJobOperator();
-         * jobOperator.setJobRepository(jobRepository);
-         * jobOperator.setTaskExecutor(batchJobTaskExecutor);
-         * jobOperator.afterPropertiesSet();
-         * 
-         * 
-         * return jobOperator;
-         */
-        /* 
-        JobOperatorFactoryBean factory = new JobOperatorFactoryBean();
-        factory.setJobRepository(jobRepository);
-        factory.setTaskExecutor(batchJobTaskExecutor);
-        factory.afterPropertiesSet();
-
-        return factory.getObject();
-    }
-        */
+    /*
+     * @Bean(name = "asyncJobOperator")
+     * 
+     * @Primary
+     * public JobOperator asyncJobOperator(
+     * JobRepository jobRepository,
+     * 
+     * @Qualifier("batchJobTaskExecutor") TaskExecutor batchJobTaskExecutor) throws
+     * Exception {
+     */
+    /*
+     * TaskExecutorJobOperator jobOperator = new TaskExecutorJobOperator();
+     * jobOperator.setJobRepository(jobRepository);
+     * jobOperator.setTaskExecutor(batchJobTaskExecutor);
+     * jobOperator.afterPropertiesSet();
+     * 
+     * 
+     * return jobOperator;
+     */
+    /*
+     * JobOperatorFactoryBean factory = new JobOperatorFactoryBean();
+     * factory.setJobRepository(jobRepository);
+     * factory.setTaskExecutor(batchJobTaskExecutor);
+     * factory.afterPropertiesSet();
+     * 
+     * return factory.getObject();
+     * }
+     */
 }

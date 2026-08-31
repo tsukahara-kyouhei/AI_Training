@@ -9,6 +9,7 @@ public record MemberFavoriteView(
         long productId,
         String productName,
         String priceText,
+        String taxExcludedPriceText,
         List<String> colorCodes,
         String productCode,
         boolean inStock,

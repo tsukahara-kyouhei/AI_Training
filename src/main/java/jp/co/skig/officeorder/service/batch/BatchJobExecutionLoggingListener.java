@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
 /**
  * Spring Batch のジョブ開始・終了を共通フォーマットで記録するリスナー。
  *
- * <p>ジョブ名、実行ID、トリガ種別、実行時間をここで一元的に記録し、
+ * <p>
+ * ジョブ名、実行ID、トリガ種別、実行時間をここで一元的に記録し、
  * 個別ジョブ側では業務結果のログに集中できるようにする。
  */
 @Component
@@ -41,7 +42,8 @@ public class BatchJobExecutionLoggingListener implements JobExecutionListener {
     /**
      * ジョブ終了時に状態別の完了ログを出力する。
      *
-     * <p>正常終了は INFO、停止は WARN、それ以外の失敗は ERROR で記録する。
+     * <p>
+     * 正常終了は INFO、停止は WARN、それ以外の失敗は ERROR で記録する。
      *
      * @param jobExecution 終了したジョブ実行
      */
@@ -83,7 +85,7 @@ public class BatchJobExecutionLoggingListener implements JobExecutionListener {
      * 実行時間をミリ秒で計算する。
      *
      * @param start 開始時刻
-     * @param end 終了時刻
+     * @param end   終了時刻
      * @return 実行時間ミリ秒。時刻が欠けている場合は {@code -1}
      */
     private long calculateDuration(LocalDateTime start, LocalDateTime end) {

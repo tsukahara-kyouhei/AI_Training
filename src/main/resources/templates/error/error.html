@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{fragments/layout/head :: head(${errorTitle} + ' | OFFICE ORDER', 'error')}">
 </head>
-<body>
-<div class="page error-page">
-    <main class="main error-page__main">
-        <div class="container error-page__container">
-            <section class="card error-panel" aria-labelledby="error-title">
-                <div class="card__pad error-panel__pad">
-                    <p class="error-panel__status" th:text="${statusCode}">404</p>
-                    <h1 class="page-title error-panel__title" id="error-title" th:text="${errorTitle}">ページが見つかりません</h1>
-                    <p class="error-panel__message" th:text="${errorMessage}">対象のページは移動または削除された可能性があります。</p>
 
-                    <div class="actions error-panel__actions">
-                        <a class="btn btn--cart-action" href="/">トップへ戻る</a>
+<body>
+    <div class="page error-page">
+        <main class="main error-page__main">
+            <div class="container error-page__container">
+                <section class="card error-panel" aria-labelledby="error-title">
+                    <div class="card__pad error-panel__pad">
+                        <p class="error-panel__status" th:text="${statusCode}">404</p>
+                        <h1 class="page-title error-panel__title" id="error-title" th:text="${errorTitle}">ページが見つかりません
+                        </h1>
+                        <p class="error-panel__message" th:text="${errorMessage}">対象のページは移動または削除された可能性があります。</p>
+
+                        <div class="actions error-panel__actions">
+                            <a class="btn btn--cart-action" href="/">トップへ戻る</a>
+                        </div>
                     </div>
-                </div>
-            </section>
-        </div>
-    </main>
-</div>
+                </section>
+            </div>
+        </main>
+    </div>
 </body>
+
 </html>

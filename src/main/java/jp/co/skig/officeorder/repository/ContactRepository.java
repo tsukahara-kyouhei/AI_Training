@@ -43,7 +43,7 @@ public class ContactRepository {
      * お問い合わせを保存する。
      *
      * @param memberId 会員ID。ゲスト時は {@code null}
-     * @param form 保存対象フォーム
+     * @param form     保存対象フォーム
      * @return 採番された問い合わせID
      */
     public long insertInquiry(Long memberId, ContactForm form) {
@@ -54,7 +54,3 @@ public class ContactRepository {
         return inquiryId;
     }
 }
-
-
-
-

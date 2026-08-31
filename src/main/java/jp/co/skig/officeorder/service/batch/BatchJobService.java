@@ -24,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 集計系バッチジョブの業務処理を担当するサービス。
  *
- * <p>売れ筋ランキングとおすすめ関連商品について、集計対象データの抽出条件、
+ * <p>
+ * 売れ筋ランキングとおすすめ関連商品について、集計対象データの抽出条件、
  * 並び順、件数上限、保存方式をここで統一している。
  */
 @Service
@@ -45,7 +46,7 @@ public class BatchJobService {
      * 集計系バッチサービスを生成する。
      *
      * @param batchRepository 集計元データ取得と結果保存を担当するリポジトリ
-     * @param appClock バッチ計算時刻の基準となるアプリ共通Clock
+     * @param appClock        バッチ計算時刻の基準となるアプリ共通Clock
      */
     public BatchJobService(BatchRepository batchRepository, Clock appClock) {
         this.batchRepository = batchRepository;
@@ -55,16 +56,18 @@ public class BatchJobService {
     /**
      * 売れ筋ランキングを再計算し、当日分の結果を全置換で保存する。
      *
-     * <p>処理概要:
+     * <p>
+     * 処理概要:
      * <ul>
-     *   <li>算出時点から直近30日かつキャンセル以外の注文を対象にする</li>
-     *   <li>算出時点で販売期間内の商品だけを対象に販売数量を集計する</li>
-     *   <li>販売数量降順、同数時は {@code product_id} 昇順で並べる</li>
-     *   <li>上位10件を採用する</li>
-     *   <li>当日分の {@code popular_product_rankings} を削除して再挿入する</li>
+     * <li>算出時点から直近30日かつキャンセル以外の注文を対象にする</li>
+     * <li>算出時点で販売期間内の商品だけを対象に販売数量を集計する</li>
+     * <li>販売数量降順、同数時は {@code product_id} 昇順で並べる</li>
+     * <li>上位10件を採用する</li>
+     * <li>当日分の {@code popular_product_rankings} を削除して再挿入する</li>
      * </ul>
      *
-     * <p>同日中の再実行では、同じ {@code rankingDate} の結果を最新内容で置き換える。
+     * <p>
+     * 同日中の再実行では、同じ {@code rankingDate} の結果を最新内容で置き換える。
      *
      * @param rankingDate 算出日
      * @return 保存したランキング件数
@@ -73,7 +76,8 @@ public class BatchJobService {
     public int executePopularRanking(LocalDate rankingDate) {
         OffsetDateTime now = OffsetDateTime.now(appClock);
         OffsetDateTime sinceAt = now.minusDays(30);
-        List<BatchRepository.PopularRankingCandidate> candidates = batchRepository.findPopularRankingCandidates(sinceAt, now);
+        List<BatchRepository.PopularRankingCandidate> candidates = batchRepository.findPopularRankingCandidates(sinceAt,
+                now);
         // 販売数量降順、同数時は product_id 昇順で上位10件を採用する。
         List<BatchRepository.PopularRankingCandidate> top = candidates.stream()
                 .sorted(Comparator
@@ -93,16 +97,18 @@ public class BatchJobService {
     /**
      * おすすめ関連商品を再計算し、当日分の結果を全置換で保存する。
      *
-     * <p>処理概要:
+     * <p>
+     * 処理概要:
      * <ul>
-     *   <li>直近30日かつキャンセル以外の注文から、注文ごとの商品出現情報を取得する</li>
-     *   <li>同一注文内で共起した商品ペアを集計する</li>
-     *   <li>商品ごとの登場注文数と商品ペアの共起回数から、コサイン類似度を算出する</li>
-     *   <li>元商品の単位でスコア降順・商品ID昇順に並べ、上位4件を採用する</li>
-     *   <li>当日分の {@code recommended_related_products} を削除して再挿入する</li>
+     * <li>直近30日かつキャンセル以外の注文から、注文ごとの商品出現情報を取得する</li>
+     * <li>同一注文内で共起した商品ペアを集計する</li>
+     * <li>商品ごとの登場注文数と商品ペアの共起回数から、コサイン類似度を算出する</li>
+     * <li>元商品の単位でスコア降順・商品ID昇順に並べ、上位4件を採用する</li>
+     * <li>当日分の {@code recommended_related_products} を削除して再挿入する</li>
      * </ul>
      *
-     * <p>同日中の再実行では、同じ {@code recommendationDate} の結果を最新内容で置き換える。
+     * <p>
+     * 同日中の再実行では、同じ {@code recommendationDate} の結果を最新内容で置き換える。
      *
      * @param recommendationDate 算出日
      * @return 保存したおすすめ関連商品の件数
@@ -124,7 +130,8 @@ public class BatchJobService {
     /**
      * 注文ごとの商品出現情報から、おすすめ関連商品の保存行を組み立てる。
      *
-     * <p>各商品について、同一注文内で一緒に購入された商品を候補とし、
+     * <p>
+     * 各商品について、同一注文内で一緒に購入された商品を候補とし、
      * {@code coOccurrence / sqrt(orderCount(source) * orderCount(target))} で
      * コサイン類似度を算出する。結果は {@code score} 降順、同点時は
      * {@code recommended_product_id} 昇順で並べ、1商品あたり最大4件まで返す。
@@ -132,7 +139,8 @@ public class BatchJobService {
      * @param occurrences 直近30日注文から抽出した {@code order_id × product_id} の出現情報
      * @return 保存対象のおすすめ関連商品行
      */
-    private List<BatchRepository.RecommendedRelatedRow> buildRelatedRows(List<BatchRepository.OrderProductOccurrence> occurrences) {
+    private List<BatchRepository.RecommendedRelatedRow> buildRelatedRows(
+            List<BatchRepository.OrderProductOccurrence> occurrences) {
         if (occurrences == null || occurrences.isEmpty()) {
             return List.of();
         }
@@ -200,8 +208,7 @@ public class BatchJobService {
                         sourceProductId,
                         candidate.targetProductId(),
                         rank,
-                        candidate.score()
-                ));
+                        candidate.score()));
                 rank++;
             }
         }
@@ -212,12 +219,10 @@ public class BatchJobService {
      * おすすめ関連商品算出時の一時候補。
      *
      * @param targetProductId 推奨先の商品ID
-     * @param score コサイン類似度から算出したスコア
+     * @param score           コサイン類似度から算出したスコア
      */
     private record RecommendationCandidate(
             long targetProductId,
-            BigDecimal score
-    ) {
+            BigDecimal score) {
     }
 }
-

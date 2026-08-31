@@ -1,81 +1,91 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{fragments/layout/head :: head('購入方法選択 | OFFICE ORDER', 'commerce')}"></head>
+
 <body>
-<div class="page">
-    <div th:replace="~{fragments/layout/header :: header}"></div>
-    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+    <div class="page">
+        <div th:replace="~{fragments/layout/header :: header}"></div>
+        <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
 
-    <main class="main">
-        <div class="container">
-            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > カート > 購入方法選択')}"></div>
-            <h1 class="page-title">購入方法を選択</h1>
+        <main class="main">
+            <div class="container">
+                <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > カート > 購入方法選択')}"></div>
+                <h1 class="page-title">購入方法を選択</h1>
 
-            <div class="checkout-method-layout">
-                <div class="card">
+                <div class="checkout-method-layout">
+                    <div class="card">
+                        <div class="card__pad">
+                            <p class="footer__title" style="margin:0 0 6px;">ログインして購入</p>
+                            <p class="muted" style="margin:0 0 14px; line-height:1.7;">
+                                お届け情報の入力省略、購入履歴、再購入、お気に入りが利用できます。
+                            </p>
+                            <form class="form" th:action="@{/login}" method="post">
+                                <div class="field">
+                                    <label for="checkout-login-mail">メールアドレス</label>
+                                    <input id="checkout-login-mail" type="email" name="email"
+                                        th:value="${rememberedLoginEmail}" tabindex="1">
+                                    <label class="check-item" style="margin-top:8px;">
+                                        <input type="checkbox" name="remember_me" value="1"
+                                            th:checked="${rememberLoginEmail}" tabindex="4">
+                                        次回から入力を省略する
+                                    </label>
+                                </div>
+                                <div class="field">
+                                    <label for="checkout-login-password">パスワード</label>
+                                    <input id="checkout-login-password" type="password" name="password" tabindex="2">
+                                    <label class="check-item" style="margin-top:8px;">
+                                        <input type="checkbox" data-password-toggle
+                                            data-target="checkout-login-password" tabindex="5">
+                                        パスワード表示
+                                    </label>
+                                </div>
+                                <input type="hidden" name="redirectPath"
+                                    th:value="${checkoutRedirectPath != null ? checkoutRedirectPath : '/checkout/input'}"
+                                    value="/checkout/input">
+                                <button class="btn btn--cart-action" type="submit" style="width:100%;"
+                                    tabindex="3">ログイン</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="checkout-method-right">
+                        <div class="card">
+                            <div class="card__pad">
+                                <p class="footer__title" style="margin:0 0 6px;">会員登録して購入</p>
+                                <p class="muted" style="margin:0 0 14px; line-height:1.7;">
+                                    会員登録のメリット: 入力省略、履歴、再購入、お気に入り。
+                                </p>
+                                <a class="btn btn--cart-action" href="/members/register"
+                                    style="width:100%;">会員登録して購入</a>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card__pad">
+                                <p class="footer__title" style="margin:0 0 6px;">会員登録せずに購入</p>
+                                <p class="muted" style="margin:0 0 14px; line-height:1.7;">
+                                    今回のみの購入向け。購入履歴やお気に入りは利用できません。
+                                </p>
+                                <a class="btn btn--primary" href="/checkout/input" style="width:100%;">会員登録せずに購入</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:14px;">
                     <div class="card__pad">
-                        <p class="footer__title" style="margin:0 0 6px;">ログインして購入</p>
-                        <p class="muted" style="margin:0 0 14px; line-height:1.7;">
-                            お届け情報の入力省略、購入履歴、再購入、お気に入りが利用できます。
+                        <p class="muted" style="margin:0; line-height:1.8;">
+                            「会員登録せずに購入」で注文情報入力へ遷移します。<br>
+                            ログイン済みの場合はカートから直接注文情報入力へ進めます。
                         </p>
-                        <form class="form" th:action="@{/login}" method="post">
-                            <div class="field">
-                                <label for="checkout-login-mail">メールアドレス</label>
-                                <input id="checkout-login-mail" type="email" name="email" th:value="${rememberedLoginEmail}" tabindex="1">
-                                <label class="check-item" style="margin-top:8px;">
-                                    <input type="checkbox" name="remember_me" value="1" th:checked="${rememberLoginEmail}" tabindex="4">
-                                    次回から入力を省略する
-                                </label>
-                            </div>
-                            <div class="field">
-                                <label for="checkout-login-password">パスワード</label>
-                                <input id="checkout-login-password" type="password" name="password" tabindex="2">
-                                <label class="check-item" style="margin-top:8px;">
-                                    <input type="checkbox" data-password-toggle data-target="checkout-login-password" tabindex="5">
-                                    パスワード表示
-                                </label>
-                            </div>
-                            <input type="hidden" name="redirectPath" th:value="${checkoutRedirectPath != null ? checkoutRedirectPath : '/checkout/input'}" value="/checkout/input">
-                            <button class="btn btn--cart-action" type="submit" style="width:100%;" tabindex="3">ログイン</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="checkout-method-right">
-                    <div class="card">
-                        <div class="card__pad">
-                            <p class="footer__title" style="margin:0 0 6px;">会員登録して購入</p>
-                            <p class="muted" style="margin:0 0 14px; line-height:1.7;">
-                                会員登録のメリット: 入力省略、履歴、再購入、お気に入り。
-                            </p>
-                            <a class="btn btn--cart-action" href="/members/register" style="width:100%;">会員登録して購入</a>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card__pad">
-                            <p class="footer__title" style="margin:0 0 6px;">会員登録せずに購入</p>
-                            <p class="muted" style="margin:0 0 14px; line-height:1.7;">
-                                今回のみの購入向け。購入履歴やお気に入りは利用できません。
-                            </p>
-                            <a class="btn btn--primary" href="/checkout/input" style="width:100%;">会員登録せずに購入</a>
-                        </div>
                     </div>
                 </div>
             </div>
+        </main>
 
-            <div class="card" style="margin-top:14px;">
-                <div class="card__pad">
-                    <p class="muted" style="margin:0; line-height:1.8;">
-                        「会員登録せずに購入」で注文情報入力へ遷移します。<br>
-                        ログイン済みの場合はカートから直接注文情報入力へ進めます。
-                    </p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <div th:replace="~{fragments/layout/footer :: footer}"></div>
-</div>
-<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+        <div th:replace="~{fragments/layout/footer :: footer}"></div>
+    </div>
+    <th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
 </body>
+
 </html>

@@ -26,11 +26,11 @@ public class WebLoggingConfig implements WebMvcConfigurer {
     /**
      * Webログ設定を生成する。
      *
-     * @param memberService 会員サービス
+     * @param memberService        会員サービス
      * @param memberSessionService 会員セッションサービス
      */
     public WebLoggingConfig(MemberService memberService,
-                            MemberSessionService memberSessionService) {
+            MemberSessionService memberSessionService) {
         this.memberService = memberService;
         this.memberSessionService = memberSessionService;
     }

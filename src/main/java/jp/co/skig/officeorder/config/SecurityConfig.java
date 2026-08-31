@@ -71,19 +71,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/internal/batch/**")
-                )
+                        .ignoringRequestMatchers("/internal/batch/**"))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
                                 "/favicon.ico",
-                                "/error"
-                        ).permitAll()
+                                "/error")
+                        .permitAll()
                         .requestMatchers("/mypage/**").hasRole("MEMBER")
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().permitAll())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(this::handleAuthRequired))
                 .formLogin(form -> form
                         .loginPage("/login")
@@ -92,19 +90,16 @@ public class SecurityConfig {
                         .passwordParameter("password")
                         .successHandler(loginSuccessHandler())
                         .failureHandler(loginFailureHandler())
-                        .permitAll()
-                )
+                        .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID", LEGACY_REMEMBER_ME_COOKIE_NAME)
-                        .permitAll()
-                )
+                        .permitAll())
                 .sessionManagement(session -> session
-                        .invalidSessionStrategy(this::handleInvalidSession)
-                );
+                        .invalidSessionStrategy(this::handleInvalidSession));
         return http.build();
     }
 
@@ -157,14 +152,14 @@ public class SecurityConfig {
     /**
      * 認証必須ページへの未認証アクセス時にログイン画面へ誘導する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param ex 認証例外
+     * @param ex       認証例外
      * @throws IOException リダイレクト失敗時
      */
     private void handleAuthRequired(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    org.springframework.security.core.AuthenticationException ex)
+            HttpServletResponse response,
+            org.springframework.security.core.AuthenticationException ex)
             throws IOException {
         String requestPath = buildRequestPathWithQuery(request);
         String redirectPath = UriUtils.encodeQueryParam(requestPath, StandardCharsets.UTF_8);
@@ -175,7 +170,7 @@ public class SecurityConfig {
     /**
      * 無効セッション検出時のリダイレクトを制御する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
      * @throws IOException リダイレクト失敗時
      */
@@ -226,7 +221,7 @@ public class SecurityConfig {
     /**
      * JSESSIONID Cookie を明示的に破棄する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
      */
     private void expireSessionCookie(HttpServletRequest request, HttpServletResponse response) {
@@ -242,9 +237,10 @@ public class SecurityConfig {
     /**
      * ログイン成功時にメールアドレス記憶Cookieを更新する。
      *
-     * <p>チェックありならメールアドレスを保存し、チェックなしなら保存済みCookieを削除する。
+     * <p>
+     * チェックありならメールアドレスを保存し、チェックなしなら保存済みCookieを削除する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
      */
     void updateRememberedLoginEmail(HttpServletRequest request, HttpServletResponse response) {

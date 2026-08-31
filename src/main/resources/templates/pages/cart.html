@@ -1,164 +1,188 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{fragments/layout/head :: head('カート | OFFICE ORDER', 'commerce')}"></head>
+
 <body>
-<div class="page">
-    <div th:replace="~{fragments/layout/header :: header}"></div>
-    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+    <div class="page">
+        <div th:replace="~{fragments/layout/header :: header}"></div>
+        <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
 
-    <main class="main">
-        <div class="container">
-            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > カート')}"></div>
-            <h1 class="page-title">カート</h1>
+        <main class="main">
+            <div class="container">
+                <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > カート')}"></div>
+                <h1 class="page-title">カート</h1>
 
-            <div class="cart-layout">
-                <section aria-label="カート明細">
-                    <div class="card">
-                        <div class="card__pad">
-                            <div class="help" th:if="${cartMessage}" th:text="${cartMessage}" style="margin:0 0 8px;"></div>
-                            <div class="error" th:if="${cartError}" th:text="${cartError}" style="margin:0 0 8px;"></div>
-                            <div class="toolbar" style="margin-top:0;">
-                                <div class="toolbar__group">
-                                    <span class="badge" th:text="'商品 ' + ${cart.totalQuantity} + ' 点'">商品 2 点</span>
+                <div class="cart-layout">
+                    <section aria-label="カート明細">
+                        <div class="card">
+                            <div class="card__pad">
+                                <div class="help" th:if="${cartMessage}" th:text="${cartMessage}"
+                                    style="margin:0 0 8px;"></div>
+                                <div class="error" th:if="${cartError}" th:text="${cartError}" style="margin:0 0 8px;">
                                 </div>
-                                <div class="toolbar__group">
-                                    <form th:action="@{/cart/clear}" method="post">
-                                        <button class="btn" type="submit" th:disabled="${isCartEmpty}">一括削除</button>
+                                <div class="toolbar" style="margin-top:0;">
+                                    <div class="toolbar__group">
+                                        <span class="badge" th:text="'商品 ' + ${cart.totalQuantity} + ' 点'">商品 2 点</span>
+                                    </div>
+                                    <div class="toolbar__group">
+                                        <form th:action="@{/cart/clear}" method="post">
+                                            <button class="btn" type="submit" th:disabled="${isCartEmpty}">一括削除</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <table class="table table--cart" aria-label="カート明細" th:if="${!isCartEmpty}">
+                                    <thead>
+                                        <tr>
+                                            <th>商品</th>
+                                            <th style="width:120px;">単価</th>
+                                            <th style="width:170px;">組立・設置</th>
+                                            <th style="width:90px;">数量</th>
+                                            <th style="width:64px;">削除</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="item : ${cart.items}">
+                                            <td>
+                                                <div class="cart-item">
+                                                    <img class="cart-item__thumb"
+                                                        th:src="@{|/images/products/${item.productCode}.png|}"
+                                                        th:alt="${item.productName}" loading="lazy">
+                                                    <div>
+                                                        <p class="cart-item__name" th:text="${item.productName}">デスク 04
+                                                            - 平机 - 幅140cmx奥行70cm</p>
+                                                        <p class="cart-item__meta">
+                                                            <span
+                                                                th:text="${'カラー: ' + item.colorName + ' / 商品コード: ' + item.productCode}">カラー:
+                                                                ホワイト / 商品コード: P0004-C01</span>
+                                                            <a th:href="${item.detailUrl}"
+                                                                style="margin-left:6px;">商品詳細</a>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><strong th:text="${item.unitPriceText + '円'}">18,800円</strong></td>
+                                            <td>
+                                                <div th:if="${item.assemblyAvailable}">
+                                                    <label class="badge"><input type="checkbox" name="assemblyRequested"
+                                                            value="true" th:checked="${item.assemblyRequested}"
+                                                            th:form="${'update-' + item.productVariantId}">
+                                                        組立・設置あり</label>
+                                                    <div class="help"
+                                                        th:text="${'1点あたり ' + item.assemblyFeePerUnitText + '円'}">1点あたり
+                                                        3,000円</div>
+                                                </div>
+                                                <span class="muted" th:if="${!item.assemblyAvailable}">お届けのみ</span>
+                                            </td>
+                                            <td>
+                                                <form th:id="${'update-' + item.productVariantId}"
+                                                    th:action="@{/cart/items/{id}/update(id=${item.productVariantId})}"
+                                                    method="post" class="qty">
+                                                    <input type="number" name="quantity" min="1" max="99"
+                                                        th:value="${item.quantity}" aria-label="数量">
+                                                    <button class="btn btn--cart-update" type="submit">更新</button>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <form
+                                                    th:action="@{/cart/items/{id}/delete(id=${item.productVariantId})}"
+                                                    method="post">
+                                                    <button class="icon-btn" type="submit" aria-label="削除">
+                                                        <span class="material-icons" aria-hidden="true">delete</span>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="card" th:if="${isCartEmpty}">
+                                    <div class="card__pad">
+                                        <p class="muted" style="margin:0;">カートに商品がありません。</p>
+                                        <a class="btn btn--ghost" href="/" style="margin-top:10px;">商品を探す</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <aside class="summary" aria-label="金額">
+                        <!-- ★ クーポン入力エリア（カートに商品がある場合のみ表示） -->
+                        <div class="card" style="margin-bottom:16px;" th:if="${!isCartEmpty}">
+                            <div class="card__pad">
+                                <p style="font-weight:bold; margin:0 0 8px 0; font-size:14px;">クーポンコード</p>
+
+                                <!-- クーポンエラー/成功メッセージ -->
+                                <div class="error" th:if="${couponError}" th:text="${couponError}"
+                                    style="margin-bottom:8px;"></div>
+                                <div class="help" th:if="${couponSuccess}" th:text="${couponSuccess}"
+                                    style="margin-bottom:8px; color:#2e7d32;"></div>
+
+                                <!-- クーポン適用フォーム -->
+                                <form th:action="@{/cart/coupon/apply}" method="post" style="display:flex; gap:8px;">
+                                    <input type="text" name="couponCode" placeholder="コードを入力"
+                                        th:value="${appliedCouponCode}"
+                                        style="flex:1; padding:6px 8px; border:1px solid #ccc; border-radius:4px;"
+                                        required>
+                                    <button class="btn btn--cart-update" type="submit">適用</button>
+                                </form>
+
+                                <!-- クーポン適用中の解除ボタン -->
+                                <div th:if="${appliedCouponCode != null and !appliedCouponCode.isBlank()}"
+                                    style="margin-top:8px; text-align:right;">
+                                    <form th:action="@{/cart/coupon/remove}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn--ghost"
+                                            style="padding:2px 8px; font-size:12px;">クーポンを解除</button>
                                     </form>
                                 </div>
                             </div>
+                        </div>
 
-                            <table class="table table--cart" aria-label="カート明細" th:if="${!isCartEmpty}">
-                                <thead>
-                                <tr>
-                                    <th>商品</th>
-                                    <th style="width:120px;">単価</th>
-                                    <th style="width:170px;">組立・設置</th>
-                                    <th style="width:90px;">数量</th>
-                                    <th style="width:64px;">削除</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="item : ${cart.items}">
-                                    <td>
-                                        <div class="cart-item">
-                                            <img class="cart-item__thumb"
-                                                 th:src="@{|/images/products/${item.productCode}.png|}"
-                                                 th:alt="${item.productName}"
-                                                 loading="lazy">
-                                            <div>
-                                                <p class="cart-item__name" th:text="${item.productName}">デスク 04 - 平机 - 幅140cmx奥行70cm</p>
-                                                <p class="cart-item__meta">
-                                                    <span th:text="${'カラー: ' + item.colorName + ' / 商品コード: ' + item.productCode}">カラー: ホワイト / 商品コード: P0004-C01</span>
-                                                    <a th:href="${item.detailUrl}" style="margin-left:6px;">商品詳細</a>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><strong th:text="${item.unitPriceText + '円'}">18,800円</strong></td>
-                                    <td>
-                                            <div th:if="${item.assemblyAvailable}">
-                                                <label class="badge"><input type="checkbox"
-                                                                            name="assemblyRequested"
-                                                                            value="true"
-                                                                            th:checked="${item.assemblyRequested}"
-                                                                            th:form="${'update-' + item.productVariantId}"> 組立・設置あり</label>
-                                                <div class="help" th:text="${'1点あたり ' + item.assemblyFeePerUnitText + '円'}">1点あたり 3,000円</div>
-                                            </div>
-                                            <span class="muted" th:if="${!item.assemblyAvailable}">お届けのみ</span>
-                                    </td>
-                                    <td>
-                                        <form th:id="${'update-' + item.productVariantId}"
-                                              th:action="@{/cart/items/{id}/update(id=${item.productVariantId})}"
-                                              method="post"
-                                              class="qty">
-                                            <input type="number" name="quantity" min="1" max="99" th:value="${item.quantity}" aria-label="数量">
-                                            <button class="btn btn--cart-update" type="submit">更新</button>
-                                        </form>
-                                    </td>
-                                    <td>
-                                        <form th:action="@{/cart/items/{id}/delete(id=${item.productVariantId})}" method="post">
-                                            <button class="icon-btn" type="submit" aria-label="削除">
-                                                <span class="material-icons" aria-hidden="true">delete</span>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                        <!-- 注文サマリー -->
+                        <div class="card">
+                            <div class="card__pad">
+                                <div class="summary__rows">
+                                    <div class="summary__row"><span>商品小計</span><strong
+                                            th:text="${cart.summary.productSubtotalText + '円'}">36,400円</strong></div>
+                                    <div class="summary__row"><span>組立・設置費</span><strong
+                                            th:text="${cart.summary.assemblyFeeTotalText + '円'}">3,000円</strong></div>
+                                    <div class="summary__row"><span>送料</span><strong
+                                            th:text="${cart.summary.shippingFeeText + '円'}">0円</strong></div>
 
-                            <div class="card" th:if="${isCartEmpty}">
-                                <div class="card__pad">
-                                    <p class="muted" style="margin:0;">カートに商品がありません。</p>
-                                    <a class="btn btn--ghost" href="/" style="margin-top:10px;">商品を探す</a>
+                                    <!-- ★ クーポン割引額の表示（適用中のみ） -->
+                                    <div class="summary__row" th:if="${cart.summary.hasDiscount()}">
+                                        <span style="color:#d9534f;">クーポン値引き</span>
+                                        <strong style="color:#d9534f;"
+                                            th:text="${'-' + cart.summary.discountAmountText + '円'}">-1,000円</strong>
+                                    </div>
+
+                                    <div class="summary__row"><span>消費税</span><strong
+                                            th:text="${cart.summary.taxAmountText + '円'}">3,940円</strong></div>
+                                    <div class="summary__row summary__total"><span>合計（税込）</span><strong
+                                            style="font-size:18px;"
+                                            th:text="${cart.summary.totalAmountText + '円'}">43,340円</strong></div>
+                                </div>
+                                <div class="actions" style="margin-top:14px;">
+                                    <a class="btn" href="/categories/desks" style="flex:1;">買い物を続ける</a>
+                                    <a class="btn btn--cart-action"
+                                        th:href="${isCartEmpty ? '#' : (isLoggedIn ? '/checkout/input' : '/checkout/method')}"
+                                        th:classappend="${isCartEmpty} ? ' is-disabled'" style="flex:1;">購入手続きへ</a>
+                                </div>
+                                <div class="help" style="margin-top:10px;">
+                                    5,000円以上で送料無料 / 未満は一律800円
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </aside>
+                </div>
 
-                <aside class="summary" aria-label="金額">
-                    <!-- ★ クーポン入力エリア（カートに商品がある場合のみ表示） -->
-                    <div class="card" style="margin-bottom:16px;" th:if="${!isCartEmpty}">
-                        <div class="card__pad">
-                            <p style="font-weight:bold; margin:0 0 8px 0; font-size:14px;">クーポンコード</p>
-                            
-                            <!-- クーポンエラー/成功メッセージ -->
-                            <div class="error" th:if="${couponError}" th:text="${couponError}" style="margin-bottom:8px;"></div>
-                            <div class="help" th:if="${couponSuccess}" th:text="${couponSuccess}" style="margin-bottom:8px; color:#2e7d32;"></div>
-
-                            <!-- クーポン適用フォーム -->
-                            <form th:action="@{/cart/coupon/apply}" method="post" style="display:flex; gap:8px;">
-                                <input type="text" name="couponCode" placeholder="コードを入力" th:value="${appliedCouponCode}" style="flex:1; padding:6px 8px; border:1px solid #ccc; border-radius:4px;" required>
-                                <button class="btn btn--cart-update" type="submit">適用</button>
-                            </form>
-
-                            <!-- クーポン適用中の解除ボタン -->
-                            <div th:if="${appliedCouponCode != null and !appliedCouponCode.isBlank()}" style="margin-top:8px; text-align:right;">
-                                <form th:action="@{/cart/coupon/remove}" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn--ghost" style="padding:2px 8px; font-size:12px;">クーポンを解除</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 注文サマリー -->
-                    <div class="card">
-                        <div class="card__pad">
-                            <div class="summary__rows">
-                                <div class="summary__row"><span>商品小計</span><strong th:text="${cart.summary.productSubtotalText + '円'}">36,400円</strong></div>
-                                <div class="summary__row"><span>組立・設置費</span><strong th:text="${cart.summary.assemblyFeeTotalText + '円'}">3,000円</strong></div>
-                                <div class="summary__row"><span>送料</span><strong th:text="${cart.summary.shippingFeeText + '円'}">0円</strong></div>
-                                
-                                <!-- ★ クーポン割引額の表示（適用中のみ） -->
-                                <div class="summary__row" th:if="${cart.summary.hasDiscount()}">
-                                    <span style="color:#d9534f;">クーポン値引き</span>
-                                    <strong style="color:#d9534f;" th:text="${'-' + cart.summary.discountAmountText + '円'}">-1,000円</strong>
-                                </div>
-
-                                <div class="summary__row"><span>消費税</span><strong th:text="${cart.summary.taxAmountText + '円'}">3,940円</strong></div>
-                                <div class="summary__row summary__total"><span>合計（税込）</span><strong style="font-size:18px;" th:text="${cart.summary.totalAmountText + '円'}">43,340円</strong></div>
-                            </div>
-                            <div class="actions" style="margin-top:14px;">
-                                <a class="btn" href="/categories/desks" style="flex:1;">買い物を続ける</a>
-                                <a class="btn btn--cart-action"
-                                   th:href="${isCartEmpty ? '#' : (isLoggedIn ? '/checkout/input' : '/checkout/method')}"
-                                   th:classappend="${isCartEmpty} ? ' is-disabled'"
-                                   style="flex:1;">購入手続きへ</a>
-                            </div>
-                            <div class="help" style="margin-top:10px;">
-                                5,000円以上で送料無料 / 未満は一律800円
-                            </div>
-                        </div>
-                    </div>
-                </aside>
             </div>
+        </main>
 
-        </div>
-    </main>
-
-    <div th:replace="~{fragments/layout/footer :: footer}"></div>
-</div>
-<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+        <div th:replace="~{fragments/layout/footer :: footer}"></div>
+    </div>
+    <th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
 </body>
+
 </html>

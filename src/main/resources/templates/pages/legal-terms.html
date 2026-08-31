@@ -1,65 +1,68 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{fragments/layout/head :: head('利用規約 | OFFICE ORDER', '')}"></head>
+
 <body>
-<div class="page">
-    <div th:replace="~{fragments/layout/header :: header}"></div>
-    <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
-    <main class="main">
-        <div class="container">
-            <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > 利用規約')}"></div>
-            <h1 class="page-title">利用規約</h1>
-            <div class="card">
-                <div class="card__pad" style="line-height:1.9;">
-                    <h2 class="section__title" style="margin:0 0 8px;">1. 商品の購入について</h2>
-                    <p style="margin:0 0 8px;">本サービス上で注文確定操作が完了した時点で、当社と利用者との間で売買契約が成立します。</p>
-                    <p style="margin:0 0 12px;">在庫状況や商品情報は最新表示に努めますが、更新タイミングにより差異が生じる場合があります。</p>
+    <div class="page">
+        <div th:replace="~{fragments/layout/header :: header}"></div>
+        <div th:replace="~{fragments/layout/notice-bar :: noticeBar}"></div>
+        <main class="main">
+            <div class="container">
+                <div th:replace="~{fragments/common/breadcrumb :: breadcrumb('トップ > 利用規約')}"></div>
+                <h1 class="page-title">利用規約</h1>
+                <div class="card">
+                    <div class="card__pad" style="line-height:1.9;">
+                        <h2 class="section__title" style="margin:0 0 8px;">1. 商品の購入について</h2>
+                        <p style="margin:0 0 8px;">本サービス上で注文確定操作が完了した時点で、当社と利用者との間で売買契約が成立します。</p>
+                        <p style="margin:0 0 12px;">在庫状況や商品情報は最新表示に努めますが、更新タイミングにより差異が生じる場合があります。</p>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">2. 配送について</h2>
-                    <p style="margin:0 0 8px;">配送先地域、交通事情、天候、繁忙期等により、表示納期より遅延する場合があります。</p>
-                    <p style="margin:0 0 12px;">組立・設置サービス対象商品については、納品日程の調整連絡を行うことがあります。</p>
+                        <h2 class="section__title" style="margin:0 0 8px;">2. 配送について</h2>
+                        <p style="margin:0 0 8px;">配送先地域、交通事情、天候、繁忙期等により、表示納期より遅延する場合があります。</p>
+                        <p style="margin:0 0 12px;">組立・設置サービス対象商品については、納品日程の調整連絡を行うことがあります。</p>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">3. 商品の返品・キャンセルについて</h2>
-                    <p style="margin:0 0 8px;">お客様都合による返品・キャンセルは、当社が別途定める条件に従って受付可否を判断します。</p>
-                    <p style="margin:0 0 12px;">本サイト上にキャンセル機能は設けず、お問い合わせ窓口経由での受付となります。</p>
+                        <h2 class="section__title" style="margin:0 0 8px;">3. 商品の返品・キャンセルについて</h2>
+                        <p style="margin:0 0 8px;">お客様都合による返品・キャンセルは、当社が別途定める条件に従って受付可否を判断します。</p>
+                        <p style="margin:0 0 12px;">本サイト上にキャンセル機能は設けず、お問い合わせ窓口経由での受付となります。</p>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">4. 商品の破損・不良について</h2>
-                    <p style="margin:0 0 8px;">商品受領時に破損・不良が確認された場合は、速やかに当社窓口へご連絡ください。</p>
-                    <p style="margin:0 0 12px;">当社確認のうえ、交換・返品・部材手配等の適切な対応を行います。</p>
+                        <h2 class="section__title" style="margin:0 0 8px;">4. 商品の破損・不良について</h2>
+                        <p style="margin:0 0 8px;">商品受領時に破損・不良が確認された場合は、速やかに当社窓口へご連絡ください。</p>
+                        <p style="margin:0 0 12px;">当社確認のうえ、交換・返品・部材手配等の適切な対応を行います。</p>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">5. 売買契約の解除について</h2>
-                    <p style="margin:0 0 8px;">利用者が本規約に違反した場合、当社は通知なく契約を解除できるものとします。</p>
-                    <p style="margin:0 0 12px;">受注後に決済不能、長期不在、受領拒否等が発生した場合も同様とします。</p>
+                        <h2 class="section__title" style="margin:0 0 8px;">5. 売買契約の解除について</h2>
+                        <p style="margin:0 0 8px;">利用者が本規約に違反した場合、当社は通知なく契約を解除できるものとします。</p>
+                        <p style="margin:0 0 12px;">受注後に決済不能、長期不在、受領拒否等が発生した場合も同様とします。</p>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">6. 免責事項について</h2>
-                    <p style="margin:0 0 8px;">当社は、本サービス利用により生じた間接的・特別損害について責任を負いません。</p>
-                    <p style="margin:0 0 12px;">ただし、当社の故意または重過失に基づく損害についてはこの限りではありません。</p>
+                        <h2 class="section__title" style="margin:0 0 8px;">6. 免責事項について</h2>
+                        <p style="margin:0 0 8px;">当社は、本サービス利用により生じた間接的・特別損害について責任を負いません。</p>
+                        <p style="margin:0 0 12px;">ただし、当社の故意または重過失に基づく損害についてはこの限りではありません。</p>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">7. 著作権について</h2>
-                    <p style="margin:0 0 8px;">本サービスに掲載される画像、文章、デザイン等の著作権は当社または権利者に帰属します。</p>
-                    <p style="margin:0 0 12px;">権利者の許諾なく複製、転載、改変、二次利用することを禁じます。</p>
+                        <h2 class="section__title" style="margin:0 0 8px;">7. 著作権について</h2>
+                        <p style="margin:0 0 8px;">本サービスに掲載される画像、文章、デザイン等の著作権は当社または権利者に帰属します。</p>
+                        <p style="margin:0 0 12px;">権利者の許諾なく複製、転載、改変、二次利用することを禁じます。</p>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">8. 禁止事項について</h2>
-                    <ul style="margin:0 0 12px; padding-left:18px;">
-                        <li>法令、公序良俗または本規約に違反する行為</li>
-                        <li>第三者または当社の権利利益を侵害する行為</li>
-                        <li>不正アクセス、システム負荷を与える行為、虚偽注文</li>
-                        <li>反社会的勢力への利益供与に該当する行為</li>
-                    </ul>
+                        <h2 class="section__title" style="margin:0 0 8px;">8. 禁止事項について</h2>
+                        <ul style="margin:0 0 12px; padding-left:18px;">
+                            <li>法令、公序良俗または本規約に違反する行為</li>
+                            <li>第三者または当社の権利利益を侵害する行為</li>
+                            <li>不正アクセス、システム負荷を与える行為、虚偽注文</li>
+                            <li>反社会的勢力への利益供与に該当する行為</li>
+                        </ul>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">9. 利用者情報</h2>
-                    <p style="margin:0 0 8px;">当社は、利用者情報をプライバシーポリシーに従って適切に取り扱います。</p>
-                    <p style="margin:0 0 12px;">利用者は、登録情報に変更が生じた場合、速やかに当社所定の方法で更新するものとします。</p>
+                        <h2 class="section__title" style="margin:0 0 8px;">9. 利用者情報</h2>
+                        <p style="margin:0 0 8px;">当社は、利用者情報をプライバシーポリシーに従って適切に取り扱います。</p>
+                        <p style="margin:0 0 12px;">利用者は、登録情報に変更が生じた場合、速やかに当社所定の方法で更新するものとします。</p>
 
-                    <h2 class="section__title" style="margin:0 0 8px;">10. 準拠法及び合意管轄</h2>
-                    <p style="margin:0 0 8px;">本規約は日本法に準拠し解釈されます。</p>
-                    <p style="margin:0;">本サービスに関して紛争が生じた場合、東京地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
+                        <h2 class="section__title" style="margin:0 0 8px;">10. 準拠法及び合意管轄</h2>
+                        <p style="margin:0 0 8px;">本規約は日本法に準拠し解釈されます。</p>
+                        <p style="margin:0;">本サービスに関して紛争が生じた場合、東京地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
-    <div th:replace="~{fragments/layout/footer :: footer}"></div>
-</div>
-<th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
+        </main>
+        <div th:replace="~{fragments/layout/footer :: footer}"></div>
+    </div>
+    <th:block th:replace="~{fragments/layout/scripts :: commonScripts}"></th:block>
 </body>
+
 </html>

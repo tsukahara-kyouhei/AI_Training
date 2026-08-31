@@ -48,8 +48,7 @@ class ProductServiceTest {
                 ProductSort.RECOMMENDED,
                 2,
                 30,
-                null
-        );
+                null);
         ProductListPage expected = new ProductListPage(List.of(), 0, 2, 30);
         when(repository.search(condition)).thenReturn(expected);
 
@@ -70,8 +69,7 @@ class ProductServiceTest {
                 "price_asc",
                 0,
                 60,
-                ProductSort.RECOMMENDED
-        );
+                ProductSort.RECOMMENDED);
 
         assertThat(condition.keyword()).isEqualTo("office desk");
         assertThat(condition.priceBands()).containsExactly(PriceBand.BAND_1, PriceBand.BAND_2);
@@ -92,8 +90,7 @@ class ProductServiceTest {
                 List.of(11L),
                 "newest",
                 1,
-                15
-        );
+                15);
 
         assertThat(condition.sort()).isEqualTo(ProductSort.NEWEST);
         assertThat(condition.saleStartFrom()).isEqualTo(now.minusMonths(6));
@@ -112,8 +109,7 @@ class ProductServiceTest {
                 null,
                 1,
                 999,
-                ProductSort.RECOMMENDED
-        );
+                ProductSort.RECOMMENDED);
 
         assertThat(condition.size()).isEqualTo(15);
         assertThat(condition.page()).isEqualTo(1);

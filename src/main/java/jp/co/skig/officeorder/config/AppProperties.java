@@ -5,7 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * `app.*` 配下の独自設定を束ねる型付き設定クラス。
  *
- * <p>アプリ固有の設定値を {@code @Value} で点在させず、
+ * <p>
+ * アプリ固有の設定値を {@code @Value} で点在させず、
  * ここへ集約して型安全に参照できるようにする。
  */
 @ConfigurationProperties(prefix = "app")

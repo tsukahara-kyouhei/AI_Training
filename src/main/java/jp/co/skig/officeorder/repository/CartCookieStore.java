@@ -17,7 +17,8 @@ import org.springframework.web.util.UriUtils;
 /**
  * カートCookieの読込・保存を担当するコンポーネント。
  *
- * <p>Cookie値は `variantId:quantity:assembly` の独自形式で保持し、
+ * <p>
+ * Cookie値は `variantId:quantity:assembly` の独自形式で保持し、
  * ここでパースとバリデーションを一元化する。
  */
 @Component
@@ -87,13 +88,13 @@ public class CartCookieStore {
     /**
      * カート明細をCookieへ保存する。
      *
-     * @param request 現在のHTTPリクエスト
+     * @param request  現在のHTTPリクエスト
      * @param response 現在のHTTPレスポンス
-     * @param items 保存対象明細
+     * @param items    保存対象明細
      */
     public void save(HttpServletRequest request,
-                     HttpServletResponse response,
-                     List<CartCookieItem> items) {
+            HttpServletResponse response,
+            List<CartCookieItem> items) {
         if (response == null) {
             return;
         }
@@ -139,7 +140,7 @@ public class CartCookieStore {
     /**
      * カートCookieを削除する。
      *
-     * @param request 現在のHTTPリクエスト
+     * @param request  現在のHTTPリクエスト
      * @param response 現在のHTTPレスポンス
      */
     public void clear(HttpServletRequest request, HttpServletResponse response) {
@@ -251,6 +252,3 @@ public class CartCookieStore {
         }
     }
 }
-
-
-

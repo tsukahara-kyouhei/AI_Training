@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import jp.co.skig.officeorder.common.MoneyFormatter;
@@ -13,6 +14,7 @@ import jp.co.skig.officeorder.mapper.row.MemberColorCodeMapperRow;
 import jp.co.skig.officeorder.mapper.row.MemberFavoriteProductMapperRow;
 import jp.co.skig.officeorder.mapper.row.MemberProfileEditMapperRow;
 import jp.co.skig.officeorder.mapper.MemberMapper;
+import jp.co.skig.officeorder.mapper.ProductMapper;
 import jp.co.skig.officeorder.model.member.MemberAdditionalAddressForm;
 import jp.co.skig.officeorder.model.member.MemberAdditionalAddressPage;
 import jp.co.skig.officeorder.model.member.MemberAdditionalAddressView;
@@ -28,24 +30,31 @@ import org.springframework.stereotype.Repository;
 /**
  * 会員関連データの取得・更新と画面表示用整形を担当するリポジトリ。
  *
- * <p>会員認証情報、プロフィール、追加お届け先、お気に入りの永続化アクセスをまとめて扱う。
+ * <p>
+ * 会員認証情報、プロフィール、追加お届け先、お気に入りの永続化アクセスをまとめて扱う。
  */
 @Repository
 public class MemberRepository {
 
     /** 会員SQLを呼び出す MyBatis Mapper。 */
     private final MemberMapper memberMapper;
+
+    private final ProductMapper productMapper;
+
     /** 時刻依存条件に使う共通時刻プロバイダ。 */
     private final AppTimeProvider appTimeProvider;
 
     /**
      * 会員リポジトリを生成する。
      *
-     * @param memberMapper 会員Mapper
+     * @param memberMapper    会員Mapper
      * @param appTimeProvider 共通時刻プロバイダ
      */
-    public MemberRepository(MemberMapper memberMapper, AppTimeProvider appTimeProvider) {
+    public MemberRepository(MemberMapper memberMapper,
+            ProductMapper productMapper,
+            AppTimeProvider appTimeProvider) {
         this.memberMapper = memberMapper;
+        this.productMapper = productMapper;
         this.appTimeProvider = appTimeProvider;
     }
 
@@ -62,7 +71,7 @@ public class MemberRepository {
     /**
      * 指定会員以外に同じメールアドレスが存在するか判定する。
      *
-     * @param email メールアドレス
+     * @param email    メールアドレス
      * @param memberId 除外対象会員ID
      * @return 重複があれば {@code true}
      */
@@ -138,7 +147,7 @@ public class MemberRepository {
     /**
      * 会員を登録する。
      *
-     * @param form 会員登録フォーム
+     * @param form         会員登録フォーム
      * @param passwordHash ハッシュ化済みパスワード
      * @return 採番された会員ID
      */
@@ -154,7 +163,7 @@ public class MemberRepository {
      * 会員プロフィールを更新する。
      *
      * @param memberId 会員ID
-     * @param form 更新フォーム
+     * @param form     更新フォーム
      * @return 更新成功時は {@code true}
      */
     public boolean updateProfile(long memberId, MemberProfileEditForm form) {
@@ -186,8 +195,8 @@ public class MemberRepository {
      * 追加お届け先一覧をページング付きで取得する。
      *
      * @param memberId 会員ID
-     * @param page ページ番号
-     * @param size ページサイズ
+     * @param page     ページ番号
+     * @param size     ページサイズ
      * @return 追加お届け先ページ
      */
     public MemberAdditionalAddressPage findAdditionalAddresses(long memberId, int page, int size) {
@@ -200,7 +209,7 @@ public class MemberRepository {
     /**
      * 指定追加お届け先を取得する。
      *
-     * @param memberId 会員ID
+     * @param memberId        会員ID
      * @param memberAddressId 追加お届け先ID
      * @return 追加お届け先
      */
@@ -226,7 +235,7 @@ public class MemberRepository {
      * 追加お届け先を登録する。
      *
      * @param memberId 会員ID
-     * @param form 登録フォーム
+     * @param form     登録フォーム
      */
     public void insertAdditionalAddress(long memberId, MemberAdditionalAddressForm form) {
         memberMapper.insertAdditionalAddress(memberId, form);
@@ -235,9 +244,9 @@ public class MemberRepository {
     /**
      * 追加お届け先を更新する。
      *
-     * @param memberId 会員ID
+     * @param memberId        会員ID
      * @param memberAddressId 追加お届け先ID
-     * @param form 更新フォーム
+     * @param form            更新フォーム
      * @return 更新成功時は {@code true}
      */
     public boolean updateAdditionalAddress(long memberId, long memberAddressId, MemberAdditionalAddressForm form) {
@@ -247,7 +256,7 @@ public class MemberRepository {
     /**
      * 追加お届け先を削除する。
      *
-     * @param memberId 会員ID
+     * @param memberId        会員ID
      * @param memberAddressId 追加お届け先ID
      */
     public void deleteAdditionalAddress(long memberId, long memberAddressId) {
@@ -258,8 +267,8 @@ public class MemberRepository {
      * お気に入り一覧を取得し、色コード付き表示用モデルへ整形する。
      *
      * @param memberId 会員ID
-     * @param page ページ番号
-     * @param size ページサイズ
+     * @param page     ページ番号
+     * @param size     ページサイズ
      * @return お気に入りページ
      */
     public MemberFavoritePage findFavorites(long memberId, int page, int size) {
@@ -290,7 +299,7 @@ public class MemberRepository {
     /**
      * 指定商品がお気に入り済みか判定する。
      *
-     * @param memberId 会員ID
+     * @param memberId  会員ID
      * @param productId 商品ID
      * @return お気に入り済みなら {@code true}
      */
@@ -301,7 +310,7 @@ public class MemberRepository {
     /**
      * お気に入りを登録する。
      *
-     * @param memberId 会員ID
+     * @param memberId  会員ID
      * @param productId 商品ID
      */
     public void insertFavorite(long memberId, long productId) {
@@ -311,7 +320,7 @@ public class MemberRepository {
     /**
      * お気に入りを削除する。
      *
-     * @param memberId 会員ID
+     * @param memberId  会員ID
      * @param productId 商品ID
      */
     public void deleteFavorite(long memberId, long productId) {
@@ -321,22 +330,32 @@ public class MemberRepository {
     /**
      * お気に入り商品行を画面表示用へ変換する。
      *
-     * @param row 商品行
+     * @param row        商品行
      * @param colorCodes カラーコード一覧
      * @return 表示用お気に入り行
      */
     private MemberFavoriteView toFavoriteView(MemberFavoriteProductMapperRow row, List<String> colorCodes) {
         boolean inStock = row.maxStock() > 0;
         String detailUrl = "/products/" + row.productId() + (inStock ? "" : "?stock=out");
+
+        BigDecimal taxRate = productMapper.selectCurrentTaxRatePercent(
+                appTimeProvider.nowOffsetDateTime());
+
+        taxRate = taxRate == null ? BigDecimal.TEN : taxRate;
+
+        BigDecimal taxExcludedPrice = ProductRepository.toTaxExclusivePrice(
+                row.minPrice(),
+                taxRate);
+
         return new MemberFavoriteView(
                 row.productId(),
                 row.productName(),
                 MoneyFormatter.formatYen(row.minPrice()),
+                MoneyFormatter.formatYen(taxExcludedPrice),
                 colorCodes,
                 row.productCode(),
                 inStock,
-                detailUrl
-        );
+                detailUrl);
     }
 
     /**
@@ -360,4 +379,3 @@ public class MemberRepository {
         return result;
     }
 }
-

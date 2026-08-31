@@ -24,7 +24,7 @@ public class GlobalExceptionLoggingAdvice {
      * Controllerで未処理の例外を記録し、元例外を再送出する。
      *
      * @param request 対象リクエスト
-     * @param ex 発生例外
+     * @param ex      発生例外
      * @throws Exception 元例外
      */
     @ExceptionHandler(Exception.class)

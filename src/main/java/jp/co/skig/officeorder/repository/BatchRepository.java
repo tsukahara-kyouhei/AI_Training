@@ -11,7 +11,8 @@ import org.springframework.stereotype.Repository;
 /**
  * 集計系バッチが利用する抽出・保存処理をまとめたリポジトリ。
  *
- * <p>SQLで取得した集計元データを、バッチサービスが扱いやすい record へ変換して返す。
+ * <p>
+ * SQLで取得した集計元データを、バッチサービスが扱いやすい record へ変換して返す。
  */
 @Repository
 public class BatchRepository {
@@ -32,15 +33,14 @@ public class BatchRepository {
      * 売れ筋ランキング算出用の販売数量候補を取得する。
      *
      * @param sinceAt 集計開始日時
-     * @param asOf 販売期間内判定の基準日時
+     * @param asOf    販売期間内判定の基準日時
      * @return 商品別販売数量候補
      */
     public List<PopularRankingCandidate> findPopularRankingCandidates(OffsetDateTime sinceAt, OffsetDateTime asOf) {
         return batchMapper.selectPopularRankingCandidates(sinceAt, asOf).stream()
                 .map(row -> new PopularRankingCandidate(
                         row.productId(),
-                        row.soldQuantity1m()
-                ))
+                        row.soldQuantity1m()))
                 .toList();
     }
 
@@ -48,7 +48,7 @@ public class BatchRepository {
      * 指定日の売れ筋ランキングを全置換で保存する。
      *
      * @param rankingDate ランキング日
-     * @param rankings 保存対象ランキング
+     * @param rankings    保存対象ランキング
      */
     public void replacePopularRankings(LocalDate rankingDate, List<PopularRankingCandidate> rankings) {
         batchMapper.deletePopularRankingsByDate(rankingDate);
@@ -68,8 +68,7 @@ public class BatchRepository {
         return batchMapper.selectOrderProductOccurrences(sinceAt).stream()
                 .map(row -> new OrderProductOccurrence(
                         row.orderId(),
-                        row.productId()
-                ))
+                        row.productId()))
                 .toList();
     }
 
@@ -77,7 +76,7 @@ public class BatchRepository {
      * 指定日のおおすすめ関連商品結果を全置換で保存する。
      *
      * @param recommendationDate 算出日
-     * @param rows 保存対象行
+     * @param rows               保存対象行
      */
     public void replaceRecommendedRelated(LocalDate recommendationDate, List<RecommendedRelatedRow> rows) {
         batchMapper.deleteRecommendedRelatedByDate(recommendationDate);
@@ -87,53 +86,44 @@ public class BatchRepository {
                     row.sourceProductId(),
                     row.rank(),
                     row.recommendedProductId(),
-                    row.score()
-            );
+                    row.score());
         }
     }
 
     /**
      * 売れ筋ランキング算出用の商品別販売数量。
      *
-     * @param productId 商品ID
+     * @param productId      商品ID
      * @param soldQuantity1m 直近1か月販売数量
      */
     public record PopularRankingCandidate(
             long productId,
-            int soldQuantity1m
-    ) {
+            int soldQuantity1m) {
     }
 
     /**
      * おすすめ関連商品算出用の注文内商品出現情報。
      *
-     * @param orderId 注文ID
+     * @param orderId   注文ID
      * @param productId 商品ID
      */
     public record OrderProductOccurrence(
             long orderId,
-            long productId
-    ) {
+            long productId) {
     }
 
     /**
      * おすすめ関連商品の保存行。
      *
-     * @param sourceProductId 元商品ID
+     * @param sourceProductId      元商品ID
      * @param recommendedProductId 推薦商品ID
-     * @param rank 順位
-     * @param score 類似度スコア
+     * @param rank                 順位
+     * @param score                類似度スコア
      */
     public record RecommendedRelatedRow(
             long sourceProductId,
             long recommendedProductId,
             int rank,
-            BigDecimal score
-    ) {
+            BigDecimal score) {
     }
 }
-
-
-
-
-

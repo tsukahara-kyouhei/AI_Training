@@ -32,11 +32,11 @@ public class AuthController {
     /**
      * 認証Controllerを生成する。
      *
-     * @param memberSessionService セッション会員サービス
+     * @param memberSessionService    セッション会員サービス
      * @param loginEmailCookieService ログイン画面メールアドレス記憶Cookieサービス
      */
     public AuthController(MemberSessionService memberSessionService,
-                          LoginEmailCookieService loginEmailCookieService) {
+            LoginEmailCookieService loginEmailCookieService) {
         this.memberSessionService = memberSessionService;
         this.loginEmailCookieService = loginEmailCookieService;
     }
@@ -44,21 +44,22 @@ public class AuthController {
     /**
      * ログイン画面を表示する。
      *
-     * <p>既ログイン時はマイページへ戻し、未ログイン時は戻り先とセッション切れ表示、
+     * <p>
+     * 既ログイン時はマイページへ戻し、未ログイン時は戻り先とセッション切れ表示、
      * 記憶済みメールアドレスCookieによる初期値をモデルへ反映する。
      *
      * @param redirectPath ログイン後戻り先
-     * @param expired セッション切れフラグ
-     * @param session 現在セッション
-     * @param model 画面モデル
+     * @param expired      セッション切れフラグ
+     * @param session      現在セッション
+     * @param model        画面モデル
      * @return 遷移先テンプレート
      */
     @GetMapping("/login")
     public String login(@RequestParam(name = "redirect", required = false) String redirectPath,
-                        @RequestParam(name = "expired", defaultValue = "false") boolean expired,
-                        HttpServletRequest request,
-                        HttpSession session,
-                        Model model) {
+            @RequestParam(name = "expired", defaultValue = "false") boolean expired,
+            HttpServletRequest request,
+            HttpSession session,
+            Model model) {
         if (memberSessionService.currentMember(session).isPresent()) {
             log.info("event={} reason=already_authenticated", LogEvent.AUTH_LOGIN_PAGE_REDIRECT.value());
             return "redirect:/mypage/orders";
@@ -78,6 +79,3 @@ public class AuthController {
         return "pages/login";
     }
 }
-
-
-

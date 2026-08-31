@@ -6,15 +6,15 @@ import java.math.BigDecimal;
  * 商品詳細で選択するカラー別商品コードの表示モデル。
  */
 public record ProductVariantView(
-        long productVariantId,
+        Long productVariantId,
         String productCode,
-        long colorId,
+        Long colorId,
         String colorName,
         String colorCode,
         BigDecimal unitPrice,
         String unitPriceText,
         String unitPriceExcludingTaxText,
-        int stockQuantity
+        Integer stockQuantity
 ) {
 }
 

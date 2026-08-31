@@ -84,7 +84,8 @@ class MemberServiceTest {
         MemberAdditionalAddressForm form = new MemberAdditionalAddressForm();
 
         assertThrows(AddressLimitExceededException.class, () -> service.createAdditionalAddress(99L, form));
-        verify(memberRepository, never()).insertAdditionalAddress(any(Long.class), any(MemberAdditionalAddressForm.class));
+        verify(memberRepository, never()).insertAdditionalAddress(any(Long.class),
+                any(MemberAdditionalAddressForm.class));
     }
 
     @Test
