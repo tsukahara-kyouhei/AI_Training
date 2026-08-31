@@ -15,7 +15,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.boot.web.servlet.error.ErrorController;
+//import org.springframework.boot.web.servlet.error.ErrorController;
 
 /**
  * ブラウザ向けエラーページと API 向け汎用エラー応答を返す Controller。
@@ -25,7 +25,7 @@ import org.springframework.boot.web.servlet.error.ErrorController;
  */
 @Controller
 @RequestMapping("${server.error.path:${error.path:/error}}")
-public class AppErrorController implements ErrorController {
+public class AppErrorController {
 
     /** 利用者向けメッセージ取得ヘルパ。 */
     private final MessageSourceAccessor messages;
