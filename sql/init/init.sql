@@ -8,6 +8,7 @@
 \ir schema/spring-batch-metadata.sql
 \ir schema/content.sql
 \ir schema/batch.sql
+\ir schema/product_reviews.sql  <-- ★これを追加
 
 \ir seed/masters.sql
 \ir seed/products.sql
