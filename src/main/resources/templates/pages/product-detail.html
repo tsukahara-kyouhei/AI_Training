@@ -49,11 +49,11 @@
 
                             <p class="pd-price-line">
                                 <span class="pd-price-label">販売価格</span>
-                                <strong class="pd-price-main" data-pd-price-excl
-                                    th:text="${detail.selectedPriceExcludingTaxText}">78,300</strong><span
-                                    class="pd-price-unit">円</span>
-                                <span class="pd-tax-note">（税込 <strong data-pd-price-incl
-                                        th:text="${detail.selectedPriceIncludingTaxText + ' 円'}">86,130
+                                <strong class="pd-price-main" data-pd-price-incl
+                                    th:text="${detail.selectedPriceIncludingTaxText}">78,300</strong><span
+                                    class="pd-price-unit">円（税込）</span>
+                                <span class="pd-tax-note">（税抜 <strong data-pd-price-excl
+                                        th:text="${detail.selectedPriceExcludingTaxText + ' 円'}">71,181
                                         円</strong>）</span>
                             </p>
 
@@ -76,6 +76,7 @@
                                                data-color-name=${variant.colorName},
                                                data-unit-price=${variant.unitPrice},
                                                data-unit-price-text=${variant.unitPriceText},
+                                               data-unit-price-excl-text=${variant.unitPriceExcludingTaxText},
                                                 data-stock-quantity=${variant.stockQuantity}"
                                         th:classappend="${variant.productVariantId == detail.selectedVariant.productVariantId} ? ' is-selected'">
                                         <input type="radio" name="color" th:value="${variant.productVariantId}"
@@ -84,8 +85,10 @@
                                             th:src="@{|/images/products/${variant.productCode}.png|}"
                                             th:alt="${variant.colorName}" loading="lazy">
                                         <p class="pd-color-name" th:text="${variant.colorName}">白(BN)</p>
-                                        <p class="pd-color-price" th:text="${variant.unitPriceText + '円(税抜)'}">
-                                            78,300円(税抜)</p>
+                                        <p class="pd-color-price" th:text="${variant.unitPriceText + '円（税込)'}">
+                                            78,300円（税込）</p>
+                                        <p class="pd-color-tax-note" th:text="${'(税抜 ' + variant.unitPriceExcludingTaxText + '円)'}">
+                                            （税抜 71,181円）</p>
                                         <p class="pd-color-stock" th:text="${'在庫: ' + variant.stockQuantity}">在庫: 4</p>
                                     </label>
                                 </div>

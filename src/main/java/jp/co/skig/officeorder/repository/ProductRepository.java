@@ -239,15 +239,7 @@ public class ProductRepository {
         ProductVariantView selectedVariant = selectVariant(variants, forceOutOfStock);
         BigDecimal taxRate = findCurrentTaxRatePercent(now);
         BigDecimal priceIncludingTax = selectedVariant.unitPrice();
-        BigDecimal priceExcludingTax = priceIncludingTax
-                // .multiply(BigDecimal.ONE.add(taxRate.divide(BigDecimal.valueOf(100), 6,
-                // RoundingMode.HALF_UP)))
-                // .setScale(0, RoundingMode.DOWN);
-                .divide(
-                        BigDecimal.ONE.add(
-                                taxRate.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)),
-                        0,
-                        RoundingMode.DOWN);
+        BigDecimal priceExcludingTax = toTaxExclusivePrice(priceIncludingTax, taxRate);
         BigDecimal assemblyFee = product.assemblyAvailable()
                 ? product.assemblyFee()
                 : BigDecimal.ZERO;
@@ -554,6 +546,14 @@ public class ProductRepository {
      * @param now 判定時刻
      * @return 税率百分率。未設定時は 10
      */
+    public static BigDecimal toTaxExclusivePrice(BigDecimal taxIncludedPrice, BigDecimal taxRatePercent) {
+        BigDecimal safeTaxIncludedPrice = taxIncludedPrice == null ? BigDecimal.ZERO : taxIncludedPrice;
+        BigDecimal safeTaxRate = taxRatePercent == null ? BigDecimal.TEN : taxRatePercent;
+        BigDecimal divisor = BigDecimal.ONE.add(
+                safeTaxRate.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP));
+        return safeTaxIncludedPrice.divide(divisor, 0, RoundingMode.DOWN);
+    }
+
     private BigDecimal findCurrentTaxRatePercent(OffsetDateTime now) {
         BigDecimal taxRate = productMapper.selectCurrentTaxRatePercent(now);
         return taxRate == null ? BigDecimal.TEN : taxRate;
@@ -569,10 +569,13 @@ public class ProductRepository {
     private ProductCardView toCard(ProductListMapperRow row, List<String> colors) {
         boolean inStock = row.maxStock() > 0;
         String detailUrl = "/products/" + row.productId() + (inStock ? "" : "?stock=out");
+        BigDecimal taxRate = findCurrentTaxRatePercent(appTimeProvider.nowOffsetDateTime());
+        BigDecimal taxExcludedPrice = toTaxExclusivePrice(row.minPrice(), taxRate);
         return new ProductCardView(
                 row.productId(),
                 row.productName(),
                 MoneyFormatter.formatYen(row.minPrice()),
+                MoneyFormatter.formatYen(taxExcludedPrice),
                 colors,
                 row.productCode(),
                 inStock,
@@ -606,6 +609,8 @@ public class ProductRepository {
      */
     private ProductVariantView toProductVariantView(ProductVariantMapperRow row) {
         BigDecimal unitPrice = row.unitPrice();
+        BigDecimal taxRate = findCurrentTaxRatePercent(appTimeProvider.nowOffsetDateTime());
+        BigDecimal unitPriceExcludingTax = toTaxExclusivePrice(unitPrice, taxRate);
         return new ProductVariantView(
                 row.productVariantId(),
                 row.productCode(),
@@ -614,6 +619,7 @@ public class ProductRepository {
                 row.colorCode(),
                 unitPrice,
                 MoneyFormatter.formatYen(unitPrice),
+                MoneyFormatter.formatYen(unitPriceExcludingTax),
                 row.stockQuantity());
     }
 }

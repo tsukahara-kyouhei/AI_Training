@@ -13,6 +13,7 @@ public record ProductVariantView(
         String colorCode,
         BigDecimal unitPrice,
         String unitPriceText,
+        String unitPriceExcludingTaxText,
         int stockQuantity
 ) {
 }

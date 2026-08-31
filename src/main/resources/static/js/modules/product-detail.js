@@ -112,8 +112,8 @@
       const assemblyFeeText = toAssemblyText(assemblyFee);
       const productName = summary.getAttribute("data-pd-product-name") || "商品";
 
-      const priceExcludingTax = summary.querySelector("[data-pd-price-excl]");
       const priceIncludingTax = summary.querySelector("[data-pd-price-incl]");
+      const priceExcludingTax = summary.querySelector("[data-pd-price-excl]");
       const assemblyText = summary.querySelector("[data-pd-assembly-text]");
       const buyImage = summary.querySelector("[data-pd-buy-image]");
       const buyColor = summary.querySelector("[data-pd-buy-color]");
@@ -140,16 +140,15 @@
         const colorName = selectedCard.getAttribute("data-color-name") || "";
         const unitPrice = parseNumber(selectedCard.getAttribute("data-unit-price"));
         const unitPriceText = selectedCard.getAttribute("data-unit-price-text") || formatYen(unitPrice);
+        const unitPriceExcludingTaxText = selectedCard.getAttribute("data-unit-price-excl-text") || formatYen(Math.floor(unitPrice / (1 + taxRate / 100)));
         const stockQuantity = Math.max(0, Math.floor(parseNumber(selectedCard.getAttribute("data-stock-quantity"))));
-        const priceWithTax = Math.floor(unitPrice * (1 + taxRate / 100));
-        const priceWithTaxText = formatYen(priceWithTax);
         const outOfStock = stockQuantity <= 0;
 
-        if (priceExcludingTax) {
-          priceExcludingTax.textContent = unitPriceText;
-        }
         if (priceIncludingTax) {
-          priceIncludingTax.textContent = `${priceWithTaxText} 円`;
+          priceIncludingTax.textContent = unitPriceText;
+        }
+        if (priceExcludingTax) {
+          priceExcludingTax.textContent = `${unitPriceExcludingTaxText} 円`;
         }
         if (assemblyText) {
           assemblyText.textContent = assemblyFeeText;

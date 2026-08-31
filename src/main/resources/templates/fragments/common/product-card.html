@@ -29,7 +29,12 @@
     <div class="ph-img" th:if="${product == null or product.productCode == null}" aria-hidden="true"></div>
     <div class="card__pad">
         <p class="product-name" th:text="${product != null ? product.productName : '商品情報'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
-        <p class="product-price"><span class="price" th:text="${product != null ? product.priceText : '0'}">12,800</span>円（税込）</p>
+        <p class="product-price">
+            <span class="price" th:text="${product != null ? product.priceText : '0'}">12,800</span>円（税込）
+            <span class="muted" th:if="${product != null and product.taxExcludedPriceText != null}" style="display:block; font-size:12px; margin-top:4px;">
+                （税抜 <span th:text="${product.taxExcludedPriceText}">11,636</span>円）
+            </span>
+        </p>
         <div class="chips" aria-label="カラーラインナップ">
             <span class="chip"
                   th:each="colorCode : ${product != null ? product.colorCodes : T(java.util.List).of()}"
@@ -68,7 +73,12 @@
     <div class="ph-img" th:if="${item == null or item.product == null or item.product.productCode == null}" aria-hidden="true"></div>
     <div class="card__pad">
         <p class="product-name" th:text="${item != null and item.product != null ? item.product.productName : '商品情報'}">デスク 01 - 平机 - 幅120cmx奥行70cm</p>
-        <p class="product-price"><span class="price" th:text="${item != null and item.product != null ? item.product.priceText : '0'}">12,800</span>円（税込）</p>
+        <p class="product-price">
+            <span class="price" th:text="${item != null and item.product != null ? item.product.priceText : '0'}">12,800</span>円（税込）
+            <span class="muted" th:if="${item != null and item.product != null and item.product.taxExcludedPriceText != null}" style="display:block; font-size:12px; margin-top:4px;">
+                （税抜 <span th:text="${item.product.taxExcludedPriceText}">11,636</span>円）
+            </span>
+        </p>
         <div class="chips" aria-label="カラーラインナップ">
             <span class="chip"
                   th:each="colorCode : ${item != null and item.product != null ? item.product.colorCodes : T(java.util.List).of()}"
