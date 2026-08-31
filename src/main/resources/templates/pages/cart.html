@@ -57,28 +57,29 @@
                                     </td>
                                     <td><strong th:text="${item.unitPriceText + '円'}">18,800円</strong></td>
                                     <td>
-                                            <div th:if="${item.assemblyAvailable}">
-                                                <input type="hidden"
-                                                       name="assemblyRequested"
-                                                       value="false"
-                                                       th:form="${'update-' + item.productVariantId}">
-                                                <label class="badge"><input type="checkbox"
-                                                                            name="assemblyRequested"
-                                                                            value="true"
-                                                                            th:checked="${item.assemblyRequested}"
-                                                                            th:form="${'update-' + item.productVariantId}"> 組立・設置あり</label>
-                                                <div class="help" th:text="${'1点あたり ' + item.assemblyFeePerUnitText + '円'}">1点あたり 3,000円</div>
-                                            </div>
-                                            <span class="muted" th:if="${!item.assemblyAvailable}">お届けのみ</span>
-                                    </td>
-                                    <td>
-                                        <form th:id="${'update-' + item.productVariantId}"
-                                              th:action="@{/cart/items/{id}/update(id=${item.productVariantId})}"
-                                              method="post"
-                                              class="qty">
-                                            <input type="number" name="quantity" min="1" max="99" th:value="${item.quantity}" aria-label="数量">
-                                            <button class="btn btn--cart-update" type="submit">更新</button>
-                                        </form>
+                                            <!-- 1つのフォームで数量と組立設置を囲む -->
+                                            <form th:id="${'update-' + item.productVariantId}"
+                                                th:action="@{/cart/items/{id}/update(id=${item.productVariantId})}"
+                                                method="post"
+                                                style="display: flex; align-items: center; gap: 10px;">
+                                                
+                                                <div th:if="${item.assemblyAvailable}">
+                                                    <label class="badge">
+                                                        <input type="checkbox"
+                                                            name="assemblyRequested"
+                                                            value="true"
+                                                            th:checked="${item.assemblyRequested}"> 組立・設置あり
+                                                    </label>
+                                                    <div class="help" th:text="${'1点あたり ' + item.assemblyFeePerUnitText + '円'}">1点あたり 3,000円</div>
+                                                </div>
+                                                <span class="muted" th:if="${!item.assemblyAvailable}">お届けのみ</span>
+                                        </td>
+                                        <td>
+                                                <div class="qty">
+                                                    <input type="number" name="quantity" min="1" max="99" th:value="${item.quantity}" aria-label="数量">
+                                                    <button class="btn btn--cart-update" type="submit">更新</button>
+                                                </div>
+                                            </form>
                                     </td>
                                     <td>
                                         <form th:action="@{/cart/items/{id}/delete(id=${item.productVariantId})}" method="post">
