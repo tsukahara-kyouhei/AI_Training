@@ -14,4 +14,3 @@ public class AddressLimitExceededException extends RuntimeException {
         super(message);
     }
 }
-

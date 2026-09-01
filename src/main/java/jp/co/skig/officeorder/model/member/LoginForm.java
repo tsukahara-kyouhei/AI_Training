@@ -44,4 +44,3 @@ public class LoginForm {
         this.redirectPath = redirectPath;
     }
 }
-

@@ -2,8 +2,7 @@
 <configuration>
     <property name="LOG_DIR" value="log"/>
     <property name="LOG_FILE" value="${LOG_DIR}/office-order.log"/>
-    <property name="LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-} %X{memberId:-}] %X{method:-} %X{path:-} : %logger{36} - %msg%n%ex"/>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-} %X{memberId:-}] %X{method:-} %X{path:-} : %logger{36} - %msg%n%ex"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

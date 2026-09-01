@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 /**
  * アプリ共通の現在時刻取得窓口。
  *
- * <p>{@link Clock} を直接参照せず、このクラス経由で取得することで
+ * <p>
+ * {@link Clock} を直接参照せず、このクラス経由で取得することで
  * テスト時に時刻差し替えしやすくする。
  */
 @Component

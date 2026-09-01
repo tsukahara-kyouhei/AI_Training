@@ -20,7 +20,7 @@ public interface BatchMapper {
      * 直近1か月の受注から売れ筋ランキング候補を商品単位で集計して取得する。
      */
     List<BatchPopularRankingCandidateMapperRow> selectPopularRankingCandidates(@Param("sinceAt") OffsetDateTime sinceAt,
-                                                                               @Param("asOf") OffsetDateTime asOf);
+            @Param("asOf") OffsetDateTime asOf);
 
     /**
      * 指定日の売れ筋ランキングを再生成する前に既存データを削除する。
@@ -31,9 +31,9 @@ public interface BatchMapper {
      * 売れ筋ランキングの1件分を保存する。
      */
     int insertPopularRanking(@Param("rankingDate") LocalDate rankingDate,
-                             @Param("rank") int rank,
-                             @Param("productId") long productId,
-                             @Param("soldQuantity1m") int soldQuantity1m);
+            @Param("rank") int rank,
+            @Param("productId") long productId,
+            @Param("soldQuantity1m") int soldQuantity1m);
 
     /**
      * おすすめ関連商品再計算向けに、同一注文内に出現した商品IDを取得する。
@@ -49,10 +49,8 @@ public interface BatchMapper {
      * おすすめ関連商品の1件分を保存する。
      */
     int insertRecommendedRelated(@Param("recommendationDate") LocalDate recommendationDate,
-                                 @Param("sourceProductId") long sourceProductId,
-                                 @Param("rank") int rank,
-                                 @Param("recommendedProductId") long recommendedProductId,
-                                 @Param("score") BigDecimal score);
+            @Param("sourceProductId") long sourceProductId,
+            @Param("rank") int rank,
+            @Param("recommendedProductId") long recommendedProductId,
+            @Param("score") BigDecimal score);
 }
-
-

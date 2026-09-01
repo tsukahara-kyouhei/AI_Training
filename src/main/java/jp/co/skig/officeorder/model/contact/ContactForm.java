@@ -41,10 +41,7 @@ public class ContactForm implements Serializable {
     private String phone;
 
     @NotBlank(message = "{validation.inquiryType.required}")
-    @Pattern(
-            regexp = ValidationPatterns.BLANK_OR_INQUIRY_TYPE,
-            message = "{validation.inquiryType.invalid}"
-    )
+    @Pattern(regexp = ValidationPatterns.BLANK_OR_INQUIRY_TYPE, message = "{validation.inquiryType.invalid}")
     private String inquiryType = "product";
 
     @NotBlank(message = "{validation.orderPhase.required}")

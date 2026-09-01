@@ -390,7 +390,7 @@
         ORDER BY effective_start_at DESC
         LIMIT 1
     </select>
-<!-- 指定コードの有効なクーポンを取得 -->
+    <!-- 指定コードの有効なクーポンを取得 -->
     <select id="selectActiveCouponByCode" resultType="jp.co.skig.officeorder.model.coupon.CouponForm">
         SELECT 
             coupon_id AS couponId,
@@ -426,7 +426,7 @@
         DO UPDATE SET 
             usage_count = customer_coupon_usages.usage_count + 1,
             last_used_at = EXCLUDED.last_used_at
-    </insert>    
+    </insert>
 </mapper>
 
 

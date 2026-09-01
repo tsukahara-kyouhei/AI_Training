@@ -25,8 +25,7 @@ public record OrderCompleteView(
         BigDecimal assemblyFeeTotal,
         BigDecimal shippingFee,
         BigDecimal taxAmount,
-        BigDecimal totalAmount
-) {
+        BigDecimal totalAmount) {
     /**
      * コンビニ決済向けの追加案内表示が必要かを判定する。
      */
@@ -54,4 +53,3 @@ public record OrderCompleteView(
         return MoneyFormatter.formatYen(totalAmount);
     }
 }
-

@@ -17,9 +17,9 @@ public class MemberMdcInterceptor implements HandlerInterceptor {
     /**
      * リクエスト開始時に会員IDをMDCへ設定する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param handler ハンドラ
+     * @param handler  ハンドラ
      * @return 処理継続可否
      */
     @Override
@@ -43,13 +43,14 @@ public class MemberMdcInterceptor implements HandlerInterceptor {
     /**
      * リクエスト完了時に会員IDをMDCから除去する。
      *
-     * @param request 現在リクエスト
+     * @param request  現在リクエスト
      * @param response 現在レスポンス
-     * @param handler ハンドラ
-     * @param ex 例外
+     * @param handler  ハンドラ
+     * @param ex       例外
      */
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+            Exception ex) {
         MDC.remove(LoggingMdcKeys.MEMBER_ID);
     }
 }

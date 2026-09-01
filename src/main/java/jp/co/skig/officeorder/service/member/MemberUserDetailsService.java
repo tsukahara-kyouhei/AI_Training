@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 /**
  * 会員認証情報を Spring Security の {@link UserDetails} に変換するサービス。
  *
- * <p>ログイン時にメールアドレスから有効会員を検索し、
+ * <p>
+ * ログイン時にメールアドレスから有効会員を検索し、
  * セッションに載せる principal を生成する。
  */
 @Service
@@ -44,7 +45,6 @@ public class MemberUserDetailsService implements UserDetailsService {
                 credential.email(),
                 credential.lastName(),
                 credential.firstName(),
-                credential.passwordHash()
-        );
+                credential.passwordHash());
     }
 }

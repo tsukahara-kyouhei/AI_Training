@@ -15,8 +15,7 @@ public record ProductCategoryFilter(
         List<Integer> chairMaterialIds,
         List<Integer> chairTasteIds,
         List<Integer> storageUsageIds,
-        List<Integer> storageTasteIds
-) {
+        List<Integer> storageTasteIds) {
 
     /**
      * 何も選択されていない初期状態の絞り込み条件を返す。
@@ -32,8 +31,7 @@ public record ProductCategoryFilter(
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of()
-        );
+                List.of());
     }
 
     /**
@@ -50,8 +48,7 @@ public record ProductCategoryFilter(
                 normalizeList(chairMaterialIds),
                 normalizeList(chairTasteIds),
                 normalizeList(storageUsageIds),
-                normalizeList(storageTasteIds)
-        );
+                normalizeList(storageTasteIds));
     }
 
     /**
@@ -80,4 +77,3 @@ public record ProductCategoryFilter(
                 .toList();
     }
 }
-

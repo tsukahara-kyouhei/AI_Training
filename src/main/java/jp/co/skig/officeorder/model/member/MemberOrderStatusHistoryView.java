@@ -8,10 +8,8 @@ import java.time.format.DateTimeFormatter;
  */
 public record MemberOrderStatusHistoryView(
         OffsetDateTime changedAt,
-        String status
-) {
-    private static final DateTimeFormatter CHANGED_AT_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String status) {
+    private static final DateTimeFormatter CHANGED_AT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**
      * ステータス変更日時を画面表示用の形式へ整形する。
@@ -42,4 +40,3 @@ public record MemberOrderStatusHistoryView(
         return "受付";
     }
 }
-

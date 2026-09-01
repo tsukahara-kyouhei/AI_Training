@@ -57,7 +57,7 @@
   align-items: start;
 }
 
-.error-panel__meta-row + .error-panel__meta-row {
+.error-panel__meta-row+.error-panel__meta-row {
   margin-top: 10px;
 }
 

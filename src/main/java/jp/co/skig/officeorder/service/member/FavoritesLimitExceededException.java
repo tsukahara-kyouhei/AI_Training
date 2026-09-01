@@ -14,4 +14,3 @@ public class FavoritesLimitExceededException extends RuntimeException {
         super(message);
     }
 }
-

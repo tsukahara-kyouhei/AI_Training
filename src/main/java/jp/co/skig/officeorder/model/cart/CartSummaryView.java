@@ -13,8 +13,7 @@ public record CartSummaryView(
         BigDecimal shippingFee,
         BigDecimal discountAmount,
         BigDecimal taxAmount,
-        BigDecimal totalAmount
-) {
+        BigDecimal totalAmount) {
     /**
      * 商品小計を画面表示用に整形する。
      */
@@ -64,4 +63,3 @@ public record CartSummaryView(
         return MoneyFormatter.formatYen(totalAmount);
     }
 }
-

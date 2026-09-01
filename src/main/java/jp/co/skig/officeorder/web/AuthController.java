@@ -26,6 +26,7 @@ public class AuthController {
 
     /** 現在会員判定とログイン後戻り先正規化を担当するサービス。 */
     private final MemberSessionService memberSessionService;
+
     /** ログイン画面のメールアドレス記憶Cookieサービス。 */
     private final LoginEmailCookieService loginEmailCookieService;
 
@@ -64,18 +65,24 @@ public class AuthController {
             log.info("event={} reason=already_authenticated", LogEvent.AUTH_LOGIN_PAGE_REDIRECT.value());
             return "redirect:/mypage/orders";
         }
+
         Optional<String> rememberedEmail = loginEmailCookieService.findRememberedEmail(request);
+
         if (!model.containsAttribute("loginForm")) {
             LoginForm form = new LoginForm();
             form.setRedirectPath(memberSessionService.sanitizeRedirectPath(redirectPath));
             rememberedEmail.ifPresent(form::setEmail);
             model.addAttribute("loginForm", form);
         }
+
         model.addAttribute("rememberLoginEmail", rememberedEmail.isPresent());
+
         if (expired) {
             log.info("event={} reason=session_expired", LogEvent.AUTH_LOGIN_PAGE_REDIRECT.value());
         }
+
         model.addAttribute("sessionExpired", expired);
+
         return "pages/login";
     }
 }

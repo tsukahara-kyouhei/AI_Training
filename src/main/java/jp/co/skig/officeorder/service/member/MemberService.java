@@ -26,7 +26,8 @@ import org.springframework.util.StringUtils;
 /**
  * 会員登録後の顧客機能を扱うアプリケーションサービス。
  *
- * <p>認証用資格情報の取得、会員登録、プロフィール更新、
+ * <p>
+ * 認証用資格情報の取得、会員登録、プロフィール更新、
  * 追加お届け先管理、お気に入り管理、退会処理をここに集約している。
  */
 @Service
@@ -53,12 +54,12 @@ public class MemberService {
      * 会員サービスを生成する。
      *
      * @param memberRepository 会員リポジトリ
-     * @param passwordEncoder パスワードエンコーダ
-     * @param messageSource 利用者向けメッセージ取得元
+     * @param passwordEncoder  パスワードエンコーダ
+     * @param messageSource    利用者向けメッセージ取得元
      */
     public MemberService(MemberRepository memberRepository,
-                         PasswordEncoder passwordEncoder,
-                         MessageSource messageSource) {
+            PasswordEncoder passwordEncoder,
+            MessageSource messageSource) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.messages = new MessageSourceAccessor(messageSource);
@@ -103,7 +104,8 @@ public class MemberService {
     /**
      * 会員登録を行い、ログインセッション用情報を返す。
      *
-     * <p>メールアドレス重複を事前・事後の両方で検知し、
+     * <p>
+     * メールアドレス重複を事前・事後の両方で検知し、
      * パスワードはハッシュ化して保存する。
      *
      * @param inputForm 会員登録フォーム
@@ -139,7 +141,7 @@ public class MemberService {
      * 会員の追加お届け先一覧を取得する。
      *
      * @param memberId 会員ID
-     * @param page ページ番号
+     * @param page     ページ番号
      * @return 追加お届け先一覧ページ
      */
     public MemberAdditionalAddressPage findAdditionalAddresses(long memberId, int page) {
@@ -150,7 +152,7 @@ public class MemberService {
     /**
      * 指定追加お届け先を会員所有の範囲で取得する。
      *
-     * @param memberId 会員ID
+     * @param memberId        会員ID
      * @param memberAddressId 追加お届け先ID
      * @return 追加お届け先
      */
@@ -181,7 +183,7 @@ public class MemberService {
     /**
      * 会員プロフィールを更新する。
      *
-     * @param memberId 会員ID
+     * @param memberId  会員ID
      * @param inputForm 更新フォーム
      */
     @Transactional
@@ -247,7 +249,7 @@ public class MemberService {
     /**
      * 追加お届け先を新規登録する。
      *
-     * @param memberId 会員ID
+     * @param memberId  会員ID
      * @param inputForm 追加お届け先フォーム
      */
     @Transactional
@@ -266,9 +268,9 @@ public class MemberService {
     /**
      * 追加お届け先を更新する。
      *
-     * @param memberId 会員ID
+     * @param memberId        会員ID
      * @param memberAddressId 追加お届け先ID
-     * @param inputForm 更新フォーム
+     * @param inputForm       更新フォーム
      * @return 更新できた場合は {@code true}
      */
     @Transactional
@@ -291,7 +293,7 @@ public class MemberService {
     /**
      * 追加お届け先を削除する。
      *
-     * @param memberId 会員ID
+     * @param memberId        会員ID
      * @param memberAddressId 追加お届け先ID
      */
     @Transactional
@@ -307,7 +309,7 @@ public class MemberService {
      * お気に入り一覧を取得する。
      *
      * @param memberId 会員ID
-     * @param page ページ番号
+     * @param page     ページ番号
      * @return お気に入り一覧ページ
      */
     public MemberFavoritePage findFavorites(long memberId, int page) {
@@ -318,7 +320,7 @@ public class MemberService {
     /**
      * 指定商品がお気に入り済みか判定する。
      *
-     * @param memberId 会員ID
+     * @param memberId  会員ID
      * @param productId 商品ID
      * @return お気に入り済みなら {@code true}
      */
@@ -329,7 +331,7 @@ public class MemberService {
     /**
      * お気に入りの追加・解除をトグルで行う。
      *
-     * @param memberId 会員ID
+     * @param memberId  会員ID
      * @param productId 商品ID
      */
     @Transactional
@@ -370,7 +372,7 @@ public class MemberService {
     /**
      * 指定商品をお気に入りから削除する。
      *
-     * @param memberId 会員ID
+     * @param memberId  会員ID
      * @param productId 商品ID
      */
     @Transactional
@@ -393,6 +395,3 @@ public class MemberService {
         return messages.getMessage(code, args);
     }
 }
-
-
-

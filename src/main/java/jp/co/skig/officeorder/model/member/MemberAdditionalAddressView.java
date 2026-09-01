@@ -22,8 +22,7 @@ public record MemberAdditionalAddressView(
         Boolean hasElevator,
         String daytimePhone,
         String fax,
-        OffsetDateTime createdAt
-) {
+        OffsetDateTime createdAt) {
     /**
      * 宛名の姓・名を画面表示用に連結する。
      */
@@ -45,7 +44,7 @@ public record MemberAdditionalAddressView(
      * 住所選択プルダウンで識別しやすい要約文字列を返す。
      */
     public String addressSummary() {
-        return "〒" + postalCode + " " + prefecture + city + addressLine + "（" + deliveryFloor + "F/EV" + (Boolean.TRUE.equals(hasElevator) ? "あり" : "なし") + "）";
+        return "〒" + postalCode + " " + prefecture + city + addressLine + "（" + deliveryFloor + "F/EV"
+                + (Boolean.TRUE.equals(hasElevator) ? "あり" : "なし") + "）";
     }
 }
-

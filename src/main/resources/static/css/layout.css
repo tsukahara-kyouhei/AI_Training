@@ -253,6 +253,7 @@
   .header__nav {
     display: none;
   }
+
   .header__search {
     width: min(240px, 46vw);
   }
@@ -305,6 +306,7 @@
   .only-desktop {
     display: none;
   }
+
   .only-mobile {
     display: block;
   }
@@ -357,4 +359,3 @@
   color: var(--muted);
   font-weight: 700;
 }
-

@@ -7,8 +7,7 @@ public record MemberSessionUser(
         Long memberId,
         String email,
         String lastName,
-        String firstName
-) {
+        String firstName) {
     /**
      * 画面ヘッダやマイページ表示用に氏名を連結する。
      */
@@ -16,4 +15,3 @@ public record MemberSessionUser(
         return lastName + " " + firstName;
     }
 }
-

@@ -14,4 +14,3 @@ public class BatchAlreadyRunningException extends RuntimeException {
         super(message);
     }
 }
-

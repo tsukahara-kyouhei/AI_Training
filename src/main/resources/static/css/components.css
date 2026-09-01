@@ -24,7 +24,9 @@
 }
 
 @media (max-width: 767px) {
-  .grid--4, .grid--3 {
+
+  .grid--4,
+  .grid--3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -90,7 +92,8 @@
   background: transparent;
 }
 
-.btn[disabled], .btn.is-disabled {
+.btn[disabled],
+.btn.is-disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -127,13 +130,11 @@
   aspect-ratio: 1 / 1;
   background:
     linear-gradient(135deg, rgba(11, 58, 91, 0.10), rgba(239, 108, 0, 0.08)),
-    repeating-linear-gradient(
-      45deg,
+    repeating-linear-gradient(45deg,
       rgba(16, 24, 40, 0.06),
       rgba(16, 24, 40, 0.06) 10px,
       rgba(255, 255, 255, 0) 10px,
-      rgba(255, 255, 255, 0) 20px
-    );
+      rgba(255, 255, 255, 0) 20px);
   border-bottom: 1px solid var(--border);
 }
 
@@ -185,12 +186,12 @@
   gap: 12px;
 }
 
-.form--filters .field + .field {
+.form--filters .field+.field {
   border-top: 1px solid rgba(16, 24, 40, 0.12);
   padding-top: 12px;
 }
 
-.form--filters .field > label:not(.check-item) {
+.form--filters .field>label:not(.check-item) {
   display: block;
   font-size: 15px;
   font-weight: 900;
@@ -203,7 +204,7 @@
   flex-direction: column;
 }
 
-.sidebar .form > .actions--stack {
+.sidebar .form>.actions--stack {
   order: -1;
   margin-bottom: 4px;
 }
@@ -226,7 +227,9 @@
   color: #7a2e00;
 }
 
-.field input, .field select, .field textarea {
+.field input,
+.field select,
+.field textarea {
   width: 100%;
   padding: 11px 12px;
   border-radius: 12px;
@@ -354,11 +357,11 @@
   overflow: hidden;
 }
 
-.color-option input:checked + .color-option__swatch {
+.color-option input:checked+.color-option__swatch {
   box-shadow: 0 0 0 2px rgba(11, 58, 91, 0.38);
 }
 
-.color-option input:checked + .color-option__swatch::after {
+.color-option input:checked+.color-option__swatch::after {
   content: "✓";
   position: absolute;
   inset: 0;
@@ -401,7 +404,8 @@
   border-collapse: collapse;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   border-bottom: 1px solid var(--border);
   padding: 12px 10px;
   text-align: left;
@@ -621,4 +625,3 @@
 .carousel__btn--next {
   right: -12px;
 }
-

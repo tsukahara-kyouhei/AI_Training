@@ -5,8 +5,7 @@
 
 <mapper namespace="jp.co.skig.officeorder.mapper.ReviewMapper">
 
-    <resultMap id="ProductReviewRowMap"
-               type="jp.co.skig.officeorder.mapper.row.ProductReviewMapperRow">
+    <resultMap id="ProductReviewRowMap" type="jp.co.skig.officeorder.mapper.row.ProductReviewMapperRow">
 
         <constructor>
             <idArg column="review_id" javaType="long"/>
@@ -16,30 +15,25 @@
             <arg column="title" javaType="string"/>
             <arg column="body" javaType="string"/>
             <arg column="published" javaType="boolean"/>
-            <arg column="created_at"
-                 javaType="java.time.OffsetDateTime"/>
-            <arg column="updated_at"
-                 javaType="java.time.OffsetDateTime"/>
+            <arg column="created_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="updated_at" javaType="java.time.OffsetDateTime"/>
         </constructor>
 
     </resultMap>
 
 
-    <resultMap id="ProductReviewSummaryRowMap"
-               type="jp.co.skig.officeorder.mapper.row.ProductReviewSummaryMapperRow">
+    <resultMap id="ProductReviewSummaryRowMap" type="jp.co.skig.officeorder.mapper.row.ProductReviewSummaryMapperRow">
 
         <constructor>
             <arg column="review_count" javaType="long"/>
-            <arg column="average_rating"
-                 javaType="java.math.BigDecimal"/>
+            <arg column="average_rating" javaType="java.math.BigDecimal"/>
         </constructor>
 
     </resultMap>
 
 
     <!-- 商品のレビュー平均評価・件数 -->
-    <select id="selectReviewSummary"
-            resultMap="ProductReviewSummaryRowMap">
+    <select id="selectReviewSummary" resultMap="ProductReviewSummaryRowMap">
 
         SELECT
             COUNT(*) AS review_count,
@@ -52,8 +46,7 @@
 
 
     <!-- 商品の公開レビュー一覧 -->
-    <select id="selectProductReviews"
-            resultMap="ProductReviewRowMap">
+    <select id="selectProductReviews" resultMap="ProductReviewRowMap">
 
         SELECT
             review_id,
@@ -74,8 +67,7 @@
 
 
     <!-- 会員自身のレビュー -->
-    <select id="selectMemberReview"
-            resultMap="ProductReviewRowMap">
+    <select id="selectMemberReview" resultMap="ProductReviewRowMap">
 
         SELECT
             review_id,
@@ -95,8 +87,7 @@
 
 
     <!-- 会員が対象商品を購入したことがあるか -->
-    <select id="existsPurchasedProduct"
-            resultType="boolean">
+    <select id="existsPurchasedProduct" resultType="boolean">
 
         SELECT EXISTS (
             SELECT 1

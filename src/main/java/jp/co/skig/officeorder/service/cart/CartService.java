@@ -141,14 +141,15 @@ public class CartService {
 
         BigDecimal taxableSubtotal = productSubtotal.add(assemblySubtotal);
         BigDecimal discountAmount = getAppliedDiscountAmount(request, taxableSubtotal);
-        //BigDecimal taxRate = cartRepository.findCurrentTaxRatePercent();
+        // BigDecimal taxRate = cartRepository.findCurrentTaxRatePercent();
 
         BigDecimal taxAmount = BigDecimal.ZERO;
 
-        //BigDecimal shippingTarget = taxableSubtotal;
-        BigDecimal shippingFee = taxableSubtotal.compareTo(BigDecimal.valueOf(FREE_SHIPPING_THRESHOLD_TAX_INCLUDED)) >= 0
-                ? BigDecimal.ZERO
-                : BigDecimal.valueOf(FLAT_SHIPPING_FEE);
+        // BigDecimal shippingTarget = taxableSubtotal;
+        BigDecimal shippingFee = taxableSubtotal
+                .compareTo(BigDecimal.valueOf(FREE_SHIPPING_THRESHOLD_TAX_INCLUDED)) >= 0
+                        ? BigDecimal.ZERO
+                        : BigDecimal.valueOf(FLAT_SHIPPING_FEE);
 
         BigDecimal totalAmount = taxableSubtotal.add(shippingFee).subtract(discountAmount)
                 .max(BigDecimal.ZERO);

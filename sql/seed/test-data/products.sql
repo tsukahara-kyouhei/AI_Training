@@ -1,231 +1,2177 @@
 -- products: 50件、variants: 99件
 -- 人手での調整を前提に、商品・発注単位・属性はすべてフラットなINSERTで定義する。
 -- sale_start_at はseed投入日の相対日時で設定し、直近6か月以内/6か月超/販売終了済みが混在するようにする。
-
-INSERT INTO products (
-    product_id,
-    product_name,
-    category_id,
-    description,
-    assembly_available,
-    assembly_fee,
-    has_variation,
-    variation_group_id,
-    variation_name,
-    sale_start_at,
-    sale_end_at,
-    created_at,
-    updated_at
-)
+INSERT INTO
+    products (
+        product_id,
+        product_name,
+        category_id,
+        description,
+        assembly_available,
+        assembly_fee,
+        has_variation,
+        variation_group_id,
+        variation_name,
+        sale_start_at,
+        sale_end_at,
+        created_at,
+        updated_at
+    )
 OVERRIDING SYSTEM VALUE
 VALUES
-    (1, 'Nordis ワークデスク 幅120cm', 'desk', '配線受けと幕板を備えたベーシックなワークデスク。執務席をすっきり見せる直線的なデザイン。', TRUE, 3000, TRUE, 1001, '幅120cmx奥行70cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '22 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (2, 'Nordis ワークデスク 幅140cm', 'desk', '配線受けと幕板を備えたベーシックなワークデスク。執務席をすっきり見せる直線的なデザイン。', TRUE, 3000, TRUE, 1001, '幅140cmx奥行70cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '145 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (3, 'Nordis ワークデスク 幅160cm', 'desk', '配線受けと幕板を備えたベーシックなワークデスク。執務席をすっきり見せる直線的なデザイン。', TRUE, 3000, TRUE, 1001, '幅160cmx奥行70cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '8 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (4, 'Lattice スタンダードデスク 幅100cm', 'desk', '省スペース設計でホームオフィスにも置きやすいスタンダードデスク。耐傷性メラミン天板を採用。', TRUE, 3000, TRUE, 1002, '幅100cmx奥行60cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '190 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (5, 'Lattice スタンダードデスク 幅120cm', 'desk', '省スペース設計でホームオフィスにも置きやすいスタンダードデスク。耐傷性メラミン天板を採用。', TRUE, 3000, TRUE, 1002, '幅120cmx奥行60cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '61 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (6, 'Lattice スタンダードデスク 幅140cm', 'desk', '省スペース設計でホームオフィスにも置きやすいスタンダードデスク。耐傷性メラミン天板を採用。', TRUE, 3000, TRUE, 1002, '幅140cmx奥行60cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '240 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (7, 'Framea 配線トレー付デスク 幅120cm', 'desk', '電源タップを隠せる配線トレー付きの執務デスク。フリーアドレスにもなじむシャープな脚部。', TRUE, 3000, TRUE, 1003, '幅120cmx奥行70cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '35 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '1 day' + TIME '23:59:59') AT TIME ZONE 'Asia/Tokyo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (8, 'Framea 配線トレー付デスク 幅140cm', 'desk', '電源タップを隠せる配線トレー付きの執務デスク。フリーアドレスにもなじむシャープな脚部。', TRUE, 3000, TRUE, 1003, '幅140cmx奥行70cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '172 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (9, 'Framea 配線トレー付デスク 幅160cm', 'desk', '電源タップを隠せる配線トレー付きの執務デスク。フリーアドレスにもなじむシャープな脚部。', TRUE, 3000, TRUE, 1003, '幅160cmx奥行70cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '280 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (10, 'Cresta ミーティングテーブル 幅120cm', 'desk', '会議室とワークスペース兼用で使いやすいミーティングテーブル。広めの天板で資料を広げやすい仕様。', FALSE, 0, TRUE, 1004, '幅120cmx奥行80cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '12 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (11, 'Cresta ミーティングテーブル 幅140cm', 'desk', '会議室とワークスペース兼用で使いやすいミーティングテーブル。広めの天板で資料を広げやすい仕様。', FALSE, 0, TRUE, 1004, '幅140cmx奥行80cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '95 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (12, 'Cresta ミーティングテーブル 幅160cm', 'desk', '会議室とワークスペース兼用で使いやすいミーティングテーブル。広めの天板で資料を広げやすい仕様。', FALSE, 0, TRUE, 1004, '幅160cmx奥行80cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '205 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (13, 'Solte サイドデスク 幅100cm', 'desk', '脇机や受付バックヤードに合わせやすいコンパクトデスク。移動しやすい軽量設計。', FALSE, 0, TRUE, 1005, '幅100cmx奥行50cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '41 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (14, 'Solte サイドデスク 幅120cm', 'desk', '脇机や受付バックヤードに合わせやすいコンパクトデスク。移動しやすい軽量設計。', FALSE, 0, TRUE, 1005, '幅120cmx奥行50cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '310 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (15, 'Axis ミーティングテーブル 幅180cm', 'desk', '打ち合わせから共同作業まで対応する大型ミーティングテーブル。脚間が広くチェアを収めやすい。', TRUE, 3000, TRUE, 1006, '幅180cmx奥行90cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '5 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (16, 'Axis ミーティングテーブル 幅240cm', 'desk', '打ち合わせから共同作業まで対応する大型ミーティングテーブル。脚間が広くチェアを収めやすい。', TRUE, 3000, TRUE, 1006, '幅240cmx奥行120cm', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '132 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (17, 'Arcus コンパクトデスク', 'desk', '限られたスペースにも収まる奥行控えめのコンパクトデスク。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '225 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (18, 'Formio 昇降デスク', 'desk', '手動昇降で立ち座りを切り替えやすいワークデスク。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '18 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (19, 'Linel L字ワークテーブル', 'desk', 'L字天板で作業領域を確保しやすいコーナーワークテーブル。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '176 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (20, 'Radius ラウンドミーティングテーブル', 'desk', 'やわらかな印象を与えるラウンド天板のミーティングテーブル。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '260 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (21, 'AeroFit メッシュチェア ローバック', 'chair', '通気性の高いメッシュ背で長時間着座にも対応するオフィスチェア。座面の奥行きに余裕があり、会議室兼用でも使いやすい。', FALSE, 0, TRUE, 2001, 'ローバック', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '9 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (22, 'AeroFit メッシュチェア ハイバック', 'chair', '通気性の高いメッシュ背で長時間着座にも対応するオフィスチェア。座面の奥行きに余裕があり、会議室兼用でも使いやすい。', FALSE, 0, TRUE, 2001, 'ハイバック', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '88 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (23, 'AeroFit メッシュチェア ヘッドレスト付', 'chair', '通気性の高いメッシュ背で長時間着座にも対応するオフィスチェア。座面の奥行きに余裕があり、会議室兼用でも使いやすい。', FALSE, 0, TRUE, 2001, 'ヘッドレスト付', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '199 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (24, 'Balancea タスクチェア スタンダード', 'chair', '執務席になじむタスクチェア。座り心地とメンテナンス性のバランスを重視した定番モデル。', FALSE, 0, TRUE, 2002, 'スタンダード', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '26 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (25, 'Balancea タスクチェア アーム付', 'chair', '執務席になじむタスクチェア。座り心地とメンテナンス性のバランスを重視した定番モデル。', FALSE, 0, TRUE, 2002, 'アーム付', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '158 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (26, 'Balancea タスクチェア ハイグレード', 'chair', '執務席になじむタスクチェア。座り心地とメンテナンス性のバランスを重視した定番モデル。', FALSE, 0, TRUE, 2002, 'ハイグレード', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '320 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (27, 'Crafit ミーティングチェア キャスター付', 'chair', '来客席や会議室で使いやすい軽快なミーティングチェア。スタッキングしやすいシルエット。', FALSE, 0, TRUE, 2003, 'キャスター付', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '47 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '1 day' + TIME '23:59:59') AT TIME ZONE 'Asia/Tokyo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (28, 'Crafit ミーティングチェア 固定脚', 'chair', '来客席や会議室で使いやすい軽快なミーティングチェア。スタッキングしやすいシルエット。', FALSE, 0, TRUE, 2003, '固定脚', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '74 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (29, 'Nostal ウッドチェア ナチュラル', 'chair', '木の質感を活かしたシンプルなチェア。カフェ風のラウンジスペースにも合わせやすい。', FALSE, 0, TRUE, 2004, 'ナチュラル', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '184 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (30, 'Nostal ウッドチェア ブラウン', 'chair', '木の質感を活かしたシンプルなチェア。カフェ風のラウンジスペースにも合わせやすい。', FALSE, 0, TRUE, 2004, 'ブラウン', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '14 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (31, 'Nostal ウッドチェア ブラック', 'chair', '木の質感を活かしたシンプルなチェア。カフェ風のラウンジスペースにも合わせやすい。', FALSE, 0, TRUE, 2004, 'ブラック', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '167 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (32, 'Sway ラウンジチェア ロータイプ', 'chair', '包み込むような背形状でリラックスしやすいラウンジチェア。待合や役員室のアクセントに適したモデル。', FALSE, 0, TRUE, 2005, 'ロータイプ', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '245 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (33, 'Sway ラウンジチェア ハイタイプ', 'chair', '包み込むような背形状でリラックスしやすいラウンジチェア。待合や役員室のアクセントに適したモデル。', FALSE, 0, TRUE, 2005, 'ハイタイプ', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '52 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (34, 'Vento メッシュスツール', 'chair', '背抜きデザインで圧迫感を抑えたメッシュスツール。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '300 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (35, 'Clave エグゼクティブチェア', 'chair', '重厚感のある張地とハイバックで落ち着いた印象を与えるエグゼクティブチェア。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '1 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (36, 'Archive ベースキャビネット 2段', 'storage', 'A4ファイルと文具をまとめて整理しやすいベースキャビネット。引出しの開閉が滑らかで、執務席脇に置きやすい。', TRUE, 2500, TRUE, 3001, '2段', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '118 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (37, 'Archive ベースキャビネット 3段', 'storage', 'A4ファイルと文具をまとめて整理しやすいベースキャビネット。引出しの開閉が滑らかで、執務席脇に置きやすい。', TRUE, 2500, TRUE, 3001, '3段', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '214 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (38, 'Archive ベースキャビネット 4段', 'storage', 'A4ファイルと文具をまとめて整理しやすいベースキャビネット。引出しの開閉が滑らかで、執務席脇に置きやすい。', TRUE, 2500, TRUE, 3001, '4段', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '32 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (39, 'Mergee オープンシェルフ 2列2段', 'storage', '背板を抑えた開放的なオープンシェルフ。間仕切り兼収納としても使いやすい設計。', FALSE, 0, TRUE, 3002, '2列2段', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '170 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (40, 'Mergee オープンシェルフ 3列2段', 'storage', '背板を抑えた開放的なオープンシェルフ。間仕切り兼収納としても使いやすい設計。', FALSE, 0, TRUE, 3002, '3列2段', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '288 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (41, 'Mergee オープンシェルフ 3列3段', 'storage', '背板を抑えた開放的なオープンシェルフ。間仕切り兼収納としても使いやすい設計。', FALSE, 0, TRUE, 3002, '3列3段', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '7 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (42, 'Securea パーソナルロッカー 2人用', 'storage', '個人荷物の保管に適したロッカー。ダイヤル錠に対応し、共用オフィスでも運用しやすい。', TRUE, 2500, TRUE, 3003, '2人用', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '149 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (43, 'Securea パーソナルロッカー 4人用', 'storage', '個人荷物の保管に適したロッカー。ダイヤル錠に対応し、共用オフィスでも運用しやすい。', TRUE, 2500, TRUE, 3003, '4人用', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '233 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (44, 'Filer スチール書庫 引違い', 'storage', '書類を見やすく収められるスチール書庫。耐久性の高い粉体塗装仕上げ。', FALSE, 0, TRUE, 3004, '引違い', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '56 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (45, 'Filer スチール書庫 両開き', 'storage', '書類を見やすく収められるスチール書庫。耐久性の高い粉体塗装仕上げ。', FALSE, 0, TRUE, 3004, '両開き', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '178 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (46, 'Nooka サイドワゴン 2段', 'storage', 'デスク下に収まりやすいスリムなサイドワゴン。ペントレー付きで小物を整理しやすい。', FALSE, 0, TRUE, 3005, '2段', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '268 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (47, 'Nooka サイドワゴン 3段', 'storage', 'デスク下に収まりやすいスリムなサイドワゴン。ペントレー付きで小物を整理しやすい。', FALSE, 0, TRUE, 3005, '3段', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '63 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '1 day' + TIME '23:59:59') AT TIME ZONE 'Asia/Tokyo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (48, 'Parcel メールロッカー', 'storage', '投函物の仕分けに使いやすいメールロッカー。受付横の運用を想定した設計。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '16 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (49, 'Calm 木製キャビネット', 'storage', '木目調で応接空間にも合わせやすい木製キャビネット。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '124 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (50, 'Junction カウンター収納', 'storage', '受付カウンター下の収納力を高めるカウンター収納。扉内に備品をまとめて収めやすい。', FALSE, 0, FALSE, NULL, NULL, (date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo') - INTERVAL '196 days' + TIME '09:00:00') AT TIME ZONE 'Asia/Tokyo', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    (
+        1,
+        'Nordis ワークデスク 幅120cm',
+        'desk',
+        '配線受けと幕板を備えたベーシックなワークデスク。執務席をすっきり見せる直線的なデザイン。',
+        TRUE,
+        3000,
+        TRUE,
+        1001,
+        '幅120cmx奥行70cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '22 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        2,
+        'Nordis ワークデスク 幅140cm',
+        'desk',
+        '配線受けと幕板を備えたベーシックなワークデスク。執務席をすっきり見せる直線的なデザイン。',
+        TRUE,
+        3000,
+        TRUE,
+        1001,
+        '幅140cmx奥行70cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '145 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        3,
+        'Nordis ワークデスク 幅160cm',
+        'desk',
+        '配線受けと幕板を備えたベーシックなワークデスク。執務席をすっきり見せる直線的なデザイン。',
+        TRUE,
+        3000,
+        TRUE,
+        1001,
+        '幅160cmx奥行70cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '8 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        4,
+        'Lattice スタンダードデスク 幅100cm',
+        'desk',
+        '省スペース設計でホームオフィスにも置きやすいスタンダードデスク。耐傷性メラミン天板を採用。',
+        TRUE,
+        3000,
+        TRUE,
+        1002,
+        '幅100cmx奥行60cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '190 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        5,
+        'Lattice スタンダードデスク 幅120cm',
+        'desk',
+        '省スペース設計でホームオフィスにも置きやすいスタンダードデスク。耐傷性メラミン天板を採用。',
+        TRUE,
+        3000,
+        TRUE,
+        1002,
+        '幅120cmx奥行60cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '61 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        6,
+        'Lattice スタンダードデスク 幅140cm',
+        'desk',
+        '省スペース設計でホームオフィスにも置きやすいスタンダードデスク。耐傷性メラミン天板を採用。',
+        TRUE,
+        3000,
+        TRUE,
+        1002,
+        '幅140cmx奥行60cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '240 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        7,
+        'Framea 配線トレー付デスク 幅120cm',
+        'desk',
+        '電源タップを隠せる配線トレー付きの執務デスク。フリーアドレスにもなじむシャープな脚部。',
+        TRUE,
+        3000,
+        TRUE,
+        1003,
+        '幅120cmx奥行70cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '35 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '1 day' + TIME '23:59:59'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        8,
+        'Framea 配線トレー付デスク 幅140cm',
+        'desk',
+        '電源タップを隠せる配線トレー付きの執務デスク。フリーアドレスにもなじむシャープな脚部。',
+        TRUE,
+        3000,
+        TRUE,
+        1003,
+        '幅140cmx奥行70cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '172 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        9,
+        'Framea 配線トレー付デスク 幅160cm',
+        'desk',
+        '電源タップを隠せる配線トレー付きの執務デスク。フリーアドレスにもなじむシャープな脚部。',
+        TRUE,
+        3000,
+        TRUE,
+        1003,
+        '幅160cmx奥行70cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '280 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        10,
+        'Cresta ミーティングテーブル 幅120cm',
+        'desk',
+        '会議室とワークスペース兼用で使いやすいミーティングテーブル。広めの天板で資料を広げやすい仕様。',
+        FALSE,
+        0,
+        TRUE,
+        1004,
+        '幅120cmx奥行80cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '12 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        11,
+        'Cresta ミーティングテーブル 幅140cm',
+        'desk',
+        '会議室とワークスペース兼用で使いやすいミーティングテーブル。広めの天板で資料を広げやすい仕様。',
+        FALSE,
+        0,
+        TRUE,
+        1004,
+        '幅140cmx奥行80cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '95 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        12,
+        'Cresta ミーティングテーブル 幅160cm',
+        'desk',
+        '会議室とワークスペース兼用で使いやすいミーティングテーブル。広めの天板で資料を広げやすい仕様。',
+        FALSE,
+        0,
+        TRUE,
+        1004,
+        '幅160cmx奥行80cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '205 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        13,
+        'Solte サイドデスク 幅100cm',
+        'desk',
+        '脇机や受付バックヤードに合わせやすいコンパクトデスク。移動しやすい軽量設計。',
+        FALSE,
+        0,
+        TRUE,
+        1005,
+        '幅100cmx奥行50cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '41 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        14,
+        'Solte サイドデスク 幅120cm',
+        'desk',
+        '脇机や受付バックヤードに合わせやすいコンパクトデスク。移動しやすい軽量設計。',
+        FALSE,
+        0,
+        TRUE,
+        1005,
+        '幅120cmx奥行50cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '310 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        15,
+        'Axis ミーティングテーブル 幅180cm',
+        'desk',
+        '打ち合わせから共同作業まで対応する大型ミーティングテーブル。脚間が広くチェアを収めやすい。',
+        TRUE,
+        3000,
+        TRUE,
+        1006,
+        '幅180cmx奥行90cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '5 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        16,
+        'Axis ミーティングテーブル 幅240cm',
+        'desk',
+        '打ち合わせから共同作業まで対応する大型ミーティングテーブル。脚間が広くチェアを収めやすい。',
+        TRUE,
+        3000,
+        TRUE,
+        1006,
+        '幅240cmx奥行120cm',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '132 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        17,
+        'Arcus コンパクトデスク',
+        'desk',
+        '限られたスペースにも収まる奥行控えめのコンパクトデスク。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '225 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        18,
+        'Formio 昇降デスク',
+        'desk',
+        '手動昇降で立ち座りを切り替えやすいワークデスク。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '18 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        19,
+        'Linel L字ワークテーブル',
+        'desk',
+        'L字天板で作業領域を確保しやすいコーナーワークテーブル。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '176 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        20,
+        'Radius ラウンドミーティングテーブル',
+        'desk',
+        'やわらかな印象を与えるラウンド天板のミーティングテーブル。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '260 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        21,
+        'AeroFit メッシュチェア ローバック',
+        'chair',
+        '通気性の高いメッシュ背で長時間着座にも対応するオフィスチェア。座面の奥行きに余裕があり、会議室兼用でも使いやすい。',
+        FALSE,
+        0,
+        TRUE,
+        2001,
+        'ローバック',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '9 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        22,
+        'AeroFit メッシュチェア ハイバック',
+        'chair',
+        '通気性の高いメッシュ背で長時間着座にも対応するオフィスチェア。座面の奥行きに余裕があり、会議室兼用でも使いやすい。',
+        FALSE,
+        0,
+        TRUE,
+        2001,
+        'ハイバック',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '88 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        23,
+        'AeroFit メッシュチェア ヘッドレスト付',
+        'chair',
+        '通気性の高いメッシュ背で長時間着座にも対応するオフィスチェア。座面の奥行きに余裕があり、会議室兼用でも使いやすい。',
+        FALSE,
+        0,
+        TRUE,
+        2001,
+        'ヘッドレスト付',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '199 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        24,
+        'Balancea タスクチェア スタンダード',
+        'chair',
+        '執務席になじむタスクチェア。座り心地とメンテナンス性のバランスを重視した定番モデル。',
+        FALSE,
+        0,
+        TRUE,
+        2002,
+        'スタンダード',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '26 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        25,
+        'Balancea タスクチェア アーム付',
+        'chair',
+        '執務席になじむタスクチェア。座り心地とメンテナンス性のバランスを重視した定番モデル。',
+        FALSE,
+        0,
+        TRUE,
+        2002,
+        'アーム付',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '158 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        26,
+        'Balancea タスクチェア ハイグレード',
+        'chair',
+        '執務席になじむタスクチェア。座り心地とメンテナンス性のバランスを重視した定番モデル。',
+        FALSE,
+        0,
+        TRUE,
+        2002,
+        'ハイグレード',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '320 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        27,
+        'Crafit ミーティングチェア キャスター付',
+        'chair',
+        '来客席や会議室で使いやすい軽快なミーティングチェア。スタッキングしやすいシルエット。',
+        FALSE,
+        0,
+        TRUE,
+        2003,
+        'キャスター付',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '47 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '1 day' + TIME '23:59:59'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        28,
+        'Crafit ミーティングチェア 固定脚',
+        'chair',
+        '来客席や会議室で使いやすい軽快なミーティングチェア。スタッキングしやすいシルエット。',
+        FALSE,
+        0,
+        TRUE,
+        2003,
+        '固定脚',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '74 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        29,
+        'Nostal ウッドチェア ナチュラル',
+        'chair',
+        '木の質感を活かしたシンプルなチェア。カフェ風のラウンジスペースにも合わせやすい。',
+        FALSE,
+        0,
+        TRUE,
+        2004,
+        'ナチュラル',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '184 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        30,
+        'Nostal ウッドチェア ブラウン',
+        'chair',
+        '木の質感を活かしたシンプルなチェア。カフェ風のラウンジスペースにも合わせやすい。',
+        FALSE,
+        0,
+        TRUE,
+        2004,
+        'ブラウン',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '14 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        31,
+        'Nostal ウッドチェア ブラック',
+        'chair',
+        '木の質感を活かしたシンプルなチェア。カフェ風のラウンジスペースにも合わせやすい。',
+        FALSE,
+        0,
+        TRUE,
+        2004,
+        'ブラック',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '167 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        32,
+        'Sway ラウンジチェア ロータイプ',
+        'chair',
+        '包み込むような背形状でリラックスしやすいラウンジチェア。待合や役員室のアクセントに適したモデル。',
+        FALSE,
+        0,
+        TRUE,
+        2005,
+        'ロータイプ',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '245 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        33,
+        'Sway ラウンジチェア ハイタイプ',
+        'chair',
+        '包み込むような背形状でリラックスしやすいラウンジチェア。待合や役員室のアクセントに適したモデル。',
+        FALSE,
+        0,
+        TRUE,
+        2005,
+        'ハイタイプ',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '52 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        34,
+        'Vento メッシュスツール',
+        'chair',
+        '背抜きデザインで圧迫感を抑えたメッシュスツール。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '300 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        35,
+        'Clave エグゼクティブチェア',
+        'chair',
+        '重厚感のある張地とハイバックで落ち着いた印象を与えるエグゼクティブチェア。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '1 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        36,
+        'Archive ベースキャビネット 2段',
+        'storage',
+        'A4ファイルと文具をまとめて整理しやすいベースキャビネット。引出しの開閉が滑らかで、執務席脇に置きやすい。',
+        TRUE,
+        2500,
+        TRUE,
+        3001,
+        '2段',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '118 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        37,
+        'Archive ベースキャビネット 3段',
+        'storage',
+        'A4ファイルと文具をまとめて整理しやすいベースキャビネット。引出しの開閉が滑らかで、執務席脇に置きやすい。',
+        TRUE,
+        2500,
+        TRUE,
+        3001,
+        '3段',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '214 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        38,
+        'Archive ベースキャビネット 4段',
+        'storage',
+        'A4ファイルと文具をまとめて整理しやすいベースキャビネット。引出しの開閉が滑らかで、執務席脇に置きやすい。',
+        TRUE,
+        2500,
+        TRUE,
+        3001,
+        '4段',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '32 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        39,
+        'Mergee オープンシェルフ 2列2段',
+        'storage',
+        '背板を抑えた開放的なオープンシェルフ。間仕切り兼収納としても使いやすい設計。',
+        FALSE,
+        0,
+        TRUE,
+        3002,
+        '2列2段',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '170 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        40,
+        'Mergee オープンシェルフ 3列2段',
+        'storage',
+        '背板を抑えた開放的なオープンシェルフ。間仕切り兼収納としても使いやすい設計。',
+        FALSE,
+        0,
+        TRUE,
+        3002,
+        '3列2段',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '288 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        41,
+        'Mergee オープンシェルフ 3列3段',
+        'storage',
+        '背板を抑えた開放的なオープンシェルフ。間仕切り兼収納としても使いやすい設計。',
+        FALSE,
+        0,
+        TRUE,
+        3002,
+        '3列3段',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '7 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        42,
+        'Securea パーソナルロッカー 2人用',
+        'storage',
+        '個人荷物の保管に適したロッカー。ダイヤル錠に対応し、共用オフィスでも運用しやすい。',
+        TRUE,
+        2500,
+        TRUE,
+        3003,
+        '2人用',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '149 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        43,
+        'Securea パーソナルロッカー 4人用',
+        'storage',
+        '個人荷物の保管に適したロッカー。ダイヤル錠に対応し、共用オフィスでも運用しやすい。',
+        TRUE,
+        2500,
+        TRUE,
+        3003,
+        '4人用',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '233 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        44,
+        'Filer スチール書庫 引違い',
+        'storage',
+        '書類を見やすく収められるスチール書庫。耐久性の高い粉体塗装仕上げ。',
+        FALSE,
+        0,
+        TRUE,
+        3004,
+        '引違い',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '56 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        45,
+        'Filer スチール書庫 両開き',
+        'storage',
+        '書類を見やすく収められるスチール書庫。耐久性の高い粉体塗装仕上げ。',
+        FALSE,
+        0,
+        TRUE,
+        3004,
+        '両開き',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '178 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        46,
+        'Nooka サイドワゴン 2段',
+        'storage',
+        'デスク下に収まりやすいスリムなサイドワゴン。ペントレー付きで小物を整理しやすい。',
+        FALSE,
+        0,
+        TRUE,
+        3005,
+        '2段',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '268 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        47,
+        'Nooka サイドワゴン 3段',
+        'storage',
+        'デスク下に収まりやすいスリムなサイドワゴン。ペントレー付きで小物を整理しやすい。',
+        FALSE,
+        0,
+        TRUE,
+        3005,
+        '3段',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '63 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '1 day' + TIME '23:59:59'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        48,
+        'Parcel メールロッカー',
+        'storage',
+        '投函物の仕分けに使いやすいメールロッカー。受付横の運用を想定した設計。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '16 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        49,
+        'Calm 木製キャビネット',
+        'storage',
+        '木目調で応接空間にも合わせやすい木製キャビネット。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '124 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        50,
+        'Junction カウンター収納',
+        'storage',
+        '受付カウンター下の収納力を高めるカウンター収納。扉内に備品をまとめて収めやすい。',
+        FALSE,
+        0,
+        FALSE,
+        NULL,
+        NULL,
+        (
+            date_trunc(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+            ) - INTERVAL '196 days' + TIME '09:00:00'
+        ) AT TIME ZONE 'Asia/Tokyo',
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    );
 
-SELECT setval(
-    pg_get_serial_sequence('products', 'product_id'),
-    (SELECT MAX(product_id) FROM products),
-    TRUE
-);
+SELECT
+    setval(
+        pg_get_serial_sequence('products', 'product_id'),
+        (
+            SELECT
+                MAX(product_id)
+            FROM
+                products
+        ),
+        TRUE
+    );
 
-INSERT INTO product_variants (
-    product_id,
-    product_code,
-    color_id,
-    unit_price,
-    stock_quantity,
-    created_at,
-    updated_at
-)
+INSERT INTO
+    product_variants (
+        product_id,
+        product_code,
+        color_id,
+        unit_price,
+        stock_quantity,
+        created_at,
+        updated_at
+    )
 VALUES
-    (1, 'P0001-C01', 1, 49800, 12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (1, 'P0001-C02', 6, 49800, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (2, 'P0002-C01', 3, 54800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (3, 'P0003-C01', 1, 59800, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (3, 'P0003-C02', 2, 59800, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (3, 'P0003-C03', 6, 59800, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (4, 'P0004-C01', 6, 29800, 18, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (4, 'P0004-C02', 4, 29800, 9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (5, 'P0005-C01', 5, 34800, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (6, 'P0006-C01', 1, 39800, 10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (6, 'P0006-C02', 3, 39800, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (6, 'P0006-C03', 6, 39800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (7, 'P0007-C01', 1, 45800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (7, 'P0007-C02', 5, 45800, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (8, 'P0008-C01', 4, 49800, 11, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (9, 'P0009-C01', 1, 53800, 8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (9, 'P0009-C02', 2, 53800, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (9, 'P0009-C03', 6, 53800, 15, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (10, 'P0010-C01', 6, 64800, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (10, 'P0010-C02', 2, 64800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (11, 'P0011-C01', 4, 69800, 9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (12, 'P0012-C01', 1, 74800, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (12, 'P0012-C02', 6, 74800, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (12, 'P0012-C03', 5, 74800, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (13, 'P0013-C01', 3, 22800, 12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (13, 'P0013-C02', 2, 22800, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (14, 'P0014-C01', 1, 25800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (15, 'P0015-C01', 2, 89800, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (15, 'P0015-C02', 3, 89800, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (15, 'P0015-C03', 1, 89800, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (16, 'P0016-C01', 4, 128000, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (16, 'P0016-C02', 5, 128000, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (17, 'P0017-C01', 6, 19800, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (18, 'P0018-C01', 6, 69800, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (18, 'P0018-C02', 1, 69800, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (18, 'P0018-C03', 4, 69800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (19, 'P0019-C01', 1, 79800, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (19, 'P0019-C02', 2, 79800, 9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (20, 'P0020-C01', 3, 54800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (21, 'P0021-C01', 1, 24800, 12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (21, 'P0021-C02', 4, 24800, 8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (21, 'P0021-C03', 7, 24800, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (22, 'P0022-C01', 4, 29800, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (22, 'P0022-C02', 7, 29800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (23, 'P0023-C01', 1, 34800, 9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (24, 'P0024-C01', 1, 19800, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (24, 'P0024-C02', 7, 19800, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (24, 'P0024-C03', 11, 19800, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (25, 'P0025-C01', 4, 24800, 11, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (25, 'P0025-C02', 9, 24800, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (26, 'P0026-C01', 1, 32800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (27, 'P0027-C01', 3, 16800, 10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (27, 'P0027-C02', 2, 16800, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (27, 'P0027-C03', 1, 16800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (28, 'P0028-C01', 4, 14800, 8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (28, 'P0028-C02', 7, 14800, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (29, 'P0029-C01', 3, 22800, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (30, 'P0030-C01', 2, 24800, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (30, 'P0030-C02', 1, 24800, 9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (30, 'P0030-C03', 6, 24800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (31, 'P0031-C01', 1, 25800, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (31, 'P0031-C02', 4, 25800, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (32, 'P0032-C01', 12, 42800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (33, 'P0033-C01', 4, 49800, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (33, 'P0033-C02', 7, 49800, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (33, 'P0033-C03', 9, 49800, 8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (34, 'P0034-C01', 1, 12800, 10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (34, 'P0034-C02', 10, 12800, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (35, 'P0035-C01', 1, 98000, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (36, 'P0036-C01', 6, 42800, 9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (36, 'P0036-C02', 4, 42800, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (36, 'P0036-C03', 5, 42800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (37, 'P0037-C01', 6, 49800, 12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (37, 'P0037-C02', 3, 49800, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (38, 'P0038-C01', 4, 56800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (39, 'P0039-C01', 6, 36800, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (39, 'P0039-C02', 2, 36800, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (39, 'P0039-C03', 1, 36800, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (40, 'P0040-C01', 6, 45800, 11, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (40, 'P0040-C02', 4, 45800, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (41, 'P0041-C01', 3, 59800, 8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (42, 'P0042-C01', 6, 69800, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (42, 'P0042-C02', 4, 69800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (42, 'P0042-C03', 1, 69800, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (43, 'P0043-C01', 3, 92800, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (43, 'P0043-C02', 2, 92800, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (44, 'P0044-C01', 6, 54800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (45, 'P0045-C01', 4, 62800, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (45, 'P0045-C02', 5, 62800, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (45, 'P0045-C03', 1, 62800, 9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (46, 'P0046-C01', 6, 24800, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (46, 'P0046-C02', 2, 24800, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (47, 'P0047-C01', 4, 29800, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (48, 'P0048-C01', 6, 118000, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (48, 'P0048-C02', 5, 118000, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (48, 'P0048-C03', 1, 118000, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (49, 'P0049-C01', 3, 64800, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (49, 'P0049-C02', 2, 64800, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (50, 'P0050-C01', 6, 79800, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    (
+        1,
+        'P0001-C01',
+        1,
+        49800,
+        12,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        1,
+        'P0001-C02',
+        6,
+        49800,
+        5,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        2,
+        'P0002-C01',
+        3,
+        54800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        3,
+        'P0003-C01',
+        1,
+        59800,
+        6,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        3,
+        'P0003-C02',
+        2,
+        59800,
+        14,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        3,
+        'P0003-C03',
+        6,
+        59800,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        4,
+        'P0004-C01',
+        6,
+        29800,
+        18,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        4,
+        'P0004-C02',
+        4,
+        29800,
+        9,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        5,
+        'P0005-C01',
+        5,
+        34800,
+        7,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        6,
+        'P0006-C01',
+        1,
+        39800,
+        10,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        6,
+        'P0006-C02',
+        3,
+        39800,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        6,
+        'P0006-C03',
+        6,
+        39800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        7,
+        'P0007-C01',
+        1,
+        45800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        7,
+        'P0007-C02',
+        5,
+        45800,
+        6,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        8,
+        'P0008-C01',
+        4,
+        49800,
+        11,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        9,
+        'P0009-C01',
+        1,
+        53800,
+        8,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        9,
+        'P0009-C02',
+        2,
+        53800,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        9,
+        'P0009-C03',
+        6,
+        53800,
+        15,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        10,
+        'P0010-C01',
+        6,
+        64800,
+        5,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        10,
+        'P0010-C02',
+        2,
+        64800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        11,
+        'P0011-C01',
+        4,
+        69800,
+        9,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        12,
+        'P0012-C01',
+        1,
+        74800,
+        14,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        12,
+        'P0012-C02',
+        6,
+        74800,
+        7,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        12,
+        'P0012-C03',
+        5,
+        74800,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        13,
+        'P0013-C01',
+        3,
+        22800,
+        12,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        13,
+        'P0013-C02',
+        2,
+        22800,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        14,
+        'P0014-C01',
+        1,
+        25800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        15,
+        'P0015-C01',
+        2,
+        89800,
+        6,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        15,
+        'P0015-C02',
+        3,
+        89800,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        15,
+        'P0015-C03',
+        1,
+        89800,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        16,
+        'P0016-C01',
+        4,
+        128000,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        16,
+        'P0016-C02',
+        5,
+        128000,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        17,
+        'P0017-C01',
+        6,
+        19800,
+        13,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        18,
+        'P0018-C01',
+        6,
+        69800,
+        7,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        18,
+        'P0018-C02',
+        1,
+        69800,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        18,
+        'P0018-C03',
+        4,
+        69800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        19,
+        'P0019-C01',
+        1,
+        79800,
+        5,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        19,
+        'P0019-C02',
+        2,
+        79800,
+        9,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        20,
+        'P0020-C01',
+        3,
+        54800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        21,
+        'P0021-C01',
+        1,
+        24800,
+        12,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        21,
+        'P0021-C02',
+        4,
+        24800,
+        8,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        21,
+        'P0021-C03',
+        7,
+        24800,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        22,
+        'P0022-C01',
+        4,
+        29800,
+        5,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        22,
+        'P0022-C02',
+        7,
+        29800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        23,
+        'P0023-C01',
+        1,
+        34800,
+        9,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        24,
+        'P0024-C01',
+        1,
+        19800,
+        7,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        24,
+        'P0024-C02',
+        7,
+        19800,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        24,
+        'P0024-C03',
+        11,
+        19800,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        25,
+        'P0025-C01',
+        4,
+        24800,
+        11,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        25,
+        'P0025-C02',
+        9,
+        24800,
+        6,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        26,
+        'P0026-C01',
+        1,
+        32800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        27,
+        'P0027-C01',
+        3,
+        16800,
+        10,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        27,
+        'P0027-C02',
+        2,
+        16800,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        27,
+        'P0027-C03',
+        1,
+        16800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        28,
+        'P0028-C01',
+        4,
+        14800,
+        8,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        28,
+        'P0028-C02',
+        7,
+        14800,
+        5,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        29,
+        'P0029-C01',
+        3,
+        22800,
+        6,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        30,
+        'P0030-C01',
+        2,
+        24800,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        30,
+        'P0030-C02',
+        1,
+        24800,
+        9,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        30,
+        'P0030-C03',
+        6,
+        24800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        31,
+        'P0031-C01',
+        1,
+        25800,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        31,
+        'P0031-C02',
+        4,
+        25800,
+        7,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        32,
+        'P0032-C01',
+        12,
+        42800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        33,
+        'P0033-C01',
+        4,
+        49800,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        33,
+        'P0033-C02',
+        7,
+        49800,
+        5,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        33,
+        'P0033-C03',
+        9,
+        49800,
+        8,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        34,
+        'P0034-C01',
+        1,
+        12800,
+        10,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        34,
+        'P0034-C02',
+        10,
+        12800,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        35,
+        'P0035-C01',
+        1,
+        98000,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        36,
+        'P0036-C01',
+        6,
+        42800,
+        9,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        36,
+        'P0036-C02',
+        4,
+        42800,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        36,
+        'P0036-C03',
+        5,
+        42800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        37,
+        'P0037-C01',
+        6,
+        49800,
+        12,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        37,
+        'P0037-C02',
+        3,
+        49800,
+        6,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        38,
+        'P0038-C01',
+        4,
+        56800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        39,
+        'P0039-C01',
+        6,
+        36800,
+        7,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        39,
+        'P0039-C02',
+        2,
+        36800,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        39,
+        'P0039-C03',
+        1,
+        36800,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        40,
+        'P0040-C01',
+        6,
+        45800,
+        11,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        40,
+        'P0040-C02',
+        4,
+        45800,
+        5,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        41,
+        'P0041-C01',
+        3,
+        59800,
+        8,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        42,
+        'P0042-C01',
+        6,
+        69800,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        42,
+        'P0042-C02',
+        4,
+        69800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        42,
+        'P0042-C03',
+        1,
+        69800,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        43,
+        'P0043-C01',
+        3,
+        92800,
+        6,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        43,
+        'P0043-C02',
+        2,
+        92800,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        44,
+        'P0044-C01',
+        6,
+        54800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        45,
+        'P0045-C01',
+        4,
+        62800,
+        5,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        45,
+        'P0045-C02',
+        5,
+        62800,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        45,
+        'P0045-C03',
+        1,
+        62800,
+        9,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        46,
+        'P0046-C01',
+        6,
+        24800,
+        14,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        46,
+        'P0046-C02',
+        2,
+        24800,
+        7,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        47,
+        'P0047-C01',
+        4,
+        29800,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        48,
+        'P0048-C01',
+        6,
+        118000,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        48,
+        'P0048-C02',
+        5,
+        118000,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        48,
+        'P0048-C03',
+        1,
+        118000,
+        0,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        49,
+        'P0049-C01',
+        3,
+        64800,
+        6,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        49,
+        'P0049-C02',
+        2,
+        64800,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        50,
+        'P0050-C01',
+        6,
+        79800,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    );
 
-INSERT INTO product_desk_attributes (
-    product_id,
-    top_shape_id,
-    width_mm,
-    depth_mm,
-    height_mm,
-    taste_id,
-    created_at,
-    updated_at
-)
+INSERT INTO
+    product_desk_attributes (
+        product_id,
+        top_shape_id,
+        width_mm,
+        depth_mm,
+        height_mm,
+        taste_id,
+        created_at,
+        updated_at
+    )
 VALUES
-    (1, 2, 1200, 700, 720, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (2, 2, 1400, 700, 720, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (3, 2, 1600, 700, 720, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (4, 2, 1000, 600, 720, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (5, 2, 1200, 600, 720, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (6, 2, 1400, 600, 720, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (7, 2, 1200, 700, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (8, 2, 1400, 700, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (9, 2, 1600, 700, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (10, 2, 1200, 800, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (11, 2, 1400, 800, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (12, 2, 1600, 800, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (13, 2, 1000, 500, 720, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (14, 2, 1200, 500, 720, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (15, 2, 1800, 900, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (16, 2, 2400, 1200, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (17, 2, 900, 600, 700, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (18, 2, 1200, 600, 720, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (19, 4, 1600, 1400, 720, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (20, 1, 1200, 1200, 720, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    (
+        1,
+        2,
+        1200,
+        700,
+        720,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        2,
+        2,
+        1400,
+        700,
+        720,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        3,
+        2,
+        1600,
+        700,
+        720,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        4,
+        2,
+        1000,
+        600,
+        720,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        5,
+        2,
+        1200,
+        600,
+        720,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        6,
+        2,
+        1400,
+        600,
+        720,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        7,
+        2,
+        1200,
+        700,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        8,
+        2,
+        1400,
+        700,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        9,
+        2,
+        1600,
+        700,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        10,
+        2,
+        1200,
+        800,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        11,
+        2,
+        1400,
+        800,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        12,
+        2,
+        1600,
+        800,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        13,
+        2,
+        1000,
+        500,
+        720,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        14,
+        2,
+        1200,
+        500,
+        720,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        15,
+        2,
+        1800,
+        900,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        16,
+        2,
+        2400,
+        1200,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        17,
+        2,
+        900,
+        600,
+        700,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        18,
+        2,
+        1200,
+        600,
+        720,
+        4,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        19,
+        4,
+        1600,
+        1400,
+        720,
+        3,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        20,
+        1,
+        1200,
+        1200,
+        720,
+        2,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    );
 
-INSERT INTO product_chair_attributes (
-    product_id,
-    function_id,
-    material_id,
-    taste_id,
-    created_at,
-    updated_at
-)
+INSERT INTO
+    product_chair_attributes (
+        product_id,
+        function_id,
+        material_id,
+        taste_id,
+        created_at,
+        updated_at
+    )
 VALUES
     (21, 3, 1, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (22, 3, 1, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -243,13 +2189,14 @@ VALUES
     (34, 4, 3, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (35, 1, 4, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT INTO product_storage_attributes (
-    product_id,
-    usage_id,
-    taste_id,
-    created_at,
-    updated_at
-)
+INSERT INTO
+    product_storage_attributes (
+        product_id,
+        usage_id,
+        taste_id,
+        created_at,
+        updated_at
+    )
 VALUES
     (36, 2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (37, 2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

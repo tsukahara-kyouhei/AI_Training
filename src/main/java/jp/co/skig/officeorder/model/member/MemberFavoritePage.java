@@ -9,8 +9,7 @@ public record MemberFavoritePage(
         List<MemberFavoriteView> items,
         long totalCount,
         int page,
-        int size
-) {
+        int size) {
     /**
      * 総件数と1ページ件数から総ページ数を算出する。
      */
@@ -21,4 +20,3 @@ public record MemberFavoritePage(
         return (int) ((totalCount + size - 1) / size);
     }
 }
-

@@ -348,6 +348,7 @@ erDiagram
 ```
 
 ## 補足
+
 - `members` と `member_additional_addresses` は 1対多の関係です。
 - `members` と `products` は `member_favorites` を介して多対多の関係です。
 - `products` と `product_variants` は 1対多の関係です。

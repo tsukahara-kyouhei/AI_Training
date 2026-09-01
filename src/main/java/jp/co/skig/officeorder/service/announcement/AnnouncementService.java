@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 /**
  * 公開中のお知らせを画面表示用に取得するサービス。
  *
- * <p>ヘッダの1行お知らせ表示と、お知らせ一覧画面のどちらも
+ * <p>
+ * ヘッダの1行お知らせ表示と、お知らせ一覧画面のどちらも
  * {@link AnnouncementRepository} の同じ公開条件を使うため、
  * 取得件数だけをここで切り替えている。
  */
@@ -49,6 +50,3 @@ public class AnnouncementService {
         return announcementRepository.findActiveAnnouncements(null);
     }
 }
-
-
-

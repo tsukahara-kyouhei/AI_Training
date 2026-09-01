@@ -26,16 +26,16 @@ public class RequestIdMdcFilter extends OncePerRequestFilter {
     /**
      * リクエスト開始時に requestId / path / method をMDCへ設定する。
      *
-     * @param request 現在リクエスト
-     * @param response 現在レスポンス
+     * @param request     現在リクエスト
+     * @param response    現在レスポンス
      * @param filterChain FilterChain
      * @throws ServletException フィルタ処理失敗時
-     * @throws IOException IO失敗時
+     * @throws IOException      IO失敗時
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
         String requestId = normalizeRequestId(request.getHeader(REQUEST_ID_HEADER));
         if (requestId == null) {
             requestId = UUID.randomUUID().toString();

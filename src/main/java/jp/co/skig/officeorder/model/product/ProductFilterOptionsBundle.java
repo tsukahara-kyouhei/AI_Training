@@ -13,8 +13,7 @@ public record ProductFilterOptionsBundle(
         List<CategoryFilterOption> chairMaterialOptions,
         List<CategoryFilterOption> chairTasteOptions,
         List<CategoryFilterOption> storageUsageOptions,
-        List<CategoryFilterOption> storageTasteOptions
-) {
+        List<CategoryFilterOption> storageTasteOptions) {
 
     public ProductFilterOptionsBundle {
         colorOptions = immutableOrEmpty(colorOptions);

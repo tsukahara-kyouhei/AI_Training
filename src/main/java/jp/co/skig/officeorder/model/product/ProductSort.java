@@ -37,4 +37,3 @@ public enum ProductSort {
         return defaultValue;
     }
 }
-

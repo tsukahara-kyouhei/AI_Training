@@ -20,10 +20,8 @@ public record MemberOrderDetailView(
         BigDecimal taxAmount,
         BigDecimal totalAmount,
         List<MemberOrderStatusHistoryView> statusHistories,
-        List<MemberOrderItemDetailView> items
-) {
-    private static final DateTimeFormatter ORDER_DATETIME_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        List<MemberOrderItemDetailView> items) {
+    private static final DateTimeFormatter ORDER_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**
      * 注文日時を一覧・詳細で統一した表示形式へ整形する。

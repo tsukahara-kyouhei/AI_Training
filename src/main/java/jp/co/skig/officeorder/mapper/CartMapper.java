@@ -18,7 +18,7 @@ public interface CartMapper {
      * カート内の商品バリアントに対応する価格・在庫・組立可否のスナップショットを取得する。
      */
     List<CartProductSnapshot> selectCartProductSnapshots(@Param("productVariantIds") List<Long> productVariantIds,
-                                                         @Param("now") OffsetDateTime now);
+            @Param("now") OffsetDateTime now);
 
     /**
      * 指定時点で有効な消費税率を取得する。

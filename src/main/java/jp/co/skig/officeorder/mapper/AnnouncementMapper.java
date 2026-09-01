@@ -17,7 +17,5 @@ public interface AnnouncementMapper {
      * 指定時点で公開中のお知らせを掲載日の新しい順で取得する。
      */
     List<AnnouncementMapperRow> selectActiveAnnouncements(@Param("limit") Integer limit,
-                                                          @Param("now") OffsetDateTime now);
+            @Param("now") OffsetDateTime now);
 }
-
-

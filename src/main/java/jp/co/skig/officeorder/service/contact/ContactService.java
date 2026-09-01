@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * お問い合わせ入力の初期化と送信を扱うサービス。
  *
- * <p>ログイン会員が問い合わせる場合だけ会員情報を初期表示へ反映し、
+ * <p>
+ * ログイン会員が問い合わせる場合だけ会員情報を初期表示へ反映し、
  * 送信時は正規化済みフォームを永続化する。
  */
 @Service
@@ -39,7 +40,8 @@ public class ContactService {
     /**
      * お問い合わせ画面の初期フォームを生成する。
      *
-     * <p>ログイン会員の場合は、氏名や連絡先など会員情報から初期値を補完する。
+     * <p>
+     * ログイン会員の場合は、氏名や連絡先など会員情報から初期値を補完する。
      *
      * @param member ログイン会員
      * @return 初期フォーム
@@ -67,7 +69,7 @@ public class ContactService {
      * お問い合わせを送信する。
      *
      * @param memberId ログイン会員ID。ゲスト時は {@code null}
-     * @param rawForm 送信フォーム
+     * @param rawForm  送信フォーム
      * @return 採番された問い合わせID
      */
     @Transactional
@@ -83,6 +85,3 @@ public class ContactService {
         return inquiryId;
     }
 }
-
-
-

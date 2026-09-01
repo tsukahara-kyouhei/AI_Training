@@ -233,7 +233,8 @@
   font-weight: 900;
 }
 
-.pd-color-price, .pd-color-stock {
+.pd-color-price,
+.pd-color-stock {
   margin: 4px 0 0;
   font-size: 11px;
   color: #60646f;
@@ -432,7 +433,7 @@
   background: #f4f4f5;
 }
 
-.pd-series-group + .pd-series-group {
+.pd-series-group+.pd-series-group {
   margin-top: 12px;
 }
 
@@ -520,4 +521,3 @@
   border-color: rgba(239, 108, 0, 0.38);
   background: rgba(239, 108, 0, 0.10);
 }
-

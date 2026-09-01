@@ -20,8 +20,5 @@ public interface ContactMapper {
      * お問い合わせ内容を永続化し、採番された問い合わせIDを返す。
      */
     Long insertInquiry(@Param("memberId") Long memberId,
-                       @Param("form") ContactForm form);
+            @Param("form") ContactForm form);
 }
-
-
-

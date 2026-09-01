@@ -1,4 +1,5 @@
-INSERT INTO desk_top_shapes (display_name, sort_order, is_active)
+INSERT INTO
+  desk_top_shapes (display_name, sort_order, is_active)
 VALUES
   ('丸形', 1, TRUE),
   ('角形', 2, TRUE),
@@ -7,7 +8,8 @@ VALUES
   ('その他', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO desk_tastes (display_name, sort_order, is_active)
+INSERT INTO
+  desk_tastes (display_name, sort_order, is_active)
 VALUES
   ('ベーシック', 1, TRUE),
   ('カジュアル', 2, TRUE),
@@ -16,7 +18,8 @@ VALUES
   ('ナチュラル', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO chair_functions (display_name, sort_order, is_active)
+INSERT INTO
+  chair_functions (display_name, sort_order, is_active)
 VALUES
   ('肘付き', 1, TRUE),
   ('肘なし', 2, TRUE),
@@ -24,7 +27,8 @@ VALUES
   ('キャスターなし', 4, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO chair_materials (display_name, sort_order, is_active)
+INSERT INTO
+  chair_materials (display_name, sort_order, is_active)
 VALUES
   ('メッシュ', 1, TRUE),
   ('クロス', 2, TRUE),
@@ -33,7 +37,8 @@ VALUES
   ('木製', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO chair_tastes (display_name, sort_order, is_active)
+INSERT INTO
+  chair_tastes (display_name, sort_order, is_active)
 VALUES
   ('ベーシック', 1, TRUE),
   ('カジュアル', 2, TRUE),
@@ -42,7 +47,8 @@ VALUES
   ('ナチュラル', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO storage_usages (display_name, sort_order, is_active)
+INSERT INTO
+  storage_usages (display_name, sort_order, is_active)
 VALUES
   ('小物収納', 1, TRUE),
   ('書類収納', 2, TRUE),
@@ -52,7 +58,8 @@ VALUES
   ('引出し付き', 6, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO storage_tastes (display_name, sort_order, is_active)
+INSERT INTO
+  storage_tastes (display_name, sort_order, is_active)
 VALUES
   ('ベーシック', 1, TRUE),
   ('カジュアル', 2, TRUE),
@@ -61,7 +68,14 @@ VALUES
   ('ナチュラル', 5, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO colors (color_name, color_code, swatch_type, sort_order, is_active)
+INSERT INTO
+  colors (
+    color_name,
+    color_code,
+    swatch_type,
+    sort_order,
+    is_active
+  )
 VALUES
   ('黒系', '#222222', 'solid', 1, TRUE),
   ('茶系', '#6F4E37', 'solid', 2, TRUE),
@@ -79,8 +93,19 @@ VALUES
   ('透明系', '#F5F5F5', 'transparent_pattern', 14, TRUE)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO tax_rates (tax_rate_percent, effective_start_at, effective_end_at, is_active)
+INSERT INTO
+  tax_rates (
+    tax_rate_percent,
+    effective_start_at,
+    effective_end_at,
+    is_active
+  )
 VALUES
-  (8.00, '2014-04-01 00:00:00+09', '2019-09-30 23:59:59+09', FALSE),
+  (
+    8.00,
+    '2014-04-01 00:00:00+09',
+    '2019-09-30 23:59:59+09',
+    FALSE
+  ),
   (10.00, '2019-10-01 00:00:00+09', NULL, TRUE)
 ON CONFLICT DO NOTHING;

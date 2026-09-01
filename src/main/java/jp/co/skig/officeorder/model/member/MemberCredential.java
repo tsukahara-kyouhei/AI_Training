@@ -8,8 +8,7 @@ public record MemberCredential(
         String email,
         String lastName,
         String firstName,
-        String passwordHash
-) {
+        String passwordHash) {
     /**
      * 認証済み会員をセッション保持用の軽量モデルへ変換する。
      */

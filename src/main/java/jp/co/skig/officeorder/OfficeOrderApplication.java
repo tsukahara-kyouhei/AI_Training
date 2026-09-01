@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-//@MapperScan("jp.co.skig.officeorder.mapper")
+// @MapperScan("jp.co.skig.officeorder.mapper")
 public class OfficeOrderApplication {
 
     public static void main(String[] args) {

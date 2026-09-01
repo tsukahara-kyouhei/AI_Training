@@ -20,14 +20,15 @@ import org.springframework.stereotype.Service;
 /**
  * 商品表示系ユースケースの窓口となるサービス。
  *
- * <p>トップ画面、新着一覧、カテゴリ一覧、検索結果、商品詳細で使う
+ * <p>
+ * トップ画面、新着一覧、カテゴリ一覧、検索結果、商品詳細で使う
  * 商品取得と検索条件正規化を集約している。
  */
 @Service
 public class ProductService {
 
     /** 一覧画面で許可する表示件数。 */
-    private static final int[] ALLOWED_PAGE_SIZES = {15, 30, 60};
+    private static final int[] ALLOWED_PAGE_SIZES = { 15, 30, 60 };
     /** トップ画面の売れ筋ランキング表示件数。 */
     private static final int TOP_RANKED_LIMIT = 8;
 
@@ -39,7 +40,7 @@ public class ProductService {
     /**
      * 商品サービスを生成する。
      *
-     * @param repository 商品参照リポジトリ
+     * @param repository      商品参照リポジトリ
      * @param appTimeProvider 共通時刻プロバイダ
      */
     public ProductService(ProductRepository repository, AppTimeProvider appTimeProvider) {
@@ -79,7 +80,7 @@ public class ProductService {
      * 最近見た商品ID一覧から表示用商品を取得する。
      *
      * @param productIds 最近見た商品ID一覧
-     * @param limit 取得件数上限
+     * @param limit      取得件数上限
      * @return 商品カード一覧
      */
     public List<ProductCardView> findRecentlyViewedProducts(List<Long> productIds, int limit) {
@@ -89,7 +90,7 @@ public class ProductService {
     /**
      * 商品詳細を取得する。
      *
-     * @param productId 商品ID
+     * @param productId       商品ID
      * @param forceOutOfStock 在庫切れ表示を強制するか
      * @return 商品詳細
      */
@@ -100,22 +101,23 @@ public class ProductService {
     /**
      * 新着商品一覧向けの検索条件を組み立てる。
      *
-     * <p>新着は販売開始日が直近6か月以内の商品に限定する。
+     * <p>
+     * 新着は販売開始日が直近6か月以内の商品に限定する。
      *
-     * @param inStockOnly 在庫ありのみ条件
+     * @param inStockOnly  在庫ありのみ条件
      * @param priceBandIds 価格帯ID一覧
-     * @param colorIds 色ID一覧
-     * @param sort 並び順
-     * @param page ページ番号
-     * @param size 表示件数
+     * @param colorIds     色ID一覧
+     * @param sort         並び順
+     * @param page         ページ番号
+     * @param size         表示件数
      * @return 正規化済み検索条件
      */
     public ProductSearchCondition buildNewArrivalCondition(boolean inStockOnly,
-                                                           List<Integer> priceBandIds,
-                                                           List<Long> colorIds,
-                                                           String sort,
-                                                           int page,
-                                                           int size) {
+            List<Integer> priceBandIds,
+            List<Long> colorIds,
+            String sort,
+            int page,
+            int size) {
         return buildCondition(
                 null,
                 null,
@@ -127,33 +129,32 @@ public class ProductService {
                 size,
                 ProductSort.NEWEST,
                 ProductCategoryFilter.empty(),
-                newArrivalSaleStartFrom()
-        );
+                newArrivalSaleStartFrom());
     }
 
     /**
      * カテゴリ・検索一覧向けの検索条件を組み立てる。
      *
-     * @param categoryId カテゴリID
-     * @param keyword キーワード
-     * @param inStockOnly 在庫ありのみ条件
+     * @param categoryId   カテゴリID
+     * @param keyword      キーワード
+     * @param inStockOnly  在庫ありのみ条件
      * @param priceBandIds 価格帯ID一覧
-     * @param colorIds 色ID一覧
-     * @param sort 並び順
-     * @param page ページ番号
-     * @param size 表示件数
-     * @param defaultSort デフォルト並び順
+     * @param colorIds     色ID一覧
+     * @param sort         並び順
+     * @param page         ページ番号
+     * @param size         表示件数
+     * @param defaultSort  デフォルト並び順
      * @return 正規化済み検索条件
      */
     public ProductSearchCondition buildCondition(String categoryId,
-                                                 String keyword,
-                                                 boolean inStockOnly,
-                                                 List<Integer> priceBandIds,
-                                                 List<Long> colorIds,
-                                                 String sort,
-                                                 int page,
-                                                 int size,
-                                                 ProductSort defaultSort) {
+            String keyword,
+            boolean inStockOnly,
+            List<Integer> priceBandIds,
+            List<Long> colorIds,
+            String sort,
+            int page,
+            int size,
+            ProductSort defaultSort) {
         return buildCondition(
                 categoryId,
                 keyword,
@@ -165,35 +166,34 @@ public class ProductService {
                 size,
                 defaultSort,
                 ProductCategoryFilter.empty(),
-                null
-        );
+                null);
     }
 
     /**
      * カテゴリ固有条件付き一覧向けの検索条件を組み立てる。
      *
-     * @param categoryId カテゴリID
-     * @param keyword キーワード
-     * @param inStockOnly 在庫ありのみ条件
-     * @param priceBandIds 価格帯ID一覧
-     * @param colorIds 色ID一覧
-     * @param sort 並び順
-     * @param page ページ番号
-     * @param size 表示件数
-     * @param defaultSort デフォルト並び順
+     * @param categoryId     カテゴリID
+     * @param keyword        キーワード
+     * @param inStockOnly    在庫ありのみ条件
+     * @param priceBandIds   価格帯ID一覧
+     * @param colorIds       色ID一覧
+     * @param sort           並び順
+     * @param page           ページ番号
+     * @param size           表示件数
+     * @param defaultSort    デフォルト並び順
      * @param categoryFilter カテゴリ固有条件
      * @return 正規化済み検索条件
      */
     public ProductSearchCondition buildCondition(String categoryId,
-                                                 String keyword,
-                                                 boolean inStockOnly,
-                                                 List<Integer> priceBandIds,
-                                                 List<Long> colorIds,
-                                                 String sort,
-                                                 int page,
-                                                 int size,
-                                                 ProductSort defaultSort,
-                                                 ProductCategoryFilter categoryFilter) {
+            String keyword,
+            boolean inStockOnly,
+            List<Integer> priceBandIds,
+            List<Long> colorIds,
+            String sort,
+            int page,
+            int size,
+            ProductSort defaultSort,
+            ProductCategoryFilter categoryFilter) {
         return buildCondition(
                 categoryId,
                 keyword,
@@ -205,37 +205,36 @@ public class ProductService {
                 size,
                 defaultSort,
                 categoryFilter,
-                null
-        );
+                null);
     }
 
     /**
      * 全条件を受け取り、一覧検索用の条件オブジェクトを構築する。
      *
-     * @param categoryId カテゴリID
-     * @param keyword キーワード
-     * @param inStockOnly 在庫ありのみ条件
-     * @param priceBandIds 価格帯ID一覧
-     * @param colorIds 色ID一覧
-     * @param sort 並び順
-     * @param page ページ番号
-     * @param size 表示件数
-     * @param defaultSort デフォルト並び順
+     * @param categoryId     カテゴリID
+     * @param keyword        キーワード
+     * @param inStockOnly    在庫ありのみ条件
+     * @param priceBandIds   価格帯ID一覧
+     * @param colorIds       色ID一覧
+     * @param sort           並び順
+     * @param page           ページ番号
+     * @param size           表示件数
+     * @param defaultSort    デフォルト並び順
      * @param categoryFilter カテゴリ固有条件
-     * @param saleStartFrom 販売開始日時の下限
+     * @param saleStartFrom  販売開始日時の下限
      * @return 正規化済み検索条件
      */
     public ProductSearchCondition buildCondition(String categoryId,
-                                                 String keyword,
-                                                 boolean inStockOnly,
-                                                 List<Integer> priceBandIds,
-                                                 List<Long> colorIds,
-                                                 String sort,
-                                                 int page,
-                                                 int size,
-                                                 ProductSort defaultSort,
-                                                 ProductCategoryFilter categoryFilter,
-                                                 OffsetDateTime saleStartFrom) {
+            String keyword,
+            boolean inStockOnly,
+            List<Integer> priceBandIds,
+            List<Long> colorIds,
+            String sort,
+            int page,
+            int size,
+            ProductSort defaultSort,
+            ProductCategoryFilter categoryFilter,
+            OffsetDateTime saleStartFrom) {
         List<PriceBand> bands = new ArrayList<>();
         if (priceBandIds != null) {
             for (Integer id : priceBandIds) {
@@ -261,8 +260,7 @@ public class ProductService {
                 ProductSort.fromValue(sort, defaultSort),
                 page,
                 size,
-                saleStartFrom
-        ));
+                saleStartFrom));
     }
 
     /**
@@ -280,12 +278,12 @@ public class ProductService {
                 condition.inStockOnly(),
                 condition.priceBands() == null ? List.of() : condition.priceBands(),
                 condition.colorIds() == null ? List.of() : condition.colorIds(),
-                condition.categoryFilter() == null ? ProductCategoryFilter.empty() : condition.categoryFilter().normalize(),
+                condition.categoryFilter() == null ? ProductCategoryFilter.empty()
+                        : condition.categoryFilter().normalize(),
                 condition.sort() == null ? ProductSort.RECOMMENDED : condition.sort(),
                 page,
                 size,
-                condition.saleStartFrom()
-        );
+                condition.saleStartFrom());
     }
 
     /**

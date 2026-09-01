@@ -16,7 +16,8 @@ import org.springframework.stereotype.Component;
 /**
  * メール件名・本文テンプレートを読み込み、差し込み項目を展開するレンダラ。
  *
- * <p>画面向けメッセージと混在させず、メール文面を専用リソースへ分離して管理するために使う。
+ * <p>
+ * 画面向けメッセージと混在させず、メール文面を専用リソースへ分離して管理するために使う。
  * テンプレート内のプレースホルダは {@code {placeholder_name}} 形式とする。
  */
 @Component
@@ -45,7 +46,7 @@ public class MailTemplateRenderer {
      * 件名テンプレートを読み込み、差し込み項目を展開する。
      *
      * @param templateKey 件名テンプレートキー
-     * @param variables 差し込み項目
+     * @param variables   差し込み項目
      * @return 展開済み件名
      */
     public String renderSubject(String templateKey, Map<String, String> variables) {
@@ -61,7 +62,7 @@ public class MailTemplateRenderer {
      * 本文テンプレートを読み込み、差し込み項目を展開する。
      *
      * @param templateName 本文テンプレート名（拡張子除く）
-     * @param variables 差し込み項目
+     * @param variables    差し込み項目
      * @return 展開済み本文
      */
     public String renderBody(String templateName, Map<String, String> variables) {
@@ -89,8 +90,8 @@ public class MailTemplateRenderer {
     /**
      * テンプレート文字列へ差し込み項目を展開する。
      *
-     * @param template テンプレート本文
-     * @param variables 差し込み項目
+     * @param template   テンプレート本文
+     * @param variables  差し込み項目
      * @param templateId エラー時に識別しやすくするためのテンプレートID
      * @return 展開済み文字列
      */

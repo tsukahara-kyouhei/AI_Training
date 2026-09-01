@@ -31,7 +31,8 @@
   display: none !important;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -83,5 +84,3 @@ a:hover {
   flex: 1;
   padding: var(--space-24) 0 var(--space-48);
 }
-
-

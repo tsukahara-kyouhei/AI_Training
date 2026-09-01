@@ -19,8 +19,7 @@ public record CartLineView(
         BigDecimal assemblyFeePerUnit,
         boolean assemblyRequested,
         int quantity,
-        String detailUrl
-) {
+        String detailUrl) {
     /**
      * 単価を画面表示用の日本円表記へ変換する。
      */
@@ -73,4 +72,3 @@ public record CartLineView(
         return MoneyFormatter.formatYen(lineAssemblySubtotal());
     }
 }
-

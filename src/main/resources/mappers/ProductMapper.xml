@@ -88,8 +88,7 @@
         </constructor>
     </resultMap>
 
-    <resultMap id="ProductReviewRowMap"
-           type="jp.co.skig.officeorder.mapper.row.ProductReviewMapperRow">
+    <resultMap id="ProductReviewRowMap" type="jp.co.skig.officeorder.mapper.row.ProductReviewMapperRow">
         <constructor>
             <idArg column="review_id" javaType="long"/>
             <arg column="member_id" javaType="long"/>
@@ -98,10 +97,8 @@
             <arg column="title" javaType="string"/>
             <arg column="body" javaType="string"/>
             <arg column="published" javaType="boolean"/>
-            <arg column="created_at"
-                javaType="java.time.OffsetDateTime"/>
-            <arg column="updated_at"
-                javaType="java.time.OffsetDateTime"/>
+            <arg column="created_at" javaType="java.time.OffsetDateTime"/>
+            <arg column="updated_at" javaType="java.time.OffsetDateTime"/>
         </constructor>
     </resultMap>
 
@@ -483,8 +480,7 @@
             p.variation_name
     </select>
 
-    <select id="selectProductReviews"
-            resultMap="ProductReviewRowMap">
+    <select id="selectProductReviews" resultMap="ProductReviewRowMap">
 
         SELECT
             pr.review_id,

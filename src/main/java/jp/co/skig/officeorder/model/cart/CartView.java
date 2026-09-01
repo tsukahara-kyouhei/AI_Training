@@ -9,8 +9,7 @@ public record CartView(
         List<CartLineView> items,
         int itemTypeCount,
         int totalQuantity,
-        CartSummaryView summary
-) {
+        CartSummaryView summary) {
     /**
      * 表示対象の明細がない空カートかを判定する。
      */
@@ -18,4 +17,3 @@ public record CartView(
         return items == null || items.isEmpty();
     }
 }
-

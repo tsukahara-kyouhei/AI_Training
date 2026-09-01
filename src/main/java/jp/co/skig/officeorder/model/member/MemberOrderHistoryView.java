@@ -13,10 +13,8 @@ public record MemberOrderHistoryView(
         String orderNumber,
         OffsetDateTime orderDatetime,
         BigDecimal totalAmount,
-        String orderStatus
-) {
-    private static final DateTimeFormatter ORDER_DATETIME_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String orderStatus) {
+    private static final DateTimeFormatter ORDER_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**
      * 注文日時を購入履歴一覧向けの表示形式へ整形する。
@@ -54,4 +52,3 @@ public record MemberOrderHistoryView(
         return "受付";
     }
 }
-
