@@ -10,6 +10,7 @@ services:
       - mailpit
     environment:
       # Spring Bootの接続先を「localhost」からコンテナ名の「db」に変更
+      TZ: Asia/Tokyo
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/office_order
       SPRING_DATASOURCE_USERNAME: office_order
       SPRING_DATASOURCE_PASSWORD: office_order

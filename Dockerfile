@@ -2,9 +2,13 @@
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /app
 # 必要なファイルだけをコンテナにコピー
+# まずpom.xml（設計図）だけをコピー
 COPY pom.xml .
+# 依存するライブラリを先に一括ダウンロード（pom.xmlに変更がない限りキャッシュされる）
+RUN mvn dependency:go-offline
+
+# その後でソースコードをコピーしてビルド
 COPY src ./src
-# テストをスキップしてjarファイル（実行ファイル）を作成
 RUN mvn clean package -DskipTests
 
 # 2. 実行用ステージ（組み立てたファイルだけを動かす軽量な環境）
