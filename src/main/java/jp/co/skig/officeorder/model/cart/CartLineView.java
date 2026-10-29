@@ -12,6 +12,7 @@ public record CartLineView(
         long productId,
         String productName,
         String productCode,
+        String categoryId,
         String colorName,
         BigDecimal unitPrice,
         int stockQuantity,

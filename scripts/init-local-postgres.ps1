@@ -1,5 +1,5 @@
-param(
-    [string]$Host = "localhost",
+﻿param(
+    [string]$DbHost = "localhost",
     [int]$Port = 5432,
     [string]$Database = "office_order",
     [string]$Username = "office_order",
@@ -20,7 +20,7 @@ function Invoke-PsqlFile {
 
     & psql `
         -v ON_ERROR_STOP=1 `
-        -h $Host `
+        -h $DbHost `
         -p $Port `
         -U $Username `
         -d $Database `
@@ -44,6 +44,7 @@ $schemaFiles = @(
     "products.sql",
     "members.sql",
     "orders.sql",
+    "coupons.sql",
     "spring-batch-metadata.sql",
     "content.sql",
     "batch.sql"
@@ -54,10 +55,12 @@ $seedFiles = @(
     "products.sql",
     "members.sql",
     "orders.sql",
+    "coupons.sql",
     "content.sql"
 )
 
 $env:PGPASSWORD = $Password
+$env:PGCLIENTENCODING = "UTF8"
 try {
     foreach ($file in $schemaFiles) {
         Invoke-PsqlFile -SqlFilePath (Join-Path $schemaDir $file)
@@ -72,4 +75,5 @@ try {
     Write-Host "ローカルPostgreSQLへの初期化が完了しました。"
 } finally {
     Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue
+    Remove-Item Env:PGCLIENTENCODING -ErrorAction SilentlyContinue
 }

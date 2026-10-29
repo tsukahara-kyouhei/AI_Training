@@ -1,0 +1,345 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< jp.co.skig:office-order >-----------------------
+[INFO] Building office-order 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ office-order ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 171 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ office-order ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ office-order ---
+[INFO] skip non existing resourceDirectory C:\work\app\AI_Training\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ office-order ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ office-order ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running jp.co.skig.officeorder.repository.MemberRepositoryTest
+[INFO] Running お気に入り
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.196 s -- in お気に入り
+[INFO] Running 追加お届け先
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in 追加お届け先
+[INFO] Running 会員種別
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in 会員種別
+[INFO] Running プロフィール
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.061 s -- in プロフィール
+[INFO] Running 会員登録
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in 会員登録
+[INFO] Running 認証情報
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in 認証情報
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.367 s -- in jp.co.skig.officeorder.repository.MemberRepositoryTest
+[INFO] Running jp.co.skig.officeorder.repository.OrderRepositoryTest
+[INFO] Running 会員初期表示
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.276 s -- in 会員初期表示
+[INFO] Running 再購入
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in 再購入
+[INFO] Running 購入履歴
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in 購入履歴
+[INFO] Running 注文完了画面
+10:49:59.424 [main] WARN jp.co.skig.officeorder.repository.OrderRepository -- event=order_payment_instruction_parse_failed orderNumber=ORD20260903-000001 paymentMethod=convenience_store payloadLength=13 reason=parse_failed
+com.fasterxml.jackson.core.JsonParseException: Unexpected character ('i' (code 105)): was expecting double-quote to start field name
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2672)
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportUnexpectedChar(ParserMinimalBase.java:742)
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._handleOddName(ReaderBasedJsonParser.java:1909)
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser.nextFieldName(ReaderBasedJsonParser.java:939)
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer._readAndBindStringKeyMap(MapDeserializer.java:596)
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:450)
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:31)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4979)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3895)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3878)
+	at jp.co.skig.officeorder.repository.OrderRepository.parsePaymentInstruction(OrderRepository.java:265)
+	at jp.co.skig.officeorder.repository.OrderRepository.findOrderCompleteByOrderNumber(OrderRepository.java:145)
+	at jp.co.skig.officeorder.repository.OrderRepositoryTest$OrderComplete.findOrderCompleteByOrderNumber_invalidJson_returnsEmptyInstruction(OrderRepositoryTest.java:201)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+10:49:59.431 [main] WARN jp.co.skig.officeorder.repository.OrderRepository -- event=order_payment_instruction_parse_failed orderNumber=ORD20260903-000001 paymentMethod=convenience_store reason=missing_payment_instruction_fields
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.055 s -- in 注文完了画面
+[INFO] Running 注文ヘッダ・連番・税率
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in 注文ヘッダ・連番・税率
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.400 s -- in jp.co.skig.officeorder.repository.OrderRepositoryTest
+[INFO] Running jp.co.skig.officeorder.service.batch.BatchJobServiceTest
+[INFO] Running BAT-005?BAT-009 おすすめ関連商品
+10:49:59.502 [main] INFO jp.co.skig.officeorder.service.batch.BatchJobService -- event=batch_job_updated job=recommended-related date=2026-09-03 rows=6
+10:49:59.510 [main] INFO jp.co.skig.officeorder.service.batch.BatchJobService -- event=batch_job_updated job=recommended-related date=2026-09-03 rows=0
+10:49:59.517 [main] INFO jp.co.skig.officeorder.service.batch.BatchJobService -- event=batch_job_updated job=recommended-related date=2026-09-03 rows=0
+10:49:59.522 [main] INFO jp.co.skig.officeorder.service.batch.BatchJobService -- event=batch_job_updated job=recommended-related date=2026-09-03 rows=2
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.060 s -- in BAT-005?BAT-009 おすすめ関連商品
+[INFO] Running BAT-001?BAT-004 売れ筋ランキング
+10:49:59.530 [main] INFO jp.co.skig.officeorder.service.batch.BatchJobService -- event=batch_job_updated job=popular-ranking date=2026-09-03 rows=1
+10:49:59.535 [main] INFO jp.co.skig.officeorder.service.batch.BatchJobService -- event=batch_job_updated job=popular-ranking date=2026-09-03 rows=10
+10:49:59.539 [main] INFO jp.co.skig.officeorder.service.batch.BatchJobService -- event=batch_job_updated job=popular-ranking date=2026-09-03 rows=2
+10:49:59.542 [main] INFO jp.co.skig.officeorder.service.batch.BatchJobService -- event=batch_job_updated job=popular-ranking date=2026-09-03 rows=4
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in BAT-001?BAT-004 売れ筋ランキング
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.080 s -- in jp.co.skig.officeorder.service.batch.BatchJobServiceTest
+[INFO] Running jp.co.skig.officeorder.service.member.MemberServiceTest
+[INFO] Running MEM-009?MEM-011 追加お届け先
+10:49:59.645 [main] WARN jp.co.skig.officeorder.service.member.MemberService -- event=member_address_update_missed memberId=1 memberAddressId=99 reason=not_found
+10:49:59.647 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_address_updated memberId=1 memberAddressId=5
+10:49:59.649 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_address_deleted memberId=1 memberAddressId=5
+10:49:59.652 [main] WARN jp.co.skig.officeorder.service.member.MemberService -- event=member_address_create_rejected memberId=1 limit=20 reason=limit_exceeded
+10:49:59.661 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_address_created memberId=1
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.114 s -- in MEM-009?MEM-011 追加お届け先
+[INFO] Running MEM-001?MEM-002 認証情報取得
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in MEM-001?MEM-002 認証情報取得
+[INFO] Running MEM-012?MEM-013 お気に入り
+10:49:59.676 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=favorite_removed memberId=1 productId=10
+10:49:59.681 [main] WARN jp.co.skig.officeorder.service.member.MemberService -- event=favorite_limit_rejected memberId=1 limit=100 reason=limit_exceeded
+10:49:59.691 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=favorite_insert_race_skipped memberId=1 productId=10 reason=already_exists
+10:49:59.694 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=favorite_removed memberId=1 productId=10
+10:49:59.699 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=favorite_added memberId=1 productId=10
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in MEM-012?MEM-013 お気に入り
+[INFO] Running 会員種別・メール重複判定
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in 会員種別・メール重複判定
+[INFO] Running 一覧・ページング
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in 一覧・ページング
+[INFO] Running MEM-006?MEM-007 プロフィール更新
+10:49:59.724 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_profile_update_start memberId=1
+10:49:59.725 [main] WARN jp.co.skig.officeorder.service.member.MemberService -- event=member_profile_update_rejected memberId=1 reason=email_duplicate
+10:49:59.730 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_profile_update_start memberId=1
+10:49:59.731 [main] WARN jp.co.skig.officeorder.service.member.MemberService -- event=member_profile_update_rejected memberId=1 reason=member_not_found
+10:49:59.734 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_profile_update_start memberId=1
+10:49:59.735 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_profile_updated memberId=1
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in MEM-006?MEM-007 プロフィール更新
+[INFO] Running MEM-003?MEM-005 会員登録
+10:49:59.742 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_register_start personalOrCorporate=personal
+10:49:59.742 [main] WARN jp.co.skig.officeorder.service.member.MemberService -- event=member_register_rejected reason=email_duplicate
+10:49:59.747 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_register_start personalOrCorporate=personal
+10:49:59.748 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_register_end memberId=1
+10:49:59.752 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_register_start personalOrCorporate=personal
+10:49:59.753 [main] WARN jp.co.skig.officeorder.service.member.MemberService -- event=member_register_rejected reason=email_duplicate
+10:49:59.757 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_register_start personalOrCorporate=personal
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in MEM-003?MEM-005 会員登録
+[INFO] Running MEM-008 退会
+10:49:59.761 [main] WARN jp.co.skig.officeorder.service.member.MemberService -- event=member_withdraw_rejected memberId=1 reason=already_withdrawn_or_not_found
+10:49:59.764 [main] INFO jp.co.skig.officeorder.service.member.MemberService -- event=member_withdrawn memberId=1
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in MEM-008 退会
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.219 s -- in jp.co.skig.officeorder.service.member.MemberServiceTest
+[INFO] Running jp.co.skig.officeorder.service.order.OrderServiceTest
+[INFO] Running ORD-003?ORD-006 空カート・在庫
+10:50:00.078 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=151000
+10:50:00.081 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+10:50:00.085 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=91000
+10:50:00.085 [main] WARN jp.co.skig.officeorder.service.order.OrderService -- event=order_place_rejected productCode=P0001-C01 quantity=3 stock=2 reason=stock_shortage
+10:50:00.087 [main] WARN jp.co.skig.officeorder.service.order.OrderService -- event=order_place_rejected memberId=1 reason=cart_empty
+10:50:00.090 [main] WARN jp.co.skig.officeorder.service.order.OrderService -- event=order_place_rejected memberId=1 reason=cart_empty
+10:50:00.093 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.093 [main] WARN jp.co.skig.officeorder.service.order.OrderService -- event=order_place_rejected productCode=P0001-C01 quantity=1 stock=0 reason=stock_shortage
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.324 s -- in ORD-003?ORD-006 空カート・在庫
+[INFO] Running ORD-010?ORD-011 個人・法人
+10:50:00.097 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.098 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+10:50:00.101 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.101 [main] WARN jp.co.skig.officeorder.service.order.OrderService -- event=order_place_rejected reason=company_name_required_for_corporate
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in ORD-010?ORD-011 個人・法人
+[INFO] Running 注文入力フォーム初期化
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in 注文入力フォーム初期化
+[INFO] Running ORD-001?ORD-002 正常注文
+10:50:00.112 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=2 totalAmount=61000
+10:50:00.113 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=2
+10:50:00.116 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.117 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in ORD-001?ORD-002 正常注文
+[INFO] Running ORD-007?ORD-009 注文番号採番
+10:50:00.124 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.129 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.130 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+10:50:00.133 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.134 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000042 itemCount=1
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in ORD-007?ORD-009 注文番号採番
+[INFO] Running 注文完了画面・購入履歴・再購入
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.050 s -- in 注文完了画面・購入履歴・再購入
+[INFO] Running ORD-012?ORD-013 支払案内JSON
+10:50:00.191 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.191 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+10:50:00.209 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.210 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in ORD-012?ORD-013 支払案内JSON
+[INFO] Running ORD-018?ORD-019 在庫更新・注文番号重複
+10:50:00.213 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.215 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.216 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in ORD-018?ORD-019 在庫更新・注文番号重複
+[INFO] Running ORD-014?ORD-015 税額計算
+10:50:00.219 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.219 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+10:50:00.221 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.222 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_end memberId=1 orderId=100 orderNumber=ORD20260903-000001 itemCount=1
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in ORD-014?ORD-015 税額計算
+[INFO] Running ORD-016?ORD-017 トランザクション・メール
+10:50:00.228 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.233 [main] INFO jp.co.skig.officeorder.service.order.OrderService -- event=order_place_start memberId=1 customerType=member itemCount=1 totalAmount=31000
+10:50:00.233 [main] ERROR jp.co.skig.officeorder.service.order.OrderService -- event=order_place_rejected orderNumber=ORD20260903-000001 memberId=1 reason=transaction_synchronization_not_active
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in ORD-016?ORD-017 トランザクション・メール
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.466 s -- in jp.co.skig.officeorder.service.order.OrderServiceTest
+[INFO] Running jp.co.skig.officeorder.service.product.ProductFilterOptionServiceTest
+[INFO] Running PRD-006 有効な価格帯だけを反映する
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in PRD-006 有効な価格帯だけを反映する
+[INFO] Running PRD-008 不正な候補IDの除外
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in PRD-008 不正な候補IDの除外
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in jp.co.skig.officeorder.service.product.ProductFilterOptionServiceTest
+[INFO] Running jp.co.skig.officeorder.service.product.ProductKeywordSearchTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.077 s -- in jp.co.skig.officeorder.service.product.ProductKeywordSearchTest
+[INFO] Running jp.co.skig.officeorder.service.product.ProductSearchIntegrationTest
+10:50:00.466 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [jp.co.skig.officeorder.service.product.ProductSearchIntegrationTest]: ProductSearchIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+10:50:00.687 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration jp.co.skig.officeorder.OfficeOrderApplication for test class jp.co.skig.officeorder.service.product.ProductSearchIntegrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.11)
+
+2026-09-04 10:50:01.210 INFO  [ ]   : o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-09-04 10:50:01.297 INFO  [ ]   : j.c.s.o.s.p.ProductSearchIntegrationTest - Starting ProductSearchIntegrationTest using Java 21.0.12.1 with PID 768 (started by trainee1273 in C:\work\app\AI_Training)
+2026-09-04 10:50:01.298 INFO  [ ]   : j.c.s.o.s.p.ProductSearchIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-09-04 10:50:02.824 INFO  [ ]   : com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-09-04 10:50:03.024 INFO  [ ]   : com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4ee1c29a
+2026-09-04 10:50:03.025 INFO  [ ]   : com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-09-04 10:50:03.893 INFO  [ ]   : o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name memberUserDetailsService
+2026-09-04 10:50:04.672 INFO  [ ]   : o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-09-04 10:50:04.673 INFO  [ ]   : o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-09-04 10:50:04.674 INFO  [ ]   : o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-09-04 10:50:04.713 INFO  [ ]   : j.c.s.o.s.p.ProductSearchIntegrationTest - Started ProductSearchIntegrationTest in 3.899 seconds (process running for 8.039)
+2026-09-04 10:50:04.715 INFO  [ ]   : j.c.s.o.s.b.BatchExecutionService - event=batch_jobs_trigger_requested trigger=startup jobs=2
+2026-09-04 10:50:04.743 INFO  [ ]   : o.s.b.c.l.support.SimpleJobOperator - Checking status of job with name=recommended-related
+2026-09-04 10:50:04.755 INFO  [ ]   : o.s.b.c.l.support.SimpleJobOperator - Attempting to launch job with name=recommended-related and parameters={{requestedAt=1788486604743, trigger=startup}}
+2026-09-04 10:50:04.806 INFO  [ ]   : j.c.s.o.s.b.BatchExecutionService - event=batch_request_accepted job=recommended-related executionId=31 trigger=startup
+2026-09-04 10:50:04.807 INFO  [ ]   : o.s.b.c.l.s.TaskExecutorJobLauncher - Job: [SimpleJob: [name=recommended-related]] launched with the following parameters: [{'requestedAt':'{value=1788486604743, type=class java.lang.String, identifying=true}','trigger':'{value=startup, type=class java.lang.String, identifying=true}'}]
+2026-09-04 10:50:04.808 INFO  [ ]   : o.s.b.c.l.support.SimpleJobOperator - Checking status of job with name=popular-ranking
+2026-09-04 10:50:04.809 INFO  [ ]   : o.s.b.c.l.support.SimpleJobOperator - Attempting to launch job with name=popular-ranking and parameters={{requestedAt=1788486604808, trigger=startup}}
+2026-09-04 10:50:04.817 INFO  [ ]   : j.c.s.o.s.b.BatchExecutionService - event=batch_request_accepted job=popular-ranking executionId=32 trigger=startup
+2026-09-04 10:50:04.818 INFO  [ ]   : o.s.b.c.l.s.TaskExecutorJobLauncher - Job: [SimpleJob: [name=popular-ranking]] launched with the following parameters: [{'requestedAt':'{value=1788486604808, type=class java.lang.String, identifying=true}','trigger':'{value=startup, type=class java.lang.String, identifying=true}'}]
+2026-09-04 10:50:04.834 INFO  [ ]   : j.c.s.o.s.b.BatchJobExecutionLoggingListener - event=batch_execution_start job=recommended-related executionId=31 trigger=startup
+2026-09-04 10:50:04.840 INFO  [ ]   : j.c.s.o.s.b.BatchJobExecutionLoggingListener - event=batch_execution_start job=popular-ranking executionId=32 trigger=startup
+2026-09-04 10:50:04.844 INFO  [ ]   : o.s.batch.core.job.SimpleStepHandler - Executing step: [recommendedRelatedStep]
+2026-09-04 10:50:04.849 INFO  [ ]   : o.s.batch.core.job.SimpleStepHandler - Executing step: [popularRankingStep]
+2026-09-04 10:50:04.909 INFO  [ ]   : j.c.s.o.s.batch.BatchJobService - event=batch_job_updated job=popular-ranking date=2026-09-04 rows=10
+2026-09-04 10:50:04.915 INFO  [ ]   : o.s.batch.core.step.AbstractStep - Step: [popularRankingStep] executed in 65ms
+2026-09-04 10:50:04.922 INFO  [ ]   : j.c.s.o.s.b.BatchJobExecutionLoggingListener - event=batch_execution_end job=popular-ranking executionId=32 status=COMPLETED durationMs=97 exitCode=COMPLETED
+2026-09-04 10:50:04.927 INFO  [ ]   : o.s.b.c.l.s.TaskExecutorJobLauncher - Job: [SimpleJob: [name=popular-ranking]] completed with the following parameters: [{'requestedAt':'{value=1788486604808, type=class java.lang.String, identifying=true}','trigger':'{value=startup, type=class java.lang.String, identifying=true}'}] and the following status: [COMPLETED] in 97ms
+2026-09-04 10:50:04.982 INFO  [ ]   : j.c.s.o.s.batch.BatchJobService - event=batch_job_updated job=recommended-related date=2026-09-04 rows=114
+2026-09-04 10:50:04.985 INFO  [ ]   : o.s.batch.core.step.AbstractStep - Step: [recommendedRelatedStep] executed in 140ms
+2026-09-04 10:50:04.991 INFO  [ ]   : j.c.s.o.s.b.BatchJobExecutionLoggingListener - event=batch_execution_end job=recommended-related executionId=31 status=COMPLETED durationMs=165 exitCode=COMPLETED
+2026-09-04 10:50:04.994 INFO  [ ]   : o.s.b.c.l.s.TaskExecutorJobLauncher - Job: [SimpleJob: [name=recommended-related]] completed with the following parameters: [{'requestedAt':'{value=1788486604743, type=class java.lang.String, identifying=true}','trigger':'{value=startup, type=class java.lang.String, identifying=true}'}] and the following status: [COMPLETED] in 165ms
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.110 s -- in jp.co.skig.officeorder.service.product.ProductSearchIntegrationTest
+[INFO] Running jp.co.skig.officeorder.service.product.ProductServiceTest
+[INFO] Running PRD-011 おすすめ商品フォールバック
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in PRD-011 おすすめ商品フォールバック
+[INFO] Running PRD-009?PRD-010 ページング
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in PRD-009?PRD-010 ページング
+[INFO] Running PRD-006?PRD-008 絞り込み条件
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in PRD-006?PRD-008 絞り込み条件
+[INFO] Running PRD-001?PRD-005 キーワード正規化
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in PRD-001?PRD-005 キーワード正規化
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in jp.co.skig.officeorder.service.product.ProductServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 134, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10.663 s
+[INFO] Finished at: 2026-09-04T10:50:05+09:00
+[INFO] ------------------------------------------------------------------------

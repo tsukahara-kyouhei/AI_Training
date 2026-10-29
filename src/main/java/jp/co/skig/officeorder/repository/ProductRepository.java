@@ -2,12 +2,14 @@ package jp.co.skig.officeorder.repository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.Normalizer;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -314,8 +316,15 @@ public class ProductRepository {
         boolean hasStorageFilter = category == ProductCategory.STORAGE && (!storageUsageIds.isEmpty()
                 || !storageTasteIds.isEmpty());
 
+        String normalizedKeyword = normalizeKeyword(condition.keyword());
+        String keywordExactNormalized = normalizedKeyword;
+        String keywordPrefixPattern = buildProductCodePrefixPattern(normalizedKeyword);
+        String keywordContainsPattern = buildKeywordContainsPattern(normalizedKeyword);
+
         params.put("categoryId", normalizedCategoryId);
-        params.put("keywordLike", toKeywordLike(condition.keyword()));
+        params.put("keywordExactNormalized", keywordExactNormalized);
+        params.put("keywordPrefixPattern", keywordPrefixPattern);
+        params.put("keywordContainsPattern", keywordContainsPattern);
         params.put("inStockOnly", condition.inStockOnly());
         params.put("colorIds", colorIds);
         params.put("priceRanges", priceRanges);
@@ -375,16 +384,62 @@ public class ProductRepository {
     }
 
     /**
-     * キーワード検索用のLIKE文字列を生成する。
+     * キーワードを比較用の正規化済み表現へ変換する。
      *
      * @param keyword キーワード
-     * @return LIKE検索文字列
+     * @return 正規化済みキーワード
      */
-    private String toKeywordLike(String keyword) {
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return null;
+        }
+        String trimmed = keyword.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        return Normalizer.normalize(trimmed, Normalizer.Form.NFKC).toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * contains 用の LIKE パターンを生成する。
+     *
+     * @param keyword キーワード
+     * @return contains 用パターン
+     */
+    private String buildKeywordContainsPattern(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return null;
         }
-        return "%" + keyword.trim() + "%";
+        return "%" + escapeLikePattern(keyword) + "%";
+    }
+
+    /**
+     * product_code の prefix パターンを生成する。
+     *
+     * @param keyword キーワード
+     * @return prefix 用パターン。prefix 対象外なら null
+     */
+    private String buildProductCodePrefixPattern(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        if (keyword.matches("p\\d{4}")) {
+            return keyword + "-%";
+        }
+        if (keyword.matches("p\\d{4}-[a-z]+")) {
+            return keyword + "%";
+        }
+        return null;
+    }
+
+    /**
+     * LIKE 検索でワイルドカード文字をそのまま検索できるようエスケープする。
+     *
+     * @param value エスケープ対象文字列
+     * @return エスケープ済み文字列
+     */
+    private String escapeLikePattern(String value) {
+        return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 
     /**

@@ -1,0 +1,11 @@
+package jp.co.skig.officeorder.model.coupon;
+
+public enum CouponErrorCode {
+    COUPON_NOT_FOUND,
+    COUPON_ALREADY_APPLIED,
+    COUPON_EXPIRED,
+    COUPON_USER_CONDITION_ERROR,
+    COUPON_TARGET_ERROR,
+    COUPON_MIN_AMOUNT_ERROR,
+    COUPON_USAGE_LIMIT_REACHED
+}

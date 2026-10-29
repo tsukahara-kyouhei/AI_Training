@@ -74,11 +74,11 @@
                             <h2 class="section__title" style="margin:0 0 10px;">ご注文内容</h2>
                             <table class="table" aria-label="ご注文明細">
                                 <thead>
-                                <tr><th>商品</th><th style="width:140px;">単価</th><th style="width:160px;">組立・設置</th><th style="width:120px;">数量</th><th style="width:140px;">小計</th></tr>
+                                <tr><th>商品</th><th style="width:140px;">単価</th><th style="width:160px;">組立・設置</th><th style="width:120px;">数量</th><th style="width:140px;">小計</th><th th:if="${orderDetail.hasCouponLineDiscountBreakdown()}" style="width:140px;">クーポン割引</th></tr>
                                 </thead>
                                 <tbody>
                                 <tr th:if="${#lists.isEmpty(orderDetail.items())}">
-                                    <td colspan="5" class="muted">ご注文明細はありません。</td>
+                                    <td class="muted" th:attr="colspan=${orderDetail.hasCouponLineDiscountBreakdown() ? 6 : 5}">ご注文明細はありません。</td>
                                 </tr>
                                 <tr th:each="item : ${orderDetail.items()}">
                                     <td>
@@ -89,11 +89,16 @@
                                     <td th:text="${item.assemblyFeeText() + '円'}">3,000円</td>
                                     <td th:text="${item.quantity()}">1</td>
                                     <td th:text="${item.lineSubtotalText() + '円'}">21,800円</td>
+                                    <td th:if="${orderDetail.hasCouponLineDiscountBreakdown()}" th:text="${item.lineCouponDiscountAmount().signum() > 0 ? '-' + item.lineCouponDiscountAmountText() + '円' : '0円'}">-500円</td>
                                 </tr>
                                 </tbody>
                             </table>
                             <div class="summary__rows" style="max-width:520px; margin-top:14px; margin-left:auto;">
                                 <div class="summary__row"><span>商品小計</span><strong th:text="${orderDetail.subtotalAmountText() + '円'}">36,400円</strong></div>
+                                <div class="summary__row" th:if="${orderDetail.appliedCouponCode() != null}">
+                                    <span th:text="${'クーポン割引（' + orderDetail.appliedCouponName() + '）'}">クーポン割引（夏得クーポン）</span>
+                                    <strong th:text="${'-' + orderDetail.couponDiscountAmountText() + '円'}">-500円</strong>
+                                </div>
                                 <div class="summary__row"><span>組立・設置費</span><strong th:text="${orderDetail.assemblyFeeTotalText() + '円'}">3,000円</strong></div>
                                 <div class="summary__row"><span>送料</span><strong th:text="${orderDetail.shippingFeeText() + '円'}">0円</strong></div>
                                 <div class="summary__row"><span>消費税</span><strong th:text="${orderDetail.taxAmountText() + '円'}">3,940円</strong></div>

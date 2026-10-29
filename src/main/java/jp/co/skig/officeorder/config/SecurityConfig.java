@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jp.co.skig.officeorder.logging.LogEvent;
+import jp.co.skig.officeorder.service.coupon.CouponSessionService;
 import jp.co.skig.officeorder.logging.LogMaskingUtil;
 import jp.co.skig.officeorder.web.auth.AuthRedirectUtils;
 import jp.co.skig.officeorder.web.auth.LoginEmailCookieService;
@@ -40,14 +41,17 @@ public class SecurityConfig {
     private static final String MEMBER_AREA_PATH = "/mypage";
     /** ログイン画面メールアドレス記憶Cookieサービス。 */
     private final LoginEmailCookieService loginEmailCookieService;
+    private final CouponSessionService couponSessionService;
 
     /**
      * Security設定を生成する。
      *
      * @param loginEmailCookieService ログイン画面メールアドレス記憶Cookieサービス
      */
-    public SecurityConfig(LoginEmailCookieService loginEmailCookieService) {
+    public SecurityConfig(LoginEmailCookieService loginEmailCookieService,
+                          CouponSessionService couponSessionService) {
         this.loginEmailCookieService = loginEmailCookieService;
+        this.couponSessionService = couponSessionService;
     }
 
     /**
@@ -121,6 +125,9 @@ public class SecurityConfig {
             }
             Object principal = authentication.getPrincipal();
             if (principal instanceof MemberPrincipal memberPrincipal) {
+                couponSessionService.clearIfMemberChanged(
+                        request.getSession(false),
+                        memberPrincipal.getMemberId());
                 log.info("event={} memberId={} redirectPath={}",
                         LogEvent.AUTH_LOGIN_SUCCESS.value(),
                         memberPrincipal.getMemberId(),

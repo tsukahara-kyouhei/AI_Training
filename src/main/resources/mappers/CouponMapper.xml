@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.skig.officeorder.mapper.CouponMapper">
+    <resultMap id="CouponRowMap" type="jp.co.skig.officeorder.mapper.row.CouponMapperRow">
+        <constructor>
+            <idArg column="id" javaType="_long"/>
+            <arg column="code" javaType="string"/>
+            <arg column="name" javaType="string"/>
+            <arg column="discount_type" javaType="string"/>
+            <arg column="discount_value" javaType="java.math.BigDecimal"/>
+            <arg column="max_discount_amount" javaType="java.math.BigDecimal"/>
+            <arg column="min_purchase_amount" javaType="java.math.BigDecimal"/>
+            <arg column="valid_from" javaType="java.time.OffsetDateTime"/>
+            <arg column="valid_to" javaType="java.time.OffsetDateTime"/>
+            <arg column="target_conditions" javaType="string"/>
+            <arg column="max_usage_total" javaType="java.lang.Long"/>
+            <arg column="max_usage_per_user" javaType="java.lang.Integer"/>
+            <arg column="used_count_total" javaType="_long"/>
+            <arg column="is_active" javaType="_boolean"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="UserCouponUsageRowMap" type="jp.co.skig.officeorder.mapper.row.UserCouponUsageMapperRow">
+        <constructor>
+            <idArg column="id" javaType="_long"/>
+            <arg column="member_id" javaType="_long"/>
+            <arg column="coupon_id" javaType="_long"/>
+            <arg column="usage_count" javaType="_int"/>
+            <arg column="last_used_at" javaType="java.time.OffsetDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <sql id="CouponColumns">
+        id, code, name, discount_type, discount_value, max_discount_amount,
+        min_purchase_amount, valid_from, valid_to, target_conditions::text AS target_conditions,
+        max_usage_total, max_usage_per_user, used_count_total, is_active
+    </sql>
+
+    <select id="selectByCode" resultMap="CouponRowMap">
+        SELECT <include refid="CouponColumns"/>
+        FROM coupons
+        WHERE code = #{code}
+    </select>
+
+    <select id="selectByCodeForUpdate" resultMap="CouponRowMap">
+        SELECT <include refid="CouponColumns"/>
+        FROM coupons
+        WHERE code = #{code}
+        FOR UPDATE
+    </select>
+
+    <select id="selectUserUsageCount" resultType="long">
+        SELECT usage_count
+        FROM user_coupon_usages
+        WHERE member_id = #{memberId} AND coupon_id = #{couponId}
+    </select>
+
+    <select id="selectUserUsageForUpdate" resultMap="UserCouponUsageRowMap">
+        SELECT id, member_id, coupon_id, usage_count, last_used_at
+        FROM user_coupon_usages
+        WHERE member_id = #{memberId} AND coupon_id = #{couponId}
+        FOR UPDATE
+    </select>
+
+    <insert id="ensureUserUsage">
+        INSERT INTO user_coupon_usages (member_id, coupon_id, usage_count)
+        VALUES (#{memberId}, #{couponId}, 0)
+        ON CONFLICT (member_id, coupon_id) DO NOTHING
+    </insert>
+
+    <update id="incrementTotalUsage">
+        UPDATE coupons
+        SET used_count_total = used_count_total + 1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{couponId}
+          AND (max_usage_total IS NULL OR used_count_total &lt; max_usage_total)
+    </update>
+
+    <update id="incrementUserUsage">
+        UPDATE user_coupon_usages
+        SET usage_count = usage_count + 1,
+            last_used_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE member_id = #{memberId} AND coupon_id = #{couponId}
+    </update>
+
+    <select id="countCompletedOrders" resultType="long">
+        SELECT COUNT(*)
+        FROM orders
+        WHERE member_id = #{memberId} AND order_status = 'completed'
+    </select>
+
+</mapper>

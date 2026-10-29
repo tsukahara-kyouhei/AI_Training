@@ -51,7 +51,9 @@ public record MemberOrderHistoryView(
         if ("cancelled".equals(orderStatus)) {
             return "キャンセル";
         }
+        if ("returned".equals(orderStatus)) {
+            return "返品";
+        }
         return "受付";
     }
 }
-

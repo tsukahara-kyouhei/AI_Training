@@ -43,6 +43,13 @@
                             <tr><th>住所</th><td th:text="${order.shippingPrefecture + order.shippingCity + order.shippingAddressLine}">東京都千代田区丸の内1-1-1</td></tr>
                             <tr><th>お届け先階数</th><td th:text="${order.shippingFloor + '階'}">5階</td></tr>
                             <tr><th>エレベーター</th><td th:text="${order.shippingHasElevator ? 'あり' : 'なし'}">あり</td></tr>
+                            <tr th:if="${order.appliedCouponCode != null}">
+                                <th>クーポン</th>
+                                <td>
+                                    <span th:text="${order.appliedCouponName}">夏得クーポン</span>
+                                    <span th:text="${'-' + order.couponDiscountAmountText() + '円'}">-500円</span>
+                                </td>
+                            </tr>
                             <tr><th>合計（税込）</th><td><strong th:text="${order.totalAmountText + '円'}">43,340円</strong></td></tr>
                             </tbody>
                         </table>

@@ -10,6 +10,7 @@
             <arg column="product_id" javaType="long"/>
             <arg column="product_name" javaType="string"/>
             <arg column="product_code" javaType="string"/>
+            <arg column="category_id" javaType="string"/>
             <arg column="color_name" javaType="string"/>
             <arg column="unit_price" javaType="java.math.BigDecimal"/>
             <arg column="stock_quantity" javaType="int"/>
@@ -24,6 +25,7 @@
         p.product_id,
         p.product_name,
         pv.product_code,
+        p.category_id,
         c.color_name,
         pv.unit_price,
         pv.stock_quantity,

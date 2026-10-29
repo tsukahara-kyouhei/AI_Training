@@ -2,8 +2,7 @@ CREATE TABLE IF NOT EXISTS orders (
     order_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     order_number VARCHAR(20) NOT NULL UNIQUE,
     order_datetime TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    order_status VARCHAR(20) NOT NULL DEFAULT 'received'
-        CHECK (order_status IN ('received', 'awaiting_payment', 'processing', 'completed', 'cancelled')),
+    order_status VARCHAR(20) NOT NULL DEFAULT 'received',
     customer_type VARCHAR(10) NOT NULL CHECK (customer_type IN ('guest', 'member')),
     personal_or_corporate VARCHAR(10) NOT NULL CHECK (personal_or_corporate IN ('personal', 'corporate')),
     member_id BIGINT,
@@ -31,6 +30,11 @@ CREATE TABLE IF NOT EXISTS orders (
     subtotal_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (subtotal_amount >= 0),
     tax_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (tax_amount >= 0),
     total_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (total_amount >= 0),
+    applied_coupon_id BIGINT,
+    applied_coupon_code VARCHAR(50),
+    applied_coupon_name VARCHAR(100),
+    coupon_discount_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (coupon_discount_amount >= 0),
+    coupon_usage_refunded BOOLEAN NOT NULL DEFAULT FALSE,
     receipt_issued BOOLEAN NOT NULL DEFAULT FALSE,
     note VARCHAR(500),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -49,6 +53,21 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE INDEX IF NOT EXISTS idx_orders_member_datetime ON orders (member_id, order_datetime DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_status_datetime ON orders (order_status, order_datetime DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_applied_coupon_id
+    ON orders (applied_coupon_id) WHERE applied_coupon_id IS NOT NULL;
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS applied_coupon_id BIGINT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS applied_coupon_code VARCHAR(50);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS applied_coupon_name VARCHAR(100);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_discount_amount NUMERIC(12,0) NOT NULL DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_usage_refunded BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_order_status_check;
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS chk_orders_order_status;
+ALTER TABLE orders ADD CONSTRAINT chk_orders_order_status
+    CHECK (order_status IN ('received', 'awaiting_payment', 'processing', 'completed', 'cancelled', 'returned'));
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_coupon_discount_amount_check;
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS chk_orders_coupon_discount_amount;
+ALTER TABLE orders ADD CONSTRAINT chk_orders_coupon_discount_amount CHECK (coupon_discount_amount >= 0);
 
 CREATE TABLE IF NOT EXISTS order_number_counters (
     order_date DATE PRIMARY KEY,
@@ -66,6 +85,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     unit_price NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (unit_price >= 0),
     quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity BETWEEN 1 AND 99),
     line_subtotal NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (line_subtotal >= 0),
+    line_coupon_discount_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (line_coupon_discount_amount >= 0),
     line_tax_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (line_tax_amount >= 0),
     line_total_amount NUMERIC(12,0) NOT NULL DEFAULT 0 CHECK (line_total_amount >= 0),
     assembly_available BOOLEAN NOT NULL DEFAULT FALSE,
@@ -77,11 +97,18 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items (order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_product_code ON order_items (product_code);
+ALTER TABLE order_items
+    ADD COLUMN IF NOT EXISTS line_coupon_discount_amount NUMERIC(12,0) NOT NULL DEFAULT 0;
+ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_line_coupon_discount_amount_check;
+ALTER TABLE order_items DROP CONSTRAINT IF EXISTS chk_order_items_line_coupon_discount_amount;
+ALTER TABLE order_items
+    ADD CONSTRAINT chk_order_items_line_coupon_discount_amount
+        CHECK (line_coupon_discount_amount >= 0);
 
 CREATE TABLE IF NOT EXISTS order_status_histories (
     order_status_history_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     order_id BIGINT NOT NULL,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('received', 'awaiting_payment', 'processing', 'completed', 'cancelled')),
+    status VARCHAR(20) NOT NULL,
     changed_by_system VARCHAR(40) NOT NULL,
     changed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_order_status_histories_order FOREIGN KEY (order_id)
@@ -89,6 +116,11 @@ CREATE TABLE IF NOT EXISTS order_status_histories (
 );
 CREATE INDEX IF NOT EXISTS idx_order_status_histories_order_changed_at
     ON order_status_histories (order_id, changed_at DESC);
+
+ALTER TABLE order_status_histories DROP CONSTRAINT IF EXISTS order_status_histories_status_check;
+ALTER TABLE order_status_histories DROP CONSTRAINT IF EXISTS chk_order_status_histories_status;
+ALTER TABLE order_status_histories ADD CONSTRAINT chk_order_status_histories_status
+    CHECK (status IN ('received', 'awaiting_payment', 'processing', 'completed', 'cancelled', 'returned'));
 
 -- logical comments
 COMMENT ON TABLE orders IS '注文';
@@ -144,6 +176,7 @@ COMMENT ON COLUMN order_items.quantity IS '数量';
 COMMENT ON COLUMN order_items.line_subtotal IS '明細小計';
 COMMENT ON COLUMN order_items.line_tax_amount IS '明細消費税額';
 COMMENT ON COLUMN order_items.line_total_amount IS '明細合計金額';
+COMMENT ON COLUMN order_items.line_coupon_discount_amount IS '明細クーポン割引額';
 COMMENT ON COLUMN order_items.assembly_available IS '組立・設置可否';
 COMMENT ON COLUMN order_items.assembly_fee IS '組立・設置費';
 COMMENT ON COLUMN order_items.created_at IS '作成日時';

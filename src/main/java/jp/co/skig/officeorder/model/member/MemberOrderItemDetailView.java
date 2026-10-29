@@ -14,7 +14,8 @@ public record MemberOrderItemDetailView(
         BigDecimal unitPrice,
         BigDecimal assemblyFee,
         int quantity,
-        BigDecimal lineSubtotal
+        BigDecimal lineSubtotal,
+        BigDecimal lineCouponDiscountAmount
 ) {
     /**
      * 単価を画面表示用に整形する。
@@ -36,5 +37,8 @@ public record MemberOrderItemDetailView(
     public String lineSubtotalText() {
         return MoneyFormatter.formatYen(lineSubtotal);
     }
-}
 
+    public String lineCouponDiscountAmountText() {
+        return MoneyFormatter.formatYen(lineCouponDiscountAmount);
+    }
+}

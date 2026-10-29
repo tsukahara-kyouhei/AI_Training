@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,6 +18,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jp.co.skig.officeorder.model.cart.CartLineView;
 import jp.co.skig.officeorder.model.cart.CartView;
 import jp.co.skig.officeorder.logging.LogEvent;
+import jp.co.skig.officeorder.model.coupon.Coupon;
+import jp.co.skig.officeorder.model.coupon.CouponConditions;
+import jp.co.skig.officeorder.model.coupon.CouponErrorCode;
+import jp.co.skig.officeorder.model.coupon.CouponValidationResult;
+import jp.co.skig.officeorder.repository.CouponRepository;
+import jp.co.skig.officeorder.service.coupon.CouponValidationException;
+import jp.co.skig.officeorder.service.coupon.CouponValidationService;
 import jp.co.skig.officeorder.service.mail.NotificationMailService;
 import jp.co.skig.officeorder.model.mail.OrderCompleteMailPayload;
 import jp.co.skig.officeorder.model.member.MemberOrderDetailView;
@@ -57,9 +65,15 @@ public class OrderService {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
     /** 購入履歴一覧の1ページ件数。 */
     private static final int ORDER_HISTORY_PAGE_SIZE = 10;
+    /** 税率が取得できない場合に適用するデフォルト税率(%)。 */
+    private static final BigDecimal DEFAULT_TAX_RATE_PERCENT = BigDecimal.TEN;
 
     /** 受注データ永続化の窓口。 */
     private final OrderRepository orderRepository;
+    /** クーポン利用実績の確定・検証窓口。 */
+    private final CouponRepository couponRepository;
+    /** クーポン適用可否判定サービス。 */
+    private final CouponValidationService couponValidationService;
     /** 支払案内JSONのシリアライズに使う ObjectMapper。 */
     private final ObjectMapper objectMapper;
     /** 注文完了メール送信サービス。 */
@@ -79,11 +93,15 @@ public class OrderService {
      * @param messageSource 利用者向けメッセージ取得元
      */
     public OrderService(OrderRepository orderRepository,
+                        CouponRepository couponRepository,
+                        CouponValidationService couponValidationService,
                         ObjectMapper objectMapper,
                         NotificationMailService notificationMailService,
                         Clock appClock,
                         MessageSource messageSource) {
         this.orderRepository = orderRepository;
+        this.couponRepository = couponRepository;
+        this.couponValidationService = couponValidationService;
         this.objectMapper = objectMapper;
         this.notificationMailService = notificationMailService;
         this.appClock = appClock;
@@ -143,6 +161,25 @@ public class OrderService {
      */
     @Transactional
     public String placeOrder(Long memberId, CheckoutInputForm rawForm, CartView cart) {
+        return placeOrder(memberId, rawForm, cart, null);
+    }
+
+    /**
+     * 注文確定と入力フォームから注文を確定する（クーポン適用あり）。
+     *
+     * <p>クーポンコードが指定された場合は、トランザクション内で
+     * FOR UPDATE ロック取得 → 最終再バリデーション → 使用回数確定
+     * （全体・会員別のインクリメント）を行い、注文スナップショットに
+     * クーポン情報を保存する。再検証NG時は例外をスローしてロールバックする。
+     *
+     * @param memberId ログイン会員ID。ゲスト時は {@code null}
+     * @param rawForm 注文情報入力フォーム
+     * @param cart 注文対象カート
+     * @param appliedCouponCode 適用中のクーポンコード。未適用は {@code null}
+     * @return 発行した注文番号
+     */
+    @Transactional
+    public String placeOrder(Long memberId, CheckoutInputForm rawForm, CartView cart, String appliedCouponCode) {
         if (cart == null || cart.isEmpty()) {
             log.warn("event={} memberId={} reason=cart_empty",
                     LogEvent.ORDER_PLACE_REJECTED.value(),
@@ -160,13 +197,60 @@ public class OrderService {
         revalidateCartStock(cart);
         Integer shippingFloor = parseFloor(form.getDeliveryFloor());
 
+        // 金額再計算前に一度検証し、ロック取得後にも最新状態で再検証する。
+        BigDecimal couponDiscountAmount = BigDecimal.ZERO;
+        String appliedCouponCodeSnapshot = null;
+        String appliedCouponNameSnapshot = null;
+        Long appliedCouponIdSnapshot = null;
+        if (StringUtils.hasText(appliedCouponCode)) {
+            Coupon coupon = couponRepository.findByCode(appliedCouponCode.trim())
+                    .orElseThrow(() -> couponValidationException(CouponErrorCode.COUPON_NOT_FOUND));
+            CouponValidationResult precheck = couponValidationService.validateCoupon(coupon, cart, memberId);
+            if (!precheck.valid()) {
+                throw couponValidationException(precheck.errorCode());
+            }
+            couponDiscountAmount = precheck.discountAmount();
+        }
+
         String customerType = memberId == null ? "guest" : "member";
         String shippingMethod = cart.items().stream().anyMatch(CartLineView::assemblyRequested) ? "assembly" : "normal";
         BigDecimal taxRate = orderRepository.findCurrentTaxRatePercent();
+        if (taxRate == null) {
+            // 税率が取得できない場合は規定のデフォルト税率(10%)を適用する
+            taxRate = DEFAULT_TAX_RATE_PERCENT;
+        }
         String paymentInstructionJson = buildPaymentInstructionJson(form.getPaymentMethod());
         OffsetDateTime orderDatetime = OffsetDateTime.now(appClock);
         String orderNumber = generateOrderNumber(orderDatetime);
         List<OrderCompleteMailPayload.OrderItemLine> mailOrderItems = new ArrayList<>();
+
+        // クーポン割引反映後の金額を再計算（税額は割引後の課税対象小計から算出、送料は割引前の値を維持）
+        BigDecimal discountedProductSubtotal = cart.summary().productSubtotal()
+                .subtract(couponDiscountAmount)
+                .max(BigDecimal.ZERO);
+        BigDecimal taxableSubtotal = discountedProductSubtotal.add(cart.summary().assemblyFeeTotal());
+        BigDecimal orderTaxAmount = taxableSubtotal
+                .multiply(taxRate)
+                .divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN);
+        BigDecimal orderTotalAmount = taxableSubtotal.add(orderTaxAmount).add(cart.summary().shippingFee());
+
+        CouponValidationResult confirmedCoupon = null;
+        if (StringUtils.hasText(appliedCouponCode)) {
+            confirmedCoupon = lockAndValidateCouponUsage(memberId, appliedCouponCode.trim(), cart);
+            couponDiscountAmount = confirmedCoupon.discountAmount();
+            appliedCouponCodeSnapshot = confirmedCoupon.coupon().code();
+            appliedCouponNameSnapshot = confirmedCoupon.coupon().name();
+            appliedCouponIdSnapshot = confirmedCoupon.coupon().id();
+
+            discountedProductSubtotal = cart.summary().productSubtotal()
+                    .subtract(couponDiscountAmount)
+                    .max(BigDecimal.ZERO);
+            taxableSubtotal = discountedProductSubtotal.add(cart.summary().assemblyFeeTotal());
+            orderTaxAmount = taxableSubtotal
+                    .multiply(taxRate)
+                    .divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN);
+            orderTotalAmount = taxableSubtotal.add(orderTaxAmount).add(cart.summary().shippingFee());
+        }
 
         Map<String, Object> orderParams = new LinkedHashMap<>();
         orderParams.put("orderNumber", orderNumber);
@@ -195,16 +279,26 @@ public class OrderService {
         orderParams.put("shippingFee", cart.summary().shippingFee());
         orderParams.put("assemblyFeeTotal", cart.summary().assemblyFeeTotal());
         orderParams.put("subtotalAmount", cart.summary().productSubtotal());
-        orderParams.put("taxAmount", cart.summary().taxAmount());
-        orderParams.put("totalAmount", cart.summary().totalAmount());
+        orderParams.put("taxAmount", orderTaxAmount);
+        orderParams.put("totalAmount", orderTotalAmount);
+        orderParams.put("appliedCouponCode", appliedCouponCodeSnapshot);
+        orderParams.put("appliedCouponName", appliedCouponNameSnapshot);
+        orderParams.put("couponDiscountAmount", couponDiscountAmount);
+        orderParams.put("appliedCouponId", appliedCouponIdSnapshot);
 
         long orderId = orderRepository.insertOrder(orderParams);
-        for (CartLineView line : cart.items()) {
+        List<BigDecimal> lineCouponDiscounts = confirmedCoupon == null
+                ? cart.items().stream().map(line -> BigDecimal.ZERO).toList()
+                : allocateCouponDiscount(cart, confirmedCoupon.coupon(), couponDiscountAmount);
+        for (int i = 0; i < cart.items().size(); i++) {
+            CartLineView line = cart.items().get(i);
             BigDecimal lineSubtotal = line.lineSubtotalBeforeTax();
-            BigDecimal lineTaxAmount = lineSubtotal
+            BigDecimal lineCouponDiscountAmount = lineCouponDiscounts.get(i);
+            BigDecimal lineTaxableSubtotal = lineSubtotal.subtract(lineCouponDiscountAmount);
+            BigDecimal lineTaxAmount = lineTaxableSubtotal
                     .multiply(taxRate)
                     .divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN);
-            BigDecimal lineTotal = lineSubtotal.add(lineTaxAmount);
+            BigDecimal lineTotal = lineTaxableSubtotal.add(lineTaxAmount);
             BigDecimal assemblyFee = (line.assemblyAvailable() && line.assemblyRequested())
                     ? line.assemblyFeePerUnit()
                     : BigDecimal.ZERO;
@@ -217,6 +311,7 @@ public class OrderService {
             itemParams.put("unitPrice", line.unitPrice());
             itemParams.put("quantity", line.quantity());
             itemParams.put("lineSubtotal", lineSubtotal);
+            itemParams.put("lineCouponDiscountAmount", lineCouponDiscountAmount);
             itemParams.put("lineTaxAmount", lineTaxAmount);
             itemParams.put("lineTotalAmount", lineTotal);
             itemParams.put("assemblyAvailable", line.assemblyAvailable());
@@ -237,6 +332,10 @@ public class OrderService {
         statusParams.put("changedBySystem", "office_order_web");
         orderRepository.insertOrderStatusHistory(statusParams);
 
+        if (confirmedCoupon != null) {
+            confirmCouponUsage(memberId, confirmedCoupon.coupon().id());
+        }
+
         OrderCompleteMailPayload mailPayload = new OrderCompleteMailPayload(
                 orderNumber,
                 orderDatetime,
@@ -253,8 +352,8 @@ public class OrderService {
                 cart.summary().productSubtotal(),
                 cart.summary().assemblyFeeTotal(),
                 cart.summary().shippingFee(),
-                cart.summary().taxAmount(),
-                cart.summary().totalAmount(),
+                orderTaxAmount,
+                orderTotalAmount,
                 List.copyOf(mailOrderItems)
         );
         sendOrderCompleteMailAfterCommit(mailPayload, orderNumber, memberId);
@@ -265,6 +364,55 @@ public class OrderService {
                 orderNumber,
                 cart.items().size());
         return orderNumber;
+    }
+
+    private List<BigDecimal> allocateCouponDiscount(CartView cart, Coupon coupon, BigDecimal discountAmount) {
+        List<BigDecimal> allocations = new ArrayList<>(
+                cart.items().stream().map(line -> BigDecimal.ZERO).toList());
+        BigDecimal normalizedDiscount = discountAmount.setScale(0, RoundingMode.UNNECESSARY);
+        if (normalizedDiscount.signum() == 0) {
+            return List.copyOf(allocations);
+        }
+
+        CouponConditions conditions = couponValidationService.parseTargetConditions(coupon.targetConditions());
+        List<Integer> targetIndexes = new ArrayList<>();
+        BigDecimal targetSubtotal = BigDecimal.ZERO;
+        for (int i = 0; i < cart.items().size(); i++) {
+            CartLineView line = cart.items().get(i);
+            if (conditions.allowedCategoryIds().contains(line.categoryId())
+                    || conditions.allowedProductIds().contains(line.productId())) {
+                targetIndexes.add(i);
+                targetSubtotal = targetSubtotal.add(line.lineProductSubtotal());
+            }
+        }
+        if (targetSubtotal.signum() <= 0 || normalizedDiscount.compareTo(targetSubtotal) > 0) {
+            throw new IllegalStateException("Coupon discount must not exceed the targeted product subtotal");
+        }
+
+        List<DiscountRemainder> remainders = new ArrayList<>();
+        BigDecimal allocatedSubtotal = BigDecimal.ZERO;
+        for (int index : targetIndexes) {
+            BigDecimal numerator = cart.items().get(index).lineProductSubtotal().multiply(normalizedDiscount);
+            BigDecimal[] quotientAndRemainder = numerator.divideAndRemainder(targetSubtotal);
+            allocations.set(index, quotientAndRemainder[0]);
+            allocatedSubtotal = allocatedSubtotal.add(quotientAndRemainder[0]);
+            remainders.add(new DiscountRemainder(index, quotientAndRemainder[1]));
+        }
+
+        int remainingYen = normalizedDiscount.subtract(allocatedSubtotal).intValueExact();
+        remainders.sort(Comparator.comparing(DiscountRemainder::remainder).reversed()
+                .thenComparingInt(DiscountRemainder::lineIndex));
+        if (remainingYen > remainders.size()) {
+            throw new IllegalStateException("Coupon discount allocation remainder exceeds target line count");
+        }
+        for (int i = 0; i < remainingYen; i++) {
+            int index = remainders.get(i).lineIndex();
+            allocations.set(index, allocations.get(index).add(BigDecimal.ONE));
+        }
+        return List.copyOf(allocations);
+    }
+
+    private record DiscountRemainder(int lineIndex, BigDecimal remainder) {
     }
 
     /**
@@ -396,6 +544,49 @@ public class OrderService {
      *
      * @param form 正規化済み注文フォーム
      */
+        private CouponValidationResult lockAndValidateCouponUsage(Long memberId,
+                                                                   String couponCode,
+                                                                   CartView cart) {
+            Coupon coupon = couponRepository.findByCodeForUpdate(couponCode)
+                    .orElseThrow(() -> couponValidationException(CouponErrorCode.COUPON_NOT_FOUND));
+            if (memberId != null) {
+                couponRepository.ensureUserUsage(memberId, coupon.id());
+            }
+        CouponValidationResult result = couponValidationService.validateCoupon(coupon, cart, memberId);
+        if (!result.valid()) {
+            log.warn("event={} couponCode={} couponId={} memberId={} reason={}",
+                    LogEvent.CHECKOUT_ORDER_REJECTED.value(),
+                    couponCode,
+                    coupon.id(),
+                    memberId,
+                    result.errorCode().name());
+            throw couponValidationException(result.errorCode());
+        }
+        return result;
+    }
+
+    private void confirmCouponUsage(Long memberId, long couponId) {
+        if (!couponRepository.incrementTotalUsage(couponId)) {
+            throw couponValidationException(CouponErrorCode.COUPON_USAGE_LIMIT_REACHED);
+        }
+        if (memberId != null) {
+            couponRepository.incrementUserUsage(memberId, couponId);
+        }
+        log.info("event={} couponId={} memberId={}",
+                LogEvent.COUPON_USAGE_CONFIRMED.value(),
+                couponId,
+                memberId);
+    }
+
+    private CouponValidationException couponValidationException(CouponErrorCode errorCode) {
+        return new CouponValidationException(errorCode, couponValidationService.message(errorCode));
+    }
+
+    /**
+     * 注文入力に対する業務バリデーションを行う。
+     *
+     * @param form 正規化済み注文フォーム
+     */
     private void validateBusinessRules(CheckoutInputForm form) {
         if (form.isCorporate() && !StringUtils.hasText(form.getCompanyName())) {
             log.warn("event={} reason=company_name_required_for_corporate",
@@ -460,6 +651,3 @@ public class OrderService {
         return messages.getMessage(code, args);
     }
 }
-
-
-

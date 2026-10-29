@@ -1,0 +1,119 @@
+﻿SUITE	jp.co.skig.officeorder.repository.MemberRepositoryTest	run=0 fail=0 err=0
+SUITE	jp.co.skig.officeorder.repository.OrderRepositoryTest	run=0 fail=0 err=0
+SUITE	jp.co.skig.officeorder.service.batch.BatchJobServiceTest	run=0 fail=0 err=0
+SUITE	jp.co.skig.officeorder.service.member.MemberServiceTest	run=0 fail=0 err=0
+FAIL	updateAdditionalAddress_ownedAddress_updates	
+Expecting value to be true but was false
+FAIL	createAdditionalAddress_atLimit_throwsAndDoesNotInsert	
+Expecting throwable message:
+  "ããä»¥ä¸ãå±ãåãè¿½å ã§ãã¾ããã"
+to contain:
+  "お届け先を追加できません"
+but did not.
+
+Throwable that failed the check
+FAIL	toggleFavorite_atLimit_throws	
+Expecting throwable message:
+  "ããä»¥ä¸ãæ°ã«å¥ãã«è¿½å ã§ãã¾ããã"
+to contain:
+  "お気に入りに追加できません"
+but did not.
+
+Throwable that failed the c
+FAIL	toggleFavorite_insertRace_skips	
+Wanted but not invoked:
+memberRepository.insertFavorite(1L, 10L);
+-> at jp.co.skig.officeorder.repository.MemberRepository.insertFavorite(MemberRepository.java
+FAIL	updateProfile_duplicateEmailForOtherMember_throws	
+Expecting throwable message:
+  "ã¡ã¼ã«ã¢ãã¬ã¹ãéè¤ãã¦ãã¾ãã"
+to contain:
+  "メールアドレスが重複"
+but did not.
+
+Throwable that failed the check:
+
+jp
+ERR	updateProfile_success_updatesProfile	会員情報の更新対象が見つかりません。
+FAIL	register_duplicateEmail_throwsAndDoesNotInsert	
+Expecting throwable message:
+  "ã¡ã¼ã«ã¢ãã¬ã¹ãéè¤ãã¦ãã¾ãã"
+to contain:
+  "メールアドレスが重複"
+but did not.
+
+Throwable that failed the check:
+
+jp
+FAIL	register_duplicateRace_convertsDbExceptionToDuplicateEmail	
+Expecting throwable message:
+  "ã¡ã¼ã«ã¢ãã¬ã¹ãéè¤ãã¦ãã¾ãã"
+to contain:
+  "メールアドレスが重複"
+but did not.
+
+Throwable that failed the check:
+
+jp
+SUITE	jp.co.skig.officeorder.service.order.OrderServiceTest	run=0 fail=0 err=0
+FAIL	placeOrder_quantityExceedsStock_rejectsAndDoesNotSave	
+Expecting throwable message:
+  "å¨åº«ãä¸è¶³ãã¦ããããæ³¨æã§ãã¾ããã"
+to contain:
+  "在庫が不足"
+but did not.
+
+Throwable that failed the check:
+FAIL	placeOrder_nullCart_throwsAndDoesNotSave	
+Expecting throwable message:
+  "ã«ã¼ãã«ååãããã¾ããã"
+to contain:
+  "カートに商品がありません"
+but did not.
+
+Throwable that failed the check:
+
+java.lang
+FAIL	placeOrder_emptyCart_throwsAndDoesNotSave	
+Expecting throwable message:
+  "ã«ã¼ãã«ååãããã¾ããã"
+to contain:
+  "カートに商品がありません"
+but did not.
+
+Throwable that failed the check:
+
+java.lang
+FAIL	placeOrder_zeroStock_rejectsAndDoesNotSave	
+Expecting throwable message:
+  "å¨åº«ãä¸è¶³ãã¦ããããæ³¨æã§ãã¾ããã"
+to contain:
+  "在庫が不足"
+but did not.
+
+Throwable that failed the check:
+FAIL	placeOrder_corporate_withoutCompanyName_throwsBusinessError	
+Expecting throwable message:
+  "æ³äººã®å ´åã¯ä¼ç¤¾åãå¥åãã¦ãã ããã"
+to contain:
+  "会社名"
+but did not.
+
+Throwable that failed the check:
+
+
+FAIL	placeOrder_multipleItems_createsItemAndMailLinesPerProduct	
+Wanted but not invoked:
+notificationMailService.sendOrderCompleteMail(
+    <any jp.co.skig.officeorder.model.mail.OrderCompleteMailPayload>
+);
+-> at jp.co.skig
+FAIL	placeOrder_singleItem_savesHeaderItemsAndStatusHistory	
+Wanted but not invoked:
+notificationMailService.sendOrderCompleteMail(
+    <any jp.co.skig.officeorder.model.mail.OrderCompleteMailPayload>
+);
+-> at jp.co.skig
+ERR	placeOrder_taxRateNull_usesDefaultTenPercent	Cannot read field "scale" because "multiplicand" is null
+SUITE	jp.co.skig.officeorder.service.product.ProductFilterOptionServiceTest	run=0 fail=0 err=0
+SUITE	jp.co.skig.officeorder.service.product.ProductServiceTest	run=0 fail=0 err=0

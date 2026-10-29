@@ -89,11 +89,16 @@
                         <h2 class="section__title" style="margin:0 0 10px;">金額</h2>
                         <div class="summary__rows" style="max-width:520px;">
                             <div class="summary__row"><span>商品小計</span><strong th:text="${cart.summary.productSubtotalText + '円'}">36,400円</strong></div>
+                            <div class="summary__row" th:if="${couponDiscountAmount != null}">
+                                <span th:text="${'クーポン割引（' + appliedCouponName + '）'}">クーポン割引（夏得クーポン）</span>
+                                <strong th:text="${'-' + #numbers.formatInteger(couponDiscountAmount, 1, 'COMMA') + '円'}">-500円</strong>
+                            </div>
                             <div class="summary__row"><span>組立・設置費</span><strong th:text="${cart.summary.assemblyFeeTotalText + '円'}">3,000円</strong></div>
                             <div class="summary__row"><span>送料</span><strong th:text="${cart.summary.shippingFeeText + '円'}">0円</strong></div>
                             <div class="summary__row"><span>消費税</span><strong th:text="${cart.summary.taxAmountText + '円'}">3,940円</strong></div>
                             <div class="summary__row summary__total"><span>合計（税込）</span><strong style="font-size:18px;" th:text="${cart.summary.totalAmountText + '円'}">43,340円</strong></div>
                         </div>
+                        <p class="help" role="alert" th:if="${checkoutError != null}" th:text="${checkoutError}"></p>
                     </div>
                 </div>
 

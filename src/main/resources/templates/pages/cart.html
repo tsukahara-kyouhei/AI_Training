@@ -104,6 +104,35 @@
                 <aside class="summary" aria-label="金額">
                     <div class="card">
                         <div class="card__pad">
+                            <section class="coupon-panel" data-coupon-panel>
+                                <h2 class="section__title" style="margin:0 0 10px;">クーポン</h2>
+                                <form id="coupon-apply-form" th:action="@{/api/cart/coupon}" action="/api/cart/coupon" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <label for="coupon-code">クーポンコード</label>
+                                    <div class="actions">
+                                        <input id="coupon-code" name="coupon_code" type="text"
+                                               maxlength="50" th:value="${appliedCouponCode}"
+                                               th:disabled="${appliedCouponCode != null}">
+                                        <button class="btn" type="submit" th:disabled="${appliedCouponCode != null}">適用</button>
+                                    </div>
+                                </form>
+                                <p id="coupon-error" class="help" role="alert"
+                                   th:text="${couponError != null ? couponError : ''}"></p>
+                                <div id="coupon-applied" th:if="${appliedCouponCode != null}">
+                                    <p class="help" style="margin-bottom:6px;">
+                                        <span th:text="${appliedCouponName != null ? appliedCouponName : appliedCouponCode}"></span>
+                                        <span>を適用中</span>
+                                    </p>
+                                    <form id="coupon-remove-form" th:action="@{/api/cart/coupon}" action="/api/cart/coupon" method="post">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button class="btn btn--ghost" type="submit">解除</button>
+                                    </form>
+                                </div>
+                                <div class="summary__row" th:if="${couponDiscountAmount != null}">
+                                    <span>クーポン割引</span>
+                                    <strong th:text="${'-' + #numbers.formatInteger(couponDiscountAmount, 1, 'COMMA') + '円'}">-500円</strong>
+                                </div>
+                            </section>
                             <div class="summary__rows">
                                 <div class="summary__row"><span>商品小計</span><strong th:text="${cart.summary.productSubtotalText + '円'}">36,400円</strong></div>
                                 <div class="summary__row"><span>組立・設置費</span><strong th:text="${cart.summary.assemblyFeeTotalText + '円'}">3,000円</strong></div>

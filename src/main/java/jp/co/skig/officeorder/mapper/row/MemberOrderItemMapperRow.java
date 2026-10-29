@@ -12,6 +12,7 @@ public record MemberOrderItemMapperRow(
         BigDecimal unitPrice,
         BigDecimal assemblyFee,
         Integer quantity,
-        BigDecimal lineSubtotal
+        BigDecimal lineSubtotal,
+        BigDecimal lineCouponDiscountAmount
 ) {
 }

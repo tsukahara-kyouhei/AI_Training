@@ -44,6 +44,9 @@
             <arg column="shipping_fee" javaType="java.math.BigDecimal"/>
             <arg column="tax_amount" javaType="java.math.BigDecimal"/>
             <arg column="total_amount" javaType="java.math.BigDecimal"/>
+            <arg column="applied_coupon_code" javaType="string"/>
+            <arg column="applied_coupon_name" javaType="string"/>
+            <arg column="coupon_discount_amount" javaType="java.math.BigDecimal"/>
         </constructor>
     </resultMap>
 
@@ -66,6 +69,18 @@
             <arg column="shipping_fee" javaType="java.math.BigDecimal"/>
             <arg column="tax_amount" javaType="java.math.BigDecimal"/>
             <arg column="total_amount" javaType="java.math.BigDecimal"/>
+            <arg column="applied_coupon_code" javaType="string"/>
+            <arg column="applied_coupon_name" javaType="string"/>
+            <arg column="coupon_discount_amount" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="OrderCouponRefundRowMap" type="jp.co.skig.officeorder.mapper.row.OrderCouponRefundMapperRow">
+        <constructor>
+            <arg column="coupon_id" javaType="java.lang.Long"/>
+            <arg column="member_id" javaType="java.lang.Long"/>
+            <arg column="order_status" javaType="string"/>
+            <arg column="coupon_usage_refunded" javaType="boolean"/>
         </constructor>
     </resultMap>
 
@@ -85,6 +100,7 @@
             <arg column="assembly_fee" javaType="java.math.BigDecimal"/>
             <arg column="quantity" javaType="java.lang.Integer"/>
             <arg column="line_subtotal" javaType="java.math.BigDecimal"/>
+            <arg column="line_coupon_discount_amount" javaType="java.math.BigDecimal"/>
         </constructor>
     </resultMap>
 
@@ -152,6 +168,10 @@
         subtotal_amount,
         tax_amount,
         total_amount,
+        applied_coupon_id,
+        applied_coupon_code,
+        applied_coupon_name,
+        coupon_discount_amount,
         receipt_issued,
         note,
         created_at,
@@ -194,6 +214,10 @@
         #{params.subtotalAmount},
         #{params.taxAmount},
         #{params.totalAmount},
+        #{params.appliedCouponId},
+        #{params.appliedCouponCode},
+        #{params.appliedCouponName},
+        #{params.couponDiscountAmount},
         FALSE,
         NULL,
         CURRENT_TIMESTAMP,
@@ -211,6 +235,7 @@
         unit_price,
         quantity,
         line_subtotal,
+        line_coupon_discount_amount,
         line_tax_amount,
         line_total_amount,
         assembly_available,
@@ -226,6 +251,7 @@
         #{params.unitPrice},
         #{params.quantity},
         #{params.lineSubtotal},
+        #{params.lineCouponDiscountAmount},
         #{params.lineTaxAmount},
         #{params.lineTotalAmount},
         #{params.assemblyAvailable},
@@ -288,7 +314,10 @@
         assembly_fee_total,
         shipping_fee,
         tax_amount,
-        total_amount
+        total_amount,
+        applied_coupon_code,
+        applied_coupon_name,
+        coupon_discount_amount
         FROM orders
         WHERE order_number = #{orderNumber}
     </select>
@@ -320,7 +349,10 @@
         o.assembly_fee_total,
         o.shipping_fee,
         o.tax_amount,
-        o.total_amount
+        o.total_amount,
+        o.applied_coupon_code,
+        o.applied_coupon_name,
+        o.coupon_discount_amount
         FROM orders o
         WHERE o.member_id = #{memberId}
         AND o.order_number = #{orderNumber}
@@ -345,7 +377,8 @@
         oi.unit_price,
         oi.assembly_fee,
         oi.quantity,
-        oi.line_subtotal
+        oi.line_subtotal,
+        oi.line_coupon_discount_amount
         FROM order_items oi
         JOIN orders o ON o.order_id = oi.order_id
         WHERE o.member_id = #{memberId}
@@ -377,7 +410,70 @@
         ORDER BY effective_start_at DESC
         LIMIT 1
     </select>
+    <!-- 注文のクーポンスナップショットを更新 -->
+    <update id="updateOrderCouponSnapshot">
+        UPDATE orders
+        SET applied_coupon_code = #{couponCode},
+            applied_coupon_name = #{couponName},
+            coupon_discount_amount = #{discountAmount},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE order_id = #{orderId}
+    </update>
+
+    <!-- 注文ステータスを cancelled へ安全に遷移（冪等化） -->
+    <update id="updateOrderStatusIfNotCancelled">
+        UPDATE orders
+        SET order_status = 'cancelled',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE order_id = #{orderId}
+        AND order_status != 'cancelled'
+    </update>
+
+    <!-- 注文に適用中のクーポンの使用回数をガード付きでデクリメント（冪等化済みステータス遷移で呼ばれる） -->
+    <select id="lockCouponForRefund" resultType="long">
+        SELECT id FROM coupons WHERE id = #{couponId} FOR UPDATE
+    </select>
+
+    <select id="lockUserCouponUsageForRefund" resultType="long">
+        SELECT id
+        FROM user_coupon_usages
+        WHERE member_id = #{memberId} AND coupon_id = #{couponId}
+        FOR UPDATE
+    </select>
+
+    <update id="decrementCouponUsage">
+        UPDATE user_coupon_usages u
+        SET usage_count = usage_count - 1, updated_at = CURRENT_TIMESTAMP
+        WHERE u.member_id = #{memberId}
+          AND u.coupon_id = #{couponId}
+          AND u.usage_count > 0
+    </update>
+
+    <!-- クーポン全体利用回数をガード付きでデクリメント -->
+    <update id="decrementCouponUsedCount">
+        UPDATE coupons
+        SET used_count_total = used_count_total - 1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{couponId}
+          AND used_count_total > 0
+    </update>
+
+    <select id="selectCouponRefundByOrderIdForUpdate"
+            resultMap="OrderCouponRefundRowMap">
+        SELECT applied_coupon_id AS coupon_id,
+               member_id,
+               order_status,
+               coupon_usage_refunded
+        FROM orders
+        WHERE order_id = #{orderId}
+        FOR UPDATE
+    </select>
+
+    <update id="markCouponUsageRefunded">
+        UPDATE orders
+        SET coupon_usage_refunded = TRUE, updated_at = CURRENT_TIMESTAMP
+        WHERE order_id = #{orderId}
+          AND coupon_usage_refunded = FALSE
+          AND order_status IN ('cancelled', 'returned')
+          AND applied_coupon_id IS NOT NULL
+    </update>
 </mapper>
-
-
-

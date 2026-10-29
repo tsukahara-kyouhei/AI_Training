@@ -266,15 +266,27 @@
         <if test="categoryId != null and categoryId != ''">
             AND p.category_id = #{categoryId}
         </if>
-        <if test="keywordLike != null and keywordLike != ''">
+        <if test="keywordExactNormalized != null and keywordExactNormalized != ''">
             AND (
-            p.product_name ILIKE #{keywordLike}
-            OR EXISTS (
+            EXISTS (
             SELECT 1
             FROM product_variants pvk
             WHERE pvk.product_id = p.product_id
-            AND pvk.product_code ILIKE #{keywordLike}
+            AND LOWER(pvk.product_code) = #{keywordExactNormalized}
             )
+            <if test="keywordPrefixPattern != null and keywordPrefixPattern != ''">
+                OR EXISTS (
+                SELECT 1
+                FROM product_variants pvk
+                WHERE pvk.product_id = p.product_id
+                AND LOWER(pvk.product_code) LIKE #{keywordPrefixPattern} ESCAPE '\'
+                )
+            </if>
+            <if test="keywordContainsPattern != null and keywordContainsPattern != ''">
+                OR p.product_name ILIKE #{keywordContainsPattern} ESCAPE '\'
+                OR p.variation_name ILIKE #{keywordContainsPattern} ESCAPE '\'
+                OR p.description ILIKE #{keywordContainsPattern} ESCAPE '\'
+            </if>
             )
         </if>
         <if test="hasVariantFilter">

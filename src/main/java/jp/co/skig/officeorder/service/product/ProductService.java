@@ -1,8 +1,10 @@
 package jp.co.skig.officeorder.service.product;
 
+import java.text.Normalizer;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import jp.co.skig.officeorder.common.AppTimeProvider;
@@ -274,9 +276,10 @@ public class ProductService {
     private ProductSearchCondition normalize(ProductSearchCondition condition) {
         int page = Math.max(condition.page(), 1);
         int size = normalizeSize(condition.size());
+        String normalizedKeyword = normalizeKeyword(condition.keyword());
         return new ProductSearchCondition(
                 condition.categoryId(),
-                condition.keyword(),
+                normalizedKeyword,
                 condition.inStockOnly(),
                 condition.priceBands() == null ? List.of() : condition.priceBands(),
                 condition.colorIds() == null ? List.of() : condition.colorIds(),
@@ -286,6 +289,18 @@ public class ProductService {
                 size,
                 condition.saleStartFrom()
         );
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return null;
+        }
+        String trimmed = keyword.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        String normalized = Normalizer.normalize(trimmed, Normalizer.Form.NFKC);
+        return normalized.toLowerCase(Locale.ROOT);
     }
 
     /**

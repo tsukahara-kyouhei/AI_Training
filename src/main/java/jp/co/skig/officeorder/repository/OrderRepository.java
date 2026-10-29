@@ -16,6 +16,7 @@ import jp.co.skig.officeorder.mapper.row.MemberOrderHistoryMapperRow;
 import jp.co.skig.officeorder.mapper.row.MemberOrderItemMapperRow;
 import jp.co.skig.officeorder.mapper.row.MemberOrderStatusHistoryMapperRow;
 import jp.co.skig.officeorder.mapper.row.OrderCompleteMapperRow;
+import jp.co.skig.officeorder.mapper.row.OrderCouponRefundMapperRow;
 import jp.co.skig.officeorder.mapper.row.OrderReorderItemMapperRow;
 import jp.co.skig.officeorder.model.member.MemberOrderDetailView;
 import jp.co.skig.officeorder.model.member.MemberOrderHistoryPage;
@@ -28,6 +29,7 @@ import jp.co.skig.officeorder.model.order.OrderReorderItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 注文関連データの取得・保存と画面表示用整形を担当するリポジトリ。
@@ -107,6 +109,78 @@ public class OrderRepository {
     }
 
     /**
+     * 注文のクーポンスナップショットを更新する（注文確定時）。
+     *
+     * @param orderId 注文ID
+     * @param couponCode クーポンコード
+     * @param couponName クーポン名
+     * @param discountAmount 割引額
+     */
+    public void updateOrderCouponSnapshot(long orderId,
+                                           String couponCode,
+                                           String couponName,
+                                           BigDecimal discountAmount) {
+        orderMapper.updateOrderCouponSnapshot(orderId, couponCode, couponName, discountAmount);
+    }
+
+    /**
+     * 注文ステータスを `cancelled` へ安全に遷移する（冪等化）。
+     *
+     * <p>既に `cancelled` ステータスの注文に対しては0件更新（二重減算防止）。
+     *
+     * @param orderId 注文ID
+     * @return 作用行数（1なら遷移成功、0なら既にキャンセル済み）
+     */
+    @Transactional
+    public int updateOrderStatusIfNotCancelled(long orderId) {
+        int updated = orderMapper.updateOrderStatusIfNotCancelled(orderId);
+        if (updated == 1) {
+            refundCouponUsageByOrderId(orderId);
+        }
+        return updated;
+    }
+
+    /**
+     * キャンセル済みまたは返品済み注文のクーポン利用回数を返還する。
+     *
+     * <p>注文行をロックし、返還済みフラグと利用回数の更新を同一トランザクションで行う。
+     *
+     * @param orderId 注文ID
+     */
+    @Transactional
+    public void refundCouponUsageByOrderId(long orderId) {
+        OrderCouponRefundMapperRow order = orderMapper.selectCouponRefundByOrderIdForUpdate(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("返還対象の注文が存在しません。");
+        }
+        if (order.couponId() == null || order.couponUsageRefunded()
+                || (!"cancelled".equals(order.orderStatus()) && !"returned".equals(order.orderStatus()))) {
+            log.info("event={} orderId={} reason=refund_not_applicable",
+                    LogEvent.COUPON_USAGE_RESTORE_SKIPPED.value(), orderId);
+            return;
+        }
+        if (orderMapper.lockCouponForRefund(order.couponId()) == null) {
+            throw new IllegalStateException("返還対象のクーポンが存在しません。");
+        }
+        if (order.memberId() != null
+                && orderMapper.lockUserCouponUsageForRefund(order.memberId(), order.couponId()) == null) {
+            throw new IllegalStateException("返還対象の会員別クーポン利用実績が存在しません。");
+        }
+        if (orderMapper.decrementCouponUsedCount(order.couponId()) != 1) {
+            throw new IllegalStateException("クーポン全体利用回数の返還に失敗しました。");
+        }
+        if (order.memberId() != null
+                && orderMapper.decrementCouponUsage(order.memberId(), order.couponId()) != 1) {
+            throw new IllegalStateException("会員別クーポン利用回数の返還に失敗しました。");
+        }
+        if (orderMapper.markCouponUsageRefunded(orderId) != 1) {
+            throw new IllegalStateException("注文のクーポン返還済み記録を保存できません。");
+        }
+        log.info("event={} orderId={} couponId={} reason=usage_restored",
+                LogEvent.COUPON_USAGE_RESTORED.value(), orderId, order.couponId());
+    }
+
+    /**
      * 指定日の日次連番を採番する。
      *
      * @param orderDate 注文日
@@ -172,7 +246,10 @@ public class OrderRepository {
                 row.assemblyFeeTotal(),
                 row.shippingFee(),
                 row.taxAmount(),
-                row.totalAmount()
+                row.totalAmount(),
+                row.appliedCouponCode(),
+                row.appliedCouponName(),
+                row.couponDiscountAmount()
         ));
     }
 
@@ -225,6 +302,9 @@ public class OrderRepository {
                 header.shippingFee(),
                 header.taxAmount(),
                 header.totalAmount(),
+                header.appliedCouponCode(),
+                header.appliedCouponName(),
+                header.couponDiscountAmount(),
                 statusHistories,
                 items
         ));
@@ -319,7 +399,8 @@ public class OrderRepository {
                 row.unitPrice(),
                 row.assemblyFee(),
                 row.quantity() == null ? 0 : row.quantity(),
-                row.lineSubtotal()
+                row.lineSubtotal(),
+                row.lineCouponDiscountAmount()
         );
     }
 

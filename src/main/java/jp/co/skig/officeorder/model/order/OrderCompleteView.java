@@ -25,7 +25,10 @@ public record OrderCompleteView(
         BigDecimal assemblyFeeTotal,
         BigDecimal shippingFee,
         BigDecimal taxAmount,
-        BigDecimal totalAmount
+        BigDecimal totalAmount,
+        String appliedCouponCode,
+        String appliedCouponName,
+        BigDecimal couponDiscountAmount
 ) {
     /**
      * コンビニ決済向けの追加案内表示が必要かを判定する。
@@ -53,5 +56,8 @@ public record OrderCompleteView(
     public String totalAmountText() {
         return MoneyFormatter.formatYen(totalAmount);
     }
-}
 
+    public String couponDiscountAmountText() {
+        return MoneyFormatter.formatYen(couponDiscountAmount);
+    }
+}

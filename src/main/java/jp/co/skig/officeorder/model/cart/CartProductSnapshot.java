@@ -10,6 +10,7 @@ public record CartProductSnapshot(
         Long productId,
         String productName,
         String productCode,
+        String categoryId,
         String colorName,
         BigDecimal unitPrice,
         Integer stockQuantity,

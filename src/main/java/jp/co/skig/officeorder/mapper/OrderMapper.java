@@ -11,6 +11,7 @@ import jp.co.skig.officeorder.mapper.row.MemberOrderItemMapperRow;
 import jp.co.skig.officeorder.mapper.row.MemberOrderHistoryMapperRow;
 import jp.co.skig.officeorder.mapper.row.MemberOrderStatusHistoryMapperRow;
 import jp.co.skig.officeorder.mapper.row.OrderCompleteMapperRow;
+import jp.co.skig.officeorder.mapper.row.OrderCouponRefundMapperRow;
 import jp.co.skig.officeorder.mapper.row.OrderReorderItemMapperRow;
 import jp.co.skig.officeorder.model.order.CheckoutMemberPrefill;
 import org.apache.ibatis.annotations.Mapper;
@@ -91,7 +92,37 @@ public interface OrderMapper {
     /**
      * 指定時点で有効な消費税率を取得する。
      */
-    BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);
+        BigDecimal selectCurrentTaxRatePercent(@Param("now") OffsetDateTime now);
+
+    /**
+     * 注文にクーポンスナップショットを保存する。
+     */
+    int updateOrderCouponSnapshot(@Param("orderId") long orderId,
+                                  @Param("couponCode") String couponCode,
+                                  @Param("couponName") String couponName,
+                                  @Param("discountAmount") BigDecimal discountAmount);
+
+    /**
+     * 注文ステータスを `cancelled` へ安全に遷移する（冪等化）。
+     * 既に `cancelled` の場合は0件更新。
+     */
+    int updateOrderStatusIfNotCancelled(@Param("orderId") long orderId);
+
+    /**
+     * 指定注文に適用中のクーポンの使用回数をガード付きで1つ減算する。
+     * クーポン未適用（applied_coupon_code IS NULL）なら何もしない。
+     * usage_count が既に 0 なら作用行数0として検知し、呼び出し側でログ警告する。
+     */
+    Long lockCouponForRefund(@Param("couponId") long couponId);
+
+    Long lockUserCouponUsageForRefund(@Param("memberId") long memberId,
+                                      @Param("couponId") long couponId);
+
+    int decrementCouponUsage(@Param("memberId") long memberId, @Param("couponId") long couponId);
+
+    int decrementCouponUsedCount(@Param("couponId") long couponId);
+
+    OrderCouponRefundMapperRow selectCouponRefundByOrderIdForUpdate(@Param("orderId") long orderId);
+
+    int markCouponUsageRefunded(@Param("orderId") long orderId);
 }
-
-

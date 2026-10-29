@@ -1,0 +1,1 @@
+-- Coupon master data is managed outside this purchase-side repository.

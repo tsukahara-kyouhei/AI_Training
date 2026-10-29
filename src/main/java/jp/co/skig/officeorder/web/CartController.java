@@ -7,10 +7,17 @@ import jakarta.validation.Valid;
 import jp.co.skig.officeorder.logging.LogEvent;
 import jp.co.skig.officeorder.service.cart.CartService;
 import jp.co.skig.officeorder.model.cart.CartView;
+import jp.co.skig.officeorder.model.coupon.Coupon;
+import jp.co.skig.officeorder.model.coupon.CouponErrorCode;
+import jp.co.skig.officeorder.model.coupon.CouponValidationResult;
 import jp.co.skig.officeorder.model.member.MemberAdditionalAddressView;
 import jp.co.skig.officeorder.model.member.MemberSessionUser;
+import jp.co.skig.officeorder.repository.CouponRepository;
 import jp.co.skig.officeorder.service.member.MemberService;
 import jp.co.skig.officeorder.service.order.OrderService;
+import jp.co.skig.officeorder.service.coupon.CouponSessionService;
+import jp.co.skig.officeorder.service.coupon.CouponValidationException;
+import jp.co.skig.officeorder.service.coupon.CouponValidationService;
 import jp.co.skig.officeorder.model.order.CheckoutInputForm;
 import jp.co.skig.officeorder.model.order.OrderCompleteView;
 import jp.co.skig.officeorder.web.auth.LoginEmailCookieService;
@@ -61,6 +68,9 @@ public class CartController {
     private final MemberService memberService;
     /** 注文サービス。 */
     private final OrderService orderService;
+    private final CouponRepository couponRepository;
+    private final CouponValidationService couponValidationService;
+    private final CouponSessionService couponSessionService;
     /** 利用者向けメッセージ取得ヘルパ。 */
     private final MessageSourceAccessor messages;
 
@@ -79,12 +89,18 @@ public class CartController {
                           LoginEmailCookieService loginEmailCookieService,
                           MemberService memberService,
                           OrderService orderService,
+                          CouponRepository couponRepository,
+                          CouponValidationService couponValidationService,
+                          CouponSessionService couponSessionService,
                           MessageSource messageSource) {
         this.cartService = cartService;
         this.memberSessionService = memberSessionService;
         this.loginEmailCookieService = loginEmailCookieService;
         this.memberService = memberService;
         this.orderService = orderService;
+        this.couponRepository = couponRepository;
+        this.couponValidationService = couponValidationService;
+        this.couponSessionService = couponSessionService;
         this.messages = new MessageSourceAccessor(messageSource);
     }
 
@@ -99,8 +115,31 @@ public class CartController {
     @GetMapping("/cart")
     public String cart(HttpServletRequest request,
                        HttpServletResponse response,
+                       HttpSession session,
                        Model model) {
         CartView cart = cartService.getCart(request, response);
+        Long memberId = memberSessionService.currentMember(session)
+                .map(MemberSessionUser::memberId)
+                .orElse(null);
+        couponSessionService.clearIfMemberChanged(session, memberId);
+        String couponCode = couponSessionService.getCouponCode(session);
+        if (couponCode != null) {
+            Coupon coupon = couponRepository.findByCode(couponCode).orElse(null);
+            if (coupon != null) {
+                CouponValidationResult result = couponValidationService.validateCoupon(coupon, cart, memberId);
+                if (result.valid()) {
+                    cart = cartService.recalculateWithCouponDiscount(cart, result.discountAmount());
+                    model.addAttribute("appliedCouponName", coupon.name());
+                    model.addAttribute("couponDiscountAmount", result.discountAmount());
+                } else {
+                    model.addAttribute("couponError", couponValidationService.message(result.errorCode()));
+                }
+            } else {
+                model.addAttribute("couponError",
+                        couponValidationService.message(CouponErrorCode.COUPON_NOT_FOUND));
+            }
+            model.addAttribute("appliedCouponCode", couponCode);
+        }
         model.addAttribute("cart", cart);
         model.addAttribute("isCartEmpty", cart.isEmpty());
         return "pages/cart";
@@ -313,11 +352,38 @@ public class CartController {
     public String checkoutConfirm(HttpServletRequest request,
                                   HttpServletResponse response,
                                   HttpSession session,
-                                  Model model) {
+                                  Model model,
+                                  RedirectAttributes redirectAttributes) {
         CartView cart = cartService.getCart(request, response);
         if (cart.isEmpty()) {
+            couponSessionService.clear(session);
             clearCheckoutSession(session);
             return "redirect:/cart";
+        }
+        Long memberId = memberSessionService.currentMember(session)
+                .map(MemberSessionUser::memberId)
+                .orElse(null);
+        if (couponSessionService.clearIfMemberChanged(session, memberId)) {
+            redirectAttributes.addFlashAttribute("couponError",
+                    couponValidationService.message(CouponErrorCode.COUPON_USER_CONDITION_ERROR));
+            return "redirect:/cart";
+        }
+        String couponCode = couponSessionService.getCouponCode(session);
+        if (couponCode != null) {
+            Coupon coupon = couponRepository.findByCode(couponCode).orElse(null);
+            CouponValidationResult result = coupon == null
+                    ? CouponValidationResult.invalid(CouponErrorCode.COUPON_NOT_FOUND)
+                    : couponValidationService.validateCoupon(coupon, cart, memberId);
+            if (!result.valid()) {
+                couponSessionService.clear(session);
+                redirectAttributes.addFlashAttribute("couponError",
+                        couponValidationService.message(result.errorCode()));
+                return "redirect:/cart";
+            }
+            cart = cartService.recalculateWithCouponDiscount(cart, result.discountAmount());
+            model.addAttribute("appliedCouponCode", coupon.code());
+            model.addAttribute("appliedCouponName", coupon.name());
+            model.addAttribute("couponDiscountAmount", result.discountAmount());
         }
         CheckoutInputForm sessionForm = (CheckoutInputForm) session.getAttribute(CHECKOUT_FORM_SESSION_KEY);
         if (sessionForm == null) {
@@ -369,14 +435,26 @@ public class CartController {
         }
         try {
             Long memberId = memberSessionService.currentMember(session).map(MemberSessionUser::memberId).orElse(null);
-            String orderNumber = orderService.placeOrder(memberId, sessionForm, cart);
+            String couponCode = couponSessionService.getCouponCode(session);
+            if (couponSessionService.clearIfMemberChanged(session, memberId)) {
+                throw new CouponValidationException(
+                        CouponErrorCode.COUPON_USER_CONDITION_ERROR,
+                        couponValidationService.message(CouponErrorCode.COUPON_USER_CONDITION_ERROR));
+            }
+            String orderNumber = orderService.placeOrder(memberId, sessionForm, cart, couponCode);
             clearCheckoutSession(session);
+            couponSessionService.clear(session);
             cartService.clear(request, response);
             log.info("event={} orderNumber={} memberId={}",
                     LogEvent.CHECKOUT_ORDER_ACCEPTED.value(),
                     orderNumber,
                     memberId);
             return "redirect:/checkout/complete/" + orderNumber;
+        } catch (CouponValidationException ex) {
+            couponSessionService.clear(session);
+            log.warn("event={} reason={}", LogEvent.CHECKOUT_ORDER_REJECTED.value(), ex.errorCode());
+            redirectAttributes.addFlashAttribute("checkoutError", ex.getMessage());
+            return "redirect:/checkout/confirm";
         } catch (IllegalArgumentException ex) {
             log.warn("event={} reason={}", LogEvent.CHECKOUT_ORDER_REJECTED.value(), ex.getMessage());
             redirectAttributes.addFlashAttribute("checkoutError", ex.getMessage());
@@ -431,6 +509,7 @@ public class CartController {
         if (session == null) {
             return;
         }
+
         session.removeAttribute(CHECKOUT_FORM_SESSION_KEY);
         session.removeAttribute(CHECKOUT_CONFIRM_TOKEN_SESSION_KEY);
     }

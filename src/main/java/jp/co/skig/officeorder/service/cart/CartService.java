@@ -112,6 +112,7 @@ public class CartService {
                     snapshot.productId(),
                     snapshot.productName(),
                     snapshot.productCode(),
+                    snapshot.categoryId(),
                     snapshot.colorName(),
                     snapshot.unitPrice(),
                     snapshot.stockQuantity(),
@@ -146,6 +147,45 @@ public class CartService {
                 totalAmount
         );
         return new CartView(lineViews, lineViews.size(), totalQuantity, summary);
+    }
+
+    /**
+     * クーポン割引額を反映したサマリーへ再計算する。
+     *
+     * <p>消費税は割引後の課税対象小計（商品小計 - 割引額 + 組立費）から再計算する。
+     * 送料は割引前の適用値を維持する（注文確定までの送料変動を防ぐため）。
+     *
+     * @param cart 元のカート
+     * @param couponDiscount クーポン割引額（税抜）。0以下または {@code null} の場合は元のカートを返す
+     * @return 割引反映後のカート
+     */
+    public CartView recalculateWithCouponDiscount(CartView cart, BigDecimal couponDiscount) {
+        if (cart == null || cart.isEmpty()
+                || couponDiscount == null || couponDiscount.signum() <= 0) {
+            return cart;
+        }
+        BigDecimal productSubtotal = cart.items().stream()
+                .map(CartLineView::lineProductSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal assemblySubtotal = cart.items().stream()
+                .map(CartLineView::lineAssemblySubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal taxRate = cartRepository.findCurrentTaxRatePercent();
+        BigDecimal discountedProductSubtotal = productSubtotal.subtract(couponDiscount).max(BigDecimal.ZERO);
+        BigDecimal taxableSubtotal = discountedProductSubtotal.add(assemblySubtotal);
+        BigDecimal taxAmount = taxableSubtotal
+                .multiply(taxRate)
+                .divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN);
+        BigDecimal shippingFee = cart.summary().shippingFee();
+        BigDecimal totalAmount = taxableSubtotal.add(taxAmount).add(shippingFee);
+        CartSummaryView summary = new CartSummaryView(
+                productSubtotal,
+                assemblySubtotal,
+                shippingFee,
+                taxAmount,
+                totalAmount
+        );
+        return new CartView(cart.items(), cart.itemTypeCount(), cart.totalQuantity(), summary);
     }
 
     /**

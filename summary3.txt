@@ -1,0 +1,65 @@
+﻿[INFO] Building office-order 0.0.1-SNAPSHOT
+[INFO] Running jp.co.skig.officeorder.service.batch.BatchJobServiceTest
+[INFO] Running BAT-001?BAT-004 売れ筋ランキング
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.786 s -- in BAT-001?BAT-004 売れ筋ランキング
+[INFO] Running BAT-005?BAT-009 おすすめ関連商品
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.079 s -- in BAT-005?BAT-009 おすすめ関連商品
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.891 s -- in jp.co.skig.officeorder.service.batch.BatchJobServiceTest
+[INFO] Running jp.co.skig.officeorder.service.member.MemberServiceTest
+[INFO] Running MEM-009?MEM-011 追加お届け先
+[ERROR] Tests run: 5, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.228 s <<< FAILURE! -- in MEM-009?MEM-011 追加お届け先
+[INFO] Running MEM-001?MEM-002 認証情報取得
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in MEM-001?MEM-002 認証情報取得
+[INFO] Running MEM-012?MEM-013 お気に入り
+[ERROR] Tests run: 5, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.044 s <<< FAILURE! -- in MEM-012?MEM-013 お気に入り
+[INFO] Running 会員種別・メール重複判定
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in 会員種別・メール重複判定
+[INFO] Running 一覧・ページング
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in 一覧・ページング
+[INFO] Running MEM-006?MEM-007 プロフィール更新
+[ERROR] Tests run: 3, Failures: 1, Errors: 1, Skipped: 0, Time elapsed: 0.019 s <<< FAILURE! -- in MEM-006?MEM-007 プロフィール更新
+[INFO] Running MEM-003?MEM-005 会員登録
+[ERROR] Tests run: 4, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.025 s <<< FAILURE! -- in MEM-003?MEM-005 会員登録
+[INFO] Running MEM-008 退会
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in MEM-008 退会
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.372 s -- in jp.co.skig.officeorder.service.member.MemberServiceTest
+[INFO] Running jp.co.skig.officeorder.service.order.OrderServiceTest
+[INFO] Running ORD-003?ORD-006 空カート・在庫
+[ERROR] Tests run: 5, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 0.307 s <<< FAILURE! -- in ORD-003?ORD-006 空カート・在庫
+[INFO] Running ORD-010?ORD-011 個人・法人
+[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.010 s <<< FAILURE! -- in ORD-010?ORD-011 個人・法人
+[INFO] Running 注文入力フォーム初期化
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in 注文入力フォーム初期化
+[INFO] Running ORD-001?ORD-002 正常注文
+[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.011 s <<< FAILURE! -- in ORD-001?ORD-002 正常注文
+[INFO] Running ORD-007?ORD-009 注文番号採番
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in ORD-007?ORD-009 注文番号採番
+[INFO] Running 注文完了画面・購入履歴・再購入
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in 注文完了画面・購入履歴・再購入
+[INFO] Running ORD-012?ORD-013 支払案内JSON
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in ORD-012?ORD-013 支払案内JSON
+[INFO] Running ORD-018?ORD-019 在庫更新・注文番号重複
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in ORD-018?ORD-019 在庫更新・注文番号重複
+[INFO] Running ORD-014?ORD-015 税額計算
+[ERROR] Tests run: 2, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.014 s <<< FAILURE! -- in ORD-014?ORD-015 税額計算
+[INFO] Running ORD-016?ORD-017 トランザクション・メール
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in ORD-016?ORD-017 トランザクション・メール
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.501 s -- in jp.co.skig.officeorder.service.order.OrderServiceTest
+[ERROR]   MemberServiceTest.createAdditionalAddress_atLimit_throwsAndDoesNotInsert 
+[ERROR]   MemberServiceTest.register_duplicateEmail_throwsAndDoesNotInsert 
+[ERROR]   MemberServiceTest.register_duplicateRace_convertsDbExceptionToDuplicateEmail 
+[ERROR]   MemberServiceTest.toggleFavorite_atLimit_throws 
+[ERROR]   MemberServiceTest.toggleFavorite_insertRace_skips 
+[ERROR]   MemberServiceTest.updateAdditionalAddress_ownedAddress_updates 
+[ERROR]   MemberServiceTest.updateProfile_duplicateEmailForOtherMember_throws 
+[ERROR]   OrderServiceTest.placeOrder_corporate_withoutCompanyName_throwsBusinessError 
+[ERROR]   OrderServiceTest.placeOrder_emptyCart_throwsAndDoesNotSave 
+[ERROR]   OrderServiceTest.placeOrder_multipleItems_createsItemAndMailLinesPerProduct 
+[ERROR]   OrderServiceTest.placeOrder_nullCart_throwsAndDoesNotSave 
+[ERROR]   OrderServiceTest.placeOrder_quantityExceedsStock_rejectsAndDoesNotSave 
+[ERROR]   OrderServiceTest.placeOrder_singleItem_savesHeaderItemsAndStatusHistory 
+[ERROR]   OrderServiceTest.placeOrder_zeroStock_rejectsAndDoesNotSave 
+[ERROR]   MemberServiceTest.updateProfile_success_updatesProfile ≫ IllegalState 会員情報の更新対象が見つかりません。
+[ERROR]   OrderServiceTest.placeOrder_taxRateNull_usesDefaultTenPercent ≫ NullPointer Cannot read field "scale" because "multiplicand" is null
+[ERROR] Tests run: 65, Failures: 14, Errors: 2, Skipped: 0
+[INFO] BUILD FAILURE

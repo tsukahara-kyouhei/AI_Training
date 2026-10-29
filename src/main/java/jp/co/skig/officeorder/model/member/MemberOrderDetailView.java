@@ -19,6 +19,9 @@ public record MemberOrderDetailView(
         BigDecimal shippingFee,
         BigDecimal taxAmount,
         BigDecimal totalAmount,
+        String appliedCouponCode,
+        String appliedCouponName,
+        BigDecimal couponDiscountAmount,
         List<MemberOrderStatusHistoryView> statusHistories,
         List<MemberOrderItemDetailView> items
 ) {
@@ -50,6 +53,9 @@ public record MemberOrderDetailView(
         }
         if ("cancelled".equals(orderStatus)) {
             return "キャンセル";
+        }
+        if ("returned".equals(orderStatus)) {
+            return "返品";
         }
         return "受付";
     }
@@ -87,5 +93,19 @@ public record MemberOrderDetailView(
      */
     public String totalAmountText() {
         return MoneyFormatter.formatYen(totalAmount);
+    }
+
+    public String couponDiscountAmountText() {
+        return MoneyFormatter.formatYen(couponDiscountAmount);
+    }
+
+    public boolean hasCouponLineDiscountBreakdown() {
+        if (appliedCouponCode == null || couponDiscountAmount.signum() <= 0) {
+            return false;
+        }
+        BigDecimal allocatedDiscount = items.stream()
+                .map(MemberOrderItemDetailView::lineCouponDiscountAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return allocatedDiscount.compareTo(couponDiscountAmount) == 0;
     }
 }

@@ -22,6 +22,9 @@ public record OrderCompleteMapperRow(
         BigDecimal assemblyFeeTotal,
         BigDecimal shippingFee,
         BigDecimal taxAmount,
-        BigDecimal totalAmount
+        BigDecimal totalAmount,
+        String appliedCouponCode,
+        String appliedCouponName,
+        BigDecimal couponDiscountAmount
 ) {
 }

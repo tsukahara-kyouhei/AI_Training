@@ -1,0 +1,12 @@
+﻿SUITE`tjp.co.skig.officeorder.repository.MemberRepositoryTest`trun=0 fail=0 err=0
+SUITE`tjp.co.skig.officeorder.repository.OrderRepositoryTest`trun=0 fail=0 err=0
+SUITE`tjp.co.skig.officeorder.service.batch.BatchJobServiceTest`trun=0 fail=0 err=0
+SUITE`tjp.co.skig.officeorder.service.member.MemberServiceTest`trun=0 fail=0 err=0
+FAIL`tMEM-009〜MEM-011 追加お届け先#updateAdditionalAddress_ownedAddress_updates`t | Expecting value to be true but was false
+FAIL`tMEM-012〜MEM-013 お気に入り#toggleFavorite_insertRace_skips`t | Wanted but not invoked: | memberRepository.insertFavorite(1L, 10L); | -> at jp.co.skig.officeorder.repository.MemberRepository.insertFavorite(MemberRepository.java:308) | However, there were exactly 2 interactions with this mock: | memberRepository.existsFavorite(1L, 10L); | -> at jp.co.skig.officeorder.service.member.MemberService.toggleFavorite(MemberService.java:337) | memberRepository.deleteFavorite(1L, 10L); | -> at jp.co.skig.officeorder.service.member.MemberService.toggleFavorite(MemberService.java:338) | 
+ERR`tMEM-006〜MEM-007 プロフィール更新#updateProfile_success_updatesProfile`t会員情報の更新対象が見つかりません。
+SUITE`tjp.co.skig.officeorder.service.order.OrderServiceTest`trun=0 fail=0 err=0
+SUITE`tjp.co.skig.officeorder.service.product.ProductFilterOptionServiceTest`trun=0 fail=0 err=0
+SUITE`tjp.co.skig.officeorder.service.product.ProductKeywordSearchTest`trun=4 fail=0 err=0
+SUITE`tjp.co.skig.officeorder.service.product.ProductSearchIntegrationTest`trun=3 fail=0 err=0
+SUITE`tjp.co.skig.officeorder.service.product.ProductServiceTest`trun=0 fail=0 err=0
