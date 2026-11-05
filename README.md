@@ -6,21 +6,21 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 受注後の業務処理や管理画面は別システムの責務です。
 
 ## 技術スタック
-- Java 21
-- Spring Boot 3.5.11
+- Java 25
+- Spring Boot 4.0.3
 - Spring Security
 - Thymeleaf
 - MyBatis
-- PostgreSQL 16
+- PostgreSQL 18
 - Docker Compose（ローカル補助用途）
 
 ## ローカル起動
 ### 前提
-- Java 21
+- Java 25
 - `./mvnw` が実行できること
 - 以下のどちらかを用意すること
   - Docker Desktop などで `docker compose` が使える
-  - PostgreSQL 16 と `psql` がローカルに入っている
+  - PostgreSQL 18 と `psql` がローカルに入っている
 
 ### 起動手順（Docker 利用）
 1. インフラを起動
