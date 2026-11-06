@@ -7,45 +7,40 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 
 ## 技術スタック
 
-- Java 21
-- Spring Boot 3.5.11
-- Spring Security
-- Thymeleaf
-- MyBatis
-- PostgreSQL 16
-- Docker Compose（ローカル補助用途）
-=======
 - Java 25
 - Spring Boot 4.0.3（Spring Security、Thymeleaf、Spring Batch など）
 - MyBatis Spring Boot Starter 4.0.0
 - PostgreSQL 18
 - Docker Compose（ローカル開発用：Mailpit v1.20、DBGate latest）
->>>>>>> feature/document-training-iwanaga
 
 ## ローカル起動
 
 ### 前提
 
-- Java 21
-- `./mvnw` が実行できること
+- Java 25
+- Windows PowerShellで `.\mvnw.cmd` を実行できること
 - 以下のどちらかを用意すること
   - Docker Desktop などで `docker compose` が使える
-  - PostgreSQL 16 と `psql` がローカルに入っている
+  - PostgreSQL 18 と `psql` がローカルに入っている
 
 ### 起動手順（Docker 利用）
 
-1. インフラを起動
-   `docker compose up -d`
-2. アプリをローカル起動
-   `./mvnw spring-boot:run "-Dspring-boot.run.profiles=local"`
+1. インフラ（DB、Mailpit、DBGate）のみを起動
+   `docker compose up -d db mailpit dbgate`
+2. PowerShellでアプリをローカル起動
+   `.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"`
 3. 確認先
    - アプリトップ: `http://localhost:8080/`
    - DB確認(DBGate): `http://localhost:3000`
    - メール確認(Mailpit): `http://localhost:8025`
+4. アプリを `Ctrl+C` で終了した後、インフラを停止
+   `docker compose stop db mailpit dbgate`
+
+> 注意: `docker compose up -d` で `app` サービスも起動すると、Composeのアプリがホストの8080番ポートを使用します。ローカルでSpring Bootを起動する場合は、上記のようにインフラのみを起動してください。
 
 ### 起動手順（Docker なし）
 
-1. PostgreSQL 16 に `office_order` DB と `office_order` ユーザーを作成
+1. PostgreSQL 18 に `office_order` DB と `office_order` ユーザーを作成
    - 接続先前提: `localhost:5432`
    - 既定ユーザー/パスワード: `office_order` / `office_order`
    - 例:
@@ -54,9 +49,9 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
      CREATE DATABASE office_order OWNER office_order;
      ```
 2. スキーマと seed を投入
-   `./scripts/init-local-postgres.ps1`
-3. アプリをローカル起動
-   `./mvnw spring-boot:run "-Dspring-boot.run.profiles=local"`
+   `.\scripts\init-local-postgres.ps1`
+3. PowerShellでアプリをローカル起動
+   `.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"`
 4. 確認先
    - アプリトップ: `http://localhost:8080/`
 
@@ -64,13 +59,22 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 
 1. コンテナ、ボリューム、イメージ、orphan を削除
    `docker compose down --rmi all --volumes --remove-orphans`
-2. Compose を再起動
+   > `--volumes` によりComposeの名前付きボリュームも削除されるため、PostgreSQLのデータが消去されます。
+2. Docker上のアプリを使う場合は全サービスを起動
    `docker compose up -d`
+
+   ローカルでSpring Bootを起動する場合は、8080番ポートの競合を避けるためインフラのみを起動
+   `docker compose up -d db mailpit dbgate`
 
 ## ログ
 
-- アプリログはコンソールと `log/office-order.log` の両方に出力されます
-- ローテーション済みログは `log/archive/` に出力されます
+- 設定ファイル: `src/main/resources/logback-spring.xml`
+- ログはコンソールとファイルの両方に出力されます。
+- 通常ログ: `log/office-order.log`
+- ローテーション済みログ: `log/archive/`
+- 日付とファイルサイズに基づいてローテーションし、1ファイルあたりのサイズは `10MB` です。
+- 保存履歴は30日分、アーカイブ総容量の上限は `1GB` です。アーカイブはgzip形式（`.gz`）で圧縮されます。
+- Docker実行時のファイルログはコンテナ内の `/app/log/` に保存されます。現在のCompose設定にはホスト側へログを保存するマウント設定がないため、コンテナを削除するとコンテナ内のファイルログも失われます。
 
 ## 初期データ
 
