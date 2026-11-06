@@ -14,6 +14,13 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 - MyBatis
 - PostgreSQL 16
 - Docker Compose（ローカル補助用途）
+=======
+- Java 25
+- Spring Boot 4.0.3（Spring Security、Thymeleaf、Spring Batch など）
+- MyBatis Spring Boot Starter 4.0.0
+- PostgreSQL 18
+- Docker Compose（ローカル開発用：Mailpit v1.20、DBGate latest）
+>>>>>>> feature/document-training-iwanaga
 
 ## ローカル起動
 
