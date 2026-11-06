@@ -10,6 +10,7 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 - 画面一覧（旧版）: [docs/design/screen-list.md](docs/design/screen-list.md)
 
 ## 技術スタック
+
 - Java 25
 - Spring Boot 4.0.3（Spring Security、Thymeleaf、Spring Batch など）
 - MyBatis Spring Boot Starter 4.0.0
@@ -17,7 +18,9 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 - Docker Compose（ローカル開発用：Mailpit v1.20、DBGate latest）
 
 ## ローカル起動
+
 ### 前提
+
 - Java 25
 - Windows PowerShellで `.\mvnw.cmd` を実行できること
 - 以下のどちらかを用意すること
@@ -25,6 +28,7 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
   - PostgreSQL 18 と `psql` がローカルに入っている
 
 ### 起動手順（Docker 利用）
+
 1. インフラ（DB、Mailpit、DBGate）のみを起動
    `docker compose up -d db mailpit dbgate`
 2. PowerShellでアプリをローカル起動
@@ -39,6 +43,7 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 > 注意: `docker compose up -d` で `app` サービスも起動すると、Composeのアプリがホストの8080番ポートを使用します。ローカルでSpring Bootを起動する場合は、上記のようにインフラのみを起動してください。
 
 ### 起動手順（Docker なし）
+
 1. PostgreSQL 18 に `office_order` DB と `office_order` ユーザーを作成
    - 接続先前提: `localhost:5432`
    - 既定ユーザー/パスワード: `office_order` / `office_order`
@@ -55,6 +60,7 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
    - アプリトップ: `http://localhost:8080/`
 
 ### Docker 全リセット手順
+
 1. コンテナ、ボリューム、イメージ、orphan を削除
    `docker compose down --rmi all --volumes --remove-orphans`
    > `--volumes` によりComposeの名前付きボリュームも削除されるため、PostgreSQLのデータが消去されます。
@@ -65,6 +71,7 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
    `docker compose up -d db mailpit dbgate`
 
 ## ログ
+
 - 設定ファイル: `src/main/resources/logback-spring.xml`
 - ログはコンソールとファイルの両方に出力されます。
 - 通常ログ: `log/office-order.log`
@@ -74,6 +81,7 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 - Docker実行時のファイルログはコンテナ内の `/app/log/` に保存されます。現在のCompose設定にはホスト側へログを保存するマウント設定がないため、コンテナを削除するとコンテナ内のファイルログも失われます。
 
 ## 初期データ
+
 - 会員: 7件（有効会員 6件、退会済み 1件）
 - 商品: 50件
 - 注文: 過去1か月分を中心に約100件
@@ -81,12 +89,15 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 - パスワードは Java 側で BCrypt ハッシュ化して扱う
 
 ### 代表的なログイン確認用アカウント
+
 - `member01@example.com` / `password`
 - `member02@example.com` / `password`
 - `member04@example.com` / `password`
 
 ### ローカル再シード手順
+
 #### Docker 利用時
+
 1. Compose を停止
    `docker compose down`
 2. PostgreSQL ボリュームのみ削除
@@ -95,9 +106,12 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
    `docker compose up -d`
 
 #### Docker なし
-- `./scripts/init-local-postgres.ps1` を再実行してください
+
+- Windows環境: `./scripts/init-local-postgres.ps1` を再実行してください
+- Mac/Linux環境: `./scripts/init-local-postgres.sh` （または該当するシェルスクリプトや手動実行の手順）を実行してください
 
 ## バッチ
+
 - 売れ筋ランキング再計算とおすすめ関連商品再計算は、サーバー起動時に自動実行されます
 - その後は毎時 0 分に自動実行されます
 - `local` プロファイルでは手動実行用の内部エンドポイントも利用できます
@@ -106,6 +120,7 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
   - `GET /internal/batch/jobs`
 
 ### 手動バッチ実行
+
 - `InternalBatchController` は `local` プロファイル時のみ有効です
 - 売れ筋ランキング再計算
   `curl -X POST http://localhost:8080/internal/batch/jobs/popular-ranking/executions`
@@ -117,5 +132,6 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 - 実行中の同一ジョブを重複起動した場合は `409 Conflict` を返します
 
 ## システムエラーページ確認
+
 - `local` プロファイルではシステムエラーページの手動確認用内部エンドポイントを利用できます
   - `http://localhost:8080/internal/test/errors/500`
