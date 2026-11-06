@@ -5,6 +5,10 @@ OFFICE ORDER は、オフィス家具を扱う顧客向け EC サイトです。
 本リポジトリで扱う範囲は、商品閲覧、会員登録、カート、注文、お問い合わせまでであり、
 受注後の業務処理や管理画面は別システムの責務です。
 
+## 関連資料
+- 画面・API・バッチ一覧: [docs/design/screen-api-batch-list.md](docs/design/screen-api-batch-list.md)
+- 画面一覧（旧版）: [docs/design/screen-list.md](docs/design/screen-list.md)
+
 ## 技術スタック
 - Java 21
 - Spring Boot 3.5.11
