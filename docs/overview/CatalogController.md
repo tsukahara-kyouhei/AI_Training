@@ -46,3 +46,83 @@
 | 出力 | 遷移先 `/login?redirect=...` | 未ログインでお気に入り操作を行った場合、操作後に戻るパスを付けてログイン画面へ案内する。 |
 | 出力 | 遷移先 `redirect` または商品詳細画面 | ログイン済みの場合、お気に入り操作後に指定された安全な戻り先へ遷移する。 |
 | 出力 | フラッシュ属性 `favoriteLimitError` | お気に入り登録数の上限に達した場合に表示するエラーメッセージ。 |
+
+## 3. 処理フロー
+
+### `newArrivals`（`GET /products/new-arrivals`）
+
+1. `ProductFilterOptionService.loadOptionsBundle` を呼び出し、絞り込み候補を取得する。
+2. 受け取った在庫・価格帯・色・並び順・ページ条件から、`ProductListSearchService.buildNewArrivalCondition` を呼び出して新着商品検索条件を作成する。
+3. `ProductListSearchService.searchWithPageCorrection` を呼び出し、ページ番号を補正しながら商品を検索する。
+4. `applyProductListModel` を呼び出し、商品一覧、ページ情報、選択条件、絞り込み候補を画面モデルに設定する。
+5. `pages/product-list-new-arrivals` を返す。
+
+### `searchResults`（`GET /products/search`）
+
+1. `ProductFilterOptionService.loadOptionsBundle` を呼び出し、絞り込み候補を取得する。
+2. キーワード、在庫・価格帯・色・カテゴリ別テイスト、並び順、ページ条件から検索条件を組み立てる。既定の並び順はおすすめ順とする。
+3. `ProductListSearchService.searchWithPageCorrection` を呼び出して商品を検索し、ページ条件を補正する。
+4. `applyProductListModel` を呼び出し、共通の商品一覧情報を画面モデルに設定する。
+5. キーワード、選択中のテイスト条件、各カテゴリのテイスト候補を画面モデルに設定する。
+6. `pages/product-list-search-results` を返す。
+
+### `desks`（`GET /categories/desks`）
+
+1. `ProductFilterOptionService.loadOptionsBundle` を呼び出し、絞り込み候補を取得する。
+2. `ProductFilterOptionService.buildDeskFilter` を呼び出し、天板形状・幅・奥行・高さ・テイスト条件を組み立てる。
+3. 共通条件とデスク固有条件から商品検索条件を作成し、既定の並び順はおすすめ順とする。
+4. `ProductListSearchService.searchWithPageCorrection` を呼び出して商品を検索し、ページ条件を補正する。
+5. `applyProductListModel` を呼び出して共通の商品一覧情報を設定し、デスク固有の選択条件と候補を画面モデルに設定する。
+6. `pages/product-list-category-desk` を返す。
+
+### `chairs`（`GET /categories/chairs`）
+
+1. `ProductFilterOptionService.loadOptionsBundle` を呼び出し、絞り込み候補を取得する。
+2. `ProductFilterOptionService.buildChairFilter` を呼び出し、機能・素材・テイスト条件を組み立てる。
+3. 共通条件とチェア固有条件から商品検索条件を作成し、既定の並び順はおすすめ順とする。
+4. `ProductListSearchService.searchWithPageCorrection` を呼び出して商品を検索し、ページ条件を補正する。
+5. `applyProductListModel` を呼び出して共通の商品一覧情報を設定し、チェア固有の選択条件と候補を画面モデルに設定する。
+6. `pages/product-list-category-chair` を返す。
+
+### `storages`（`GET /categories/storages`）
+
+1. `ProductFilterOptionService.loadOptionsBundle` を呼び出し、絞り込み候補を取得する。
+2. `ProductFilterOptionService.buildStorageFilter` を呼び出し、用途・テイスト条件を組み立てる。
+3. 共通条件と収納家具固有条件から商品検索条件を作成し、既定の並び順はおすすめ順とする。
+4. `ProductListSearchService.searchWithPageCorrection` を呼び出して商品を検索し、ページ条件を補正する。
+5. `applyProductListModel` を呼び出して共通の商品一覧情報を設定し、収納家具固有の選択条件と候補を画面モデルに設定する。
+6. `pages/product-list-category-storage` を返す。
+
+### `productDetail`（`GET /products/{productId}`）
+
+1. `stock` が `out` の場合、在庫切れ商品として扱う指定を有効にする。
+2. `ProductService.findDetail` を呼び出し、商品詳細を取得する。
+   - 商品が見つからない場合：HTTP 404 を返す。
+3. `MemberSessionService.currentMember` を呼び出し、ログイン中の会員を確認する。
+   - ログイン中の場合：`MemberService.isFavorite` を呼び出し、対象商品のお気に入り登録状態を取得する。
+   - 未ログインの場合：お気に入り状態を `false` とする。
+4. 商品詳細、カテゴリ表示名、お気に入り状態、詳細ページのパスを画面モデルに設定する。
+5. `pages/product-detail` を返す。
+
+### `recentlyViewed`（`GET /products/recently-viewed`）
+
+1. `parseRecentlyViewedIds` を呼び出し、ID の文字列を解析する。
+   - 空・不正な値は除外し、正の数値の重複を除いた最大 4 件を対象とする。
+2. 有効な商品 ID がない場合：空の JSON 配列を返す。
+3. 有効な商品 ID がある場合：`ProductService.findRecentlyViewedProducts` を呼び出し、商品カード一覧を JSON で返す。
+
+### `toggleFavorite`（`POST /products/{productId}/favorite`）
+
+1. `stock` が `out` の場合は在庫切れ表示を有効にし、商品詳細画面の既定戻り先を作成する。
+2. `MemberSessionService.sanitizeRedirectPath` を呼び出し、指定された戻り先を検証する。
+   - 戻り先が利用できない場合：商品詳細画面を戻り先にする。
+3. `ProductService.findDetail` を呼び出し、対象商品が存在することを確認する。
+   - 商品が見つからない場合：HTTP 404 を返す。
+4. `MemberSessionService.currentMember` を呼び出し、ログイン中の会員を確認する。
+   - 未ログインの場合：ログを記録し、戻り先を URL エンコードして `/login?redirect=...` へリダイレクトする。
+   - ログイン中の場合：次の処理を続ける。
+5. `action` が `remove` の場合：`MemberService.removeFavorite` を呼び出してお気に入りを解除し、操作ログを記録して戻り先へリダイレクトする。
+6. `action` が `remove` 以外の場合：`MemberService.toggleFavorite` を呼び出してお気に入り状態を切り替える。
+   - 切り替えに成功した場合：操作ログを記録する。
+   - `FavoritesLimitExceededException` が発生した場合：上限超過ログを記録し、例外メッセージをフラッシュ属性 `favoriteLimitError` に設定する。
+7. 指定または既定の戻り先へリダイレクトする。

@@ -9,3 +9,10 @@
 | 入力 | 実行プロファイル `local` | このテスト用エンドポイントが有効になるプロファイル。 |
 | 入力 | HTTP GET リクエスト `/internal/test/errors/500` | 500 エラー画面の確認用リクエスト。URL パラメータやフォーム入力は受け取らない。 |
 | 出力 | HTTP 500 エラー応答 | `IllegalStateException` を発生させ、共通エラー処理によるシステムエラー応答を起動する。 |
+
+## 3. 処理フロー
+
+### `forceServerError`（GET `/internal/test/errors/500`）
+
+1. リクエストを受け付ける。
+2. `IllegalStateException`（`local error page test`）を送出し、共通エラー処理へ引き継ぐ。

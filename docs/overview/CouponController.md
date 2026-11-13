@@ -13,3 +13,16 @@
 | 入力 | HTTP POST リクエスト `/cart/coupon/remove` | カートに適用中のクーポンを解除するリクエスト。 |
 | 出力 | HTTP セッション属性 `appliedCouponCode` | 適用時は受け取ったクーポンコードを設定し、解除時は属性を削除する。 |
 | 出力 | 遷移先 `redirect:/cart` | クーポン適用または解除後にカート画面へリダイレクトする。 |
+
+## 3. 処理フロー
+
+### `applyCoupon`（POST `/cart/coupon/apply`）
+
+1. リクエストからクーポンコード `couponCode` を受け取る。
+2. HTTP セッション属性 `appliedCouponCode` に受け取ったクーポンコードを設定する。
+3. `redirect:/cart` へリダイレクトする。
+
+### `removeCoupon`（POST `/cart/coupon/remove`）
+
+1. HTTP セッションから `appliedCouponCode` 属性を削除する。
+2. `redirect:/cart` へリダイレクトする。

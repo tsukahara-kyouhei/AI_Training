@@ -25,3 +25,51 @@
 | 出力 | フラッシュ属性 `registeredMemberCode` | 登録完了画面に表示する会員コード（`MEM` と 7 桁の会員 ID）。 |
 | 出力 | 遷移先 `redirect:/members/register/complete` | 登録確定後の完了画面へのリダイレクト先。 |
 | 出力 | 遷移先 `pages/member-register-complete` | 会員コードと登録完了案内を表示する画面。完了コードがない場合は HTTP 404。 |
+
+## 3. 処理フロー
+
+### `showForm`（GET `/members/register`）
+
+1. 画面モデルに `registerForm` が既に設定されているか確認する。
+2. `registerForm` が設定されていない場合：
+   1. セッションから確認待ちの `PENDING_REGISTER_FORM` を取得する。
+   2. 確認待ちフォームがある場合はそれを画面モデルに設定し、ない場合は新しい `MemberRegisterForm` を設定する。
+3. 会員登録入力画面 `pages/member-register` を返す。
+
+### `confirm`（POST `/members/register/confirm`）
+
+1. 入力フォームを正規化する。
+2. フォームの基本項目を検証し、会員種別に応じた追加ルールを検証する。
+   - 法人会員で会社名が未入力または空白の場合：会社名の入力エラーを追加する。
+3. メールアドレスにエラーがない場合、`MemberService` を呼び出して登録済みメールアドレスか確認する。
+   - 既に登録されている場合：メールアドレスの重複エラーを追加する。
+4. 入力エラーがある場合：
+   1. エラー件数をログに記録する。
+   2. 会員登録入力画面 `pages/member-register` を返す。
+5. 入力エラーがない場合：
+   1. 正規化したフォームをセッション属性 `PENDING_REGISTER_FORM` に保存する。
+   2. フォームを画面モデル `registerForm` に設定する。
+   3. 確認画面 `pages/member-register-confirm` を返す。
+
+### `register`（POST `/members/register`）
+
+1. セッションから確認待ちの `PENDING_REGISTER_FORM` を取得する。
+2. 確認待ちフォームがない場合、`redirect:/members/register` へリダイレクトする。
+3. 確認待ちフォームがある場合、`MemberService` を呼び出して会員登録を確定する。
+4. 登録時にメールアドレスの重複が判明した場合：
+   1. 登録拒否をログに記録する。
+   2. メールアドレスの重複エラーを画面モデルに設定する。
+   3. 会員登録入力画面 `pages/member-register` を返す。
+5. 登録に成功した場合：
+   1. セッションから `PENDING_REGISTER_FORM` を削除する。
+   2. `MemberSessionService` を呼び出して、作成した会員をログイン状態にする。
+   3. `NotificationMailService` を呼び出して、会員登録完了メールを送信する。
+   4. 登録完了をログに記録する。
+   5. 会員 ID を `MEM` と 7 桁の数字で整形し、フラッシュ属性 `registeredMemberCode` に設定する。
+   6. `redirect:/members/register/complete` へリダイレクトする。
+
+### `complete`（GET `/members/register/complete`）
+
+1. 画面モデルに `registeredMemberCode` が設定されているか確認する。
+2. `registeredMemberCode` が設定されていない場合、HTTP 404 の例外を送出する。
+3. 設定されている場合、会員登録完了画面 `pages/member-register-complete` を返す。

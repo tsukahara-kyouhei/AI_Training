@@ -47,3 +47,121 @@
 | 出力 | 遷移先 `/checkout/complete/{orderNumber}` | 注文確定後の完了画面へのリダイレクト先。 |
 | 出力 | 遷移先 `pages/checkout-complete` | 注文完了画面。画面モデル `order` に注文完了情報を渡す。 |
 | 出力 | HTTP 404 | 指定された注文番号に対応する注文完了情報が見つからない場合に返す。 |
+
+## 3. 処理フロー
+
+### `cart`（`GET /cart`）
+
+1. `CartService.getCart` を呼び出し、現在のカートを取得する。
+2. カート情報を `cart`、空カートかどうかを `isCartEmpty` として画面モデルに設定する。
+3. `pages/cart` を返す。
+
+### `addItem`（`POST /cart/items`）
+
+1. `CartService.sanitizeRedirectPath` を呼び出し、指定された戻り先を検証する。
+   - 戻り先が利用できない場合：戻り先を `/cart` にする。
+2. `CartService.addItem` を呼び出し、商品バリエーション、数量、組立指定をカートに追加する。
+   - 追加に成功した場合：成功メッセージをフラッシュ属性 `cartMessage` に設定する。
+   - `IllegalArgumentException` が発生した場合：警告ログを記録し、例外メッセージをフラッシュ属性 `cartError` に設定する。
+3. 決定した戻り先へリダイレクトする。
+
+### `updateItem`（`POST /cart/items/{productVariantId}/update`）
+
+1. `CartService.updateItem` を呼び出し、対象商品の数量と組立指定を更新する。
+   - 更新に成功した場合：追加のメッセージは設定しない。
+   - `IllegalArgumentException` が発生した場合：警告ログを記録し、例外メッセージをフラッシュ属性 `cartError` に設定する。
+2. `/cart` へリダイレクトする。
+
+### `deleteItem`（`POST /cart/items/{productVariantId}/delete`）
+
+1. `CartService.removeItem` を呼び出し、指定された商品をカートから削除する。
+2. `/cart` へリダイレクトする。
+
+### `applyCoupon`（`POST /cart/apply-coupon`、`POST /cart/coupon/apply`）
+
+1. クーポンコードの前後の空白を取り除く。
+2. クーポンコードが空の場合：入力を促すメッセージをフラッシュ属性 `cartError` に設定し、`/cart` へリダイレクトする。
+3. クーポンコードが空でない場合：HTTP セッション属性 `appliedCouponCode` にコードを設定し、`/cart` へリダイレクトする。
+
+### `removeCoupon`（`POST /cart/remove-coupon`、`POST /cart/coupon/remove`）
+
+1. HTTP セッションから `appliedCouponCode` を削除する。
+2. `/cart` へリダイレクトする。
+
+### `clearCart`（`POST /cart/clear`）
+
+1. `CartService.clear` を呼び出し、カートを空にする。
+2. `/cart` へリダイレクトする。
+
+### `checkoutMethod`（`GET /checkout/method`）
+
+1. `CartService.getCart` を呼び出し、現在のカートを取得する。
+2. カートが空の場合：`/cart` へリダイレクトする。
+3. カートに商品がある場合：
+   1. `bindRememberedLoginEmail` を呼び出し、記憶済みメールアドレスを画面モデルに設定する。
+   2. `checkoutRedirectPath` に `/checkout/input` を設定する。
+   3. `pages/checkout-method` を返す。
+
+### `checkoutInput`（`GET /checkout/input`）
+
+1. `CartService.getCart` を呼び出し、現在のカートを取得する。
+2. カートが空の場合：`/cart` へリダイレクトする。
+3. 画面モデルに `checkoutForm` がない場合：
+   - セッションに `checkout_input_form` がある場合：保存済みフォームを `checkoutForm` として設定する。
+   - 保存済みフォームがない場合：`MemberSessionService.currentMember` を呼び出す。会員情報をもとに `OrderService.createInitialForm` を呼び出して初期フォームを作成し、`checkoutForm` として設定する。
+4. カートを `cart` として画面モデルに設定する。
+5. `bindCheckoutAddressOptions` を呼び出し、会員状態と追加お届け先の選択肢を画面モデルに設定する。
+6. `pages/checkout-input` を返す。
+
+### `checkoutInputSubmit`（`POST /checkout/input`）
+
+1. `CartService.getCart` を呼び出し、現在のカートを取得する。
+2. カートが空の場合：`/cart` へリダイレクトする。
+3. 入力フォームを正規化し、`validateCheckoutFormBusinessRules` を呼び出して業務ルールを検証する。
+4. 入力エラーがある場合：
+   1. 警告ログを記録する。
+   2. カートを画面モデルに設定する。
+   3. `bindCheckoutAddressOptions` を呼び出し、会員状態と追加お届け先の選択肢を設定する。
+   4. `pages/checkout-input` を返し、入力画面を再表示する。
+5. 入力エラーがない場合：
+   1. 正規化したフォームをセッション属性 `checkout_input_form` に保存する。
+   2. 新しい確認用トークンを生成し、`checkout_confirm_token` に保存する。
+   3. フォームをフラッシュ属性 `checkoutForm` に設定する。
+   4. `/checkout/confirm` へリダイレクトする。
+
+### `checkoutConfirm`（`GET /checkout/confirm`）
+
+1. `CartService.getCart` を呼び出し、現在のカートを取得する。
+2. カートが空の場合：`clearCheckoutSession` を呼び出して購入手続き情報を削除し、`/cart` へリダイレクトする。
+3. セッション属性 `checkout_input_form` を確認する。
+   - フォームがない場合：`/checkout/input` へリダイレクトする。
+4. セッションの確認用トークンを確認する。
+   - トークンがない場合：新しいトークンを生成してセッションに保存する。
+5. フォーム、カート、クーポン割引額、適用中クーポンコード、確認用トークンを画面モデルに設定する。
+6. `pages/checkout-confirm` を返す。
+
+### `placeOrder`（`POST /checkout/confirm`）
+
+1. `CartService.getCart` を呼び出し、現在のカートを取得する。
+2. カートが空の場合：`clearCheckoutSession` を呼び出して購入手続き情報を削除し、`/cart` へリダイレクトする。
+3. セッション属性 `checkout_input_form` を確認する。
+   - フォームがない場合：再入力メッセージをフラッシュ属性 `checkoutError` に設定し、`/checkout/input` へリダイレクトする。
+4. セッションの確認用トークンと送信されたトークンを照合する。
+   - トークンがない、または一致しない場合：警告ログを記録し、`clearCheckoutSession` を呼び出して購入手続き情報を削除する。確認エラーメッセージを `checkoutError` に設定し、`/checkout/input` へリダイレクトする。
+5. トークンが一致する場合：
+   1. `MemberSessionService.currentMember` を呼び出して会員 ID を取得する（未ログインの場合は会員 ID なし）。
+   2. `OrderService.placeOrder` を呼び出して注文を確定する。
+   3. `clearCheckoutSession` と `CartService.clear` を呼び出し、購入手続き情報とカートを消去する。
+   4. 注文確定ログを記録し、注文番号を含む `/checkout/complete/{orderNumber}` へリダイレクトする。
+   - 注文確定で `IllegalArgumentException` が発生した場合：警告ログを記録し、例外メッセージを `checkoutError` に設定して `/checkout/input` へリダイレクトする。
+
+### `checkoutCompleteFallback`（`GET /checkout/complete`）
+
+1. `/checkout/input` へリダイレクトする。
+
+### `checkoutComplete`（`GET /checkout/complete/{orderNumber}`）
+
+1. `OrderService.findOrderCompleteView` を呼び出し、注文番号に対応する完了情報を取得する。
+   - 注文情報が見つからない場合：HTTP 404 を返す。
+2. 取得した注文情報を `order` として画面モデルに設定する。
+3. `pages/checkout-complete` を返す。

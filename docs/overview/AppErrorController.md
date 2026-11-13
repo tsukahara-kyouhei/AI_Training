@@ -26,3 +26,21 @@
 | 出力 | JSON `message` | タイトルと利用者向け説明を結合したメッセージ。 |
 | 出力 | JSON `requestId` | リクエスト ID 属性から取得した受付番号。 |
 | 出力 | JSON `path` | エラー発生元の URI。 |
+
+## 3. 処理フロー
+
+### `handleError`（`/error`）
+
+1. `resolveErrorDescriptor` を呼び出し、リクエストのエラー状態コードに対応するステータス、エラーコード、利用者向けメッセージ、HTML テンプレートを決定する。
+   - エラー状態コードが取得できない、または HTTP ステータスに解決できない場合：500 として扱う。
+   - 404 の場合：`NOT_FOUND` とページ未検出向けメッセージ、`error/error` を設定する。
+   - 404 以外の 4xx の場合：`REQUEST_ERROR` とリクエストエラー向けメッセージ、`error/error` を設定する。
+   - その他の場合：500 として `SERVER_ERROR` とシステムエラー向けメッセージ、`error/500` を設定する。
+2. `expectsJson` を呼び出し、`Accept` ヘッダーが `application/json` を含むか判定する。
+   - JSON 応答の場合：
+     1. `buildJsonBody` を呼び出し、ステータス、エラーコード、メッセージ、受付番号、発生元 URI を含む本文を作成する。
+     2. 決定した HTTP ステータスと JSON 本文を `ResponseEntity` として返す。
+   - HTML 応答の場合：
+     1. HTTP レスポンスのステータスを設定する。
+     2. `statusCode`、`errorTitle`、`errorMessage`、`requestId`、`errorPath` を画面モデルに設定する。
+     3. 決定したエラー画面のテンプレート名を返す。

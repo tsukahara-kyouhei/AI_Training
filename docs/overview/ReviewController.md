@@ -20,3 +20,52 @@
 | 出力 | リダイレクト先 `/products/{productId}/reviews` | レビュー投稿・編集後、または購入条件を満たさない場合のレビュー一覧画面。 |
 | 出力 | リダイレクト先 `/products/{productId}/reviews/edit?memberId={memberId}` | 対象商品にレビュー投稿済みの会員を編集画面へ案内する。 |
 | 出力 | エラー応答 | 未購入商品の投稿、または編集対象レビューが存在しない場合に例外を送出し、共通エラー処理へ委譲する。 |
+
+## 3. 処理フロー
+
+### `showReviewList`（GET `/products/{productId}/reviews`）
+
+1. `ReviewService` を呼び出して、対象商品のレビュー一覧と評価集計を取得する。
+2. レビュー一覧に商品 ID を設定する。
+3. レビュー一覧と評価集計を画面モデル `reviewPage`、`reviewSummary` に設定する。
+4. ログイン中の場合：
+   1. 認証情報から会員 ID を取得する。
+   2. `ReviewService` を呼び出して対象商品を購入済みか確認する。
+   3. `ReviewService` を呼び出して対象商品のレビューを投稿済みか確認する。
+5. 購入済みか、レビュー投稿済みか、ログイン中か、およびログイン会員 ID を画面モデルに設定する。
+   - 未ログインの場合：購入済み・投稿済みを `false`、会員 ID を未設定として扱う。
+6. レビュー一覧画面 `review/list` を返す。
+
+### `showReviewForm`（GET `/products/{productId}/reviews/new`）
+
+1. 認証情報からログイン会員 ID を取得する。
+2. `ReviewService` を呼び出して対象商品を購入済みか確認する。
+3. 未購入の場合、対象商品のレビュー一覧へリダイレクトする。
+4. `ReviewService` を呼び出して対象商品のレビューを投稿済みか確認する。
+5. 既に投稿済みの場合、対象商品のレビュー編集画面へリダイレクトする。
+6. 未購入でも投稿済みでもない場合、新しいレビュー入力フォームを作成して商品 ID を設定する。
+7. フォームを画面モデル `reviewForm` に設定し、レビュー入力画面 `review/form` を返す。
+
+### `submitReview`（POST `/products/{productId}/reviews`）
+
+1. 認証情報からログイン会員 ID を取得する。
+2. `ReviewService` を呼び出して対象商品を購入済みか確認する。
+3. 未購入の場合、レビュー投稿不可を示す `IllegalStateException` を送出する。
+4. 購入済みの場合、`ReviewService` を呼び出してレビューを登録または更新する。
+5. 対象商品のレビュー一覧へリダイレクトする。
+
+### `showEditReviewForm`（GET `/products/{productId}/reviews/edit`）
+
+1. 認証情報からログイン会員 ID を取得する。
+2. `ReviewService` を呼び出してログイン会員の対象商品レビューを取得する。
+3. 既存レビューが見つからない場合、レビューが存在しないことを示す `IllegalStateException` を送出する。
+4. 既存レビューが見つかった場合、商品 ID、評価、タイトル、本文をレビュー入力フォームに設定する。
+5. フォームを画面モデル `reviewForm` に設定し、レビュー入力画面 `review/form` を返す。
+
+### `submitEditReview`（POST `/products/{productId}/reviews/edit`）
+
+1. 認証情報からログイン会員 ID を取得する。
+2. `ReviewService` を呼び出して対象商品を購入済みか確認する。
+3. 未購入の場合、レビュー投稿不可を示す `IllegalStateException` を送出する。
+4. 購入済みの場合、`ReviewService` を呼び出してレビューを登録または更新する。
+5. 対象商品のレビュー一覧へリダイレクトする。

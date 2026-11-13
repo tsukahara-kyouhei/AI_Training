@@ -18,3 +18,23 @@
 | 出力 | 画面モデル `loginForm` | ログイン画面のフォーム。正規化した戻り先と、記憶済みメールアドレスがあればその値を含む。 |
 | 出力 | 画面モデル `rememberLoginEmail` | 記憶済みメールアドレスがあるかを示す真偽値。 |
 | 出力 | 画面モデル `sessionExpired` | セッション切れの案内を表示するかを示す真偽値。 |
+
+## 3. 処理フロー
+
+### `login`（`GET /login`）
+
+1. `MemberSessionService.currentMember` を呼び出し、現在ログイン中の会員を確認する。
+   - ログイン済みの場合：ログイン画面を表示せず、`/mypage/orders` へリダイレクトする。
+   - 未ログインの場合：次の処理を続ける。
+2. `LoginEmailCookieService.findRememberedEmail` を呼び出し、記憶済みメールアドレスを取得する。
+3. 画面モデルに `loginForm` がない場合：
+   1. 新しい `LoginForm` を作成する。
+   2. `MemberSessionService.sanitizeRedirectPath` を呼び出し、`redirect` の値を安全なアプリ内相対パスに整える。
+   3. 戻り先をフォームに設定する。
+   4. 記憶済みメールアドレスがある場合：そのメールアドレスをフォームに設定する。
+   5. 作成したフォームを `loginForm` として画面モデルに追加する。
+   - `loginForm` が既に画面モデルにある場合：既存のフォームを維持する。
+4. 記憶済みメールアドレスの有無を `rememberLoginEmail` として画面モデルに追加する。
+5. `expired` が `true` の場合：セッション切れを示すログを記録する。
+6. `expired` の値を `sessionExpired` として画面モデルに追加する。
+7. `pages/login` を返し、ログイン画面を表示する。
