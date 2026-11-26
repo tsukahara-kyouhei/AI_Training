@@ -1,11 +1,11 @@
 debug: true
 spring:
   application:
-    name: office-order
+    name: office_order
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:db2://localhost:50000/office_order}
+    url: ${SPRING_DATASOURCE_URL:jdbc:db2://localhost:50000/OFFICEOR}
     username: ${SPRING_DATASOURCE_USERNAME:db2inst1}
-    password: ${DB2INST1_PASSWORD}
+    password: ${DB2INST1_PASSWORD:DB2INST1_PASSWORD}
     driver-class-name: com.ibm.db2.jcc.DB2Driver
   sql:
     init:
