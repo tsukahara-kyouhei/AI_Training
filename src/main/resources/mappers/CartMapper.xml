@@ -47,7 +47,7 @@
         AND effective_start_at &lt;= #{now}
         AND (effective_end_at IS NULL OR effective_end_at &gt; #{now})
         ORDER BY effective_start_at DESC
-        LIMIT 1
+        FETCH FIRST 1 ROW ONLY
     </select>
 </mapper>
 

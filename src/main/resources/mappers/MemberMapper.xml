@@ -88,20 +88,22 @@
     </resultMap>
 
     <select id="existsByEmail" resultType="boolean">
-        SELECT EXISTS(
+        SELECT CASE WHEN EXISTS(
         SELECT 1
         FROM members
         WHERE LOWER(email) = LOWER(#{email})
-        )
+        ) THEN 1 ELSE 0 END
+        FROM SYSIBM.SYSDUMMY1
     </select>
 
     <select id="existsByEmailForOtherMember" resultType="boolean">
-        SELECT EXISTS(
+        SELECT CASE WHEN EXISTS(
         SELECT 1
         FROM members
         WHERE LOWER(email) = LOWER(#{email})
         AND member_id &lt;&gt; #{memberId}
-        )
+        ) THEN 1 ELSE 0 END
+        FROM SYSIBM.SYSDUMMY1
     </select>
 
     <select id="selectActiveCredentialByEmail" resultMap="MemberCredentialMap">
@@ -154,6 +156,8 @@
     </select>
 
     <select id="insertMember" resultType="long">
+        SELECT member_id
+        FROM FINAL TABLE (
         INSERT INTO members (
         personal_or_corporate,
         last_name,
@@ -206,7 +210,7 @@
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
         )
-        RETURNING member_id
+        )
     </select>
 
     <select id="selectMemberTypeById" resultType="string">
@@ -243,7 +247,7 @@
         FROM member_additional_addresses
         WHERE member_id = #{memberId}
         ORDER BY created_at ASC
-        LIMIT #{limit} OFFSET #{offset}
+        OFFSET #{offset} ROWS FETCH FIRST #{limit} ROWS ONLY
     </select>
 
     <select id="selectAdditionalAddressById" resultMap="MemberAdditionalAddressViewMap">
@@ -364,7 +368,7 @@
         AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{now})
         GROUP BY mf.product_id, p.product_name, mf.created_at
         ORDER BY mf.created_at DESC, mf.product_id DESC
-        LIMIT #{limit} OFFSET #{offset}
+        OFFSET #{offset} ROWS FETCH FIRST #{limit} ROWS ONLY
     </select>
 
     <select id="selectFavoriteColorCodes" resultMap="MemberColorCodeRowMap">
@@ -382,12 +386,13 @@
     </select>
 
     <select id="existsFavorite" resultType="boolean">
-        SELECT EXISTS(
+        SELECT CASE WHEN EXISTS(
         SELECT 1
         FROM member_favorites
         WHERE member_id = #{memberId}
         AND product_id = #{productId}
-        )
+        ) THEN 1 ELSE 0 END
+        FROM SYSIBM.SYSDUMMY1
     </select>
 
     <insert id="insertFavorite">

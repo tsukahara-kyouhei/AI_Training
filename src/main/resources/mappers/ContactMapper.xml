@@ -29,6 +29,8 @@
     </select>
 
     <select id="insertInquiry" resultType="long">
+        SELECT inquiry_id 
+        FROM FINAL TABLE (
         INSERT INTO inquiries (
         member_id,
         company_name,
@@ -61,7 +63,7 @@
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
         )
-        RETURNING inquiry_id
+        )
     </select>
 
 </mapper>

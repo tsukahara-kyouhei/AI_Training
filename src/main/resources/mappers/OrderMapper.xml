@@ -122,6 +122,8 @@
     </select>
 
     <select id="insertOrder" resultType="long">
+        SELECT order_id
+        FROM FINAL TABLE (
         INSERT INTO orders (
         order_number,
         order_datetime,
@@ -184,7 +186,7 @@
         #{params.paymentMethod},
         <choose>
             <when test="params.paymentInstructionJson != null">
-                CAST(#{params.paymentInstructionJson} AS jsonb)
+                #{params.paymentInstructionJson}
             </when>
             <otherwise>
                 NULL
@@ -203,7 +205,7 @@
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
         )
-        RETURNING order_id
+        )
     </select>
 
     <insert id="insertOrderItem">
@@ -255,23 +257,19 @@
     </insert>
 
     <select id="nextOrderSequence" parameterType="java.time.LocalDate" resultType="int">
-        INSERT INTO order_number_counters (
-        order_date,
-        last_sequence,
-        created_at,
-        updated_at
+        SELECT last_sequence
+        FROM FINAL TABLE (
+            MERGE INTO order_number_counters AS target
+            USING (VALUES (CAST(#{orderDate} AS DATE))) AS source (order_date)
+            ON target.order_date = source.order_date
+            WHEN MATCHED THEN
+                UPDATE SET
+                    last_sequence = target.last_sequence + 1,
+                    updated_at = CURRENT_TIMESTAMP
+            WHEN NOT MATCHED THEN
+                INSERT (order_date, last_sequence, created_at, updated_at)
+                VALUES (source.order_date, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         )
-        VALUES (
-        #{orderDate},
-        1,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP
-        )
-        ON CONFLICT (order_date) DO UPDATE
-        SET
-        last_sequence = order_number_counters.last_sequence + 1,
-        updated_at = CURRENT_TIMESTAMP
-        RETURNING last_sequence
     </select>
 
     <select id="selectOrderCompleteByOrderNumber" resultMap="OrderCompleteRowMap">
@@ -312,7 +310,7 @@
         FROM orders
         WHERE member_id = #{memberId}
         ORDER BY order_datetime DESC, order_id DESC
-        LIMIT #{limit} OFFSET #{offset}
+        OFFSET #{offset} ROWS FETCH FIRST #{limit} ROWS ONLY
     </select>
 
     <select id="selectMemberOrderDetail" resultMap="MemberOrderDetailRowMap">
@@ -379,7 +377,7 @@
         AND effective_start_at &lt;= #{now}
         AND (effective_end_at IS NULL OR effective_end_at &gt; #{now})
         ORDER BY effective_start_at DESC
-        LIMIT 1
+        FETCH FIRST 1 ROW ONLY
     </select>
 
     <!-- 特定の会員が特定の商品を購入した件数を取得する -->

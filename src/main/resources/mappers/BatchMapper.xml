@@ -21,7 +21,7 @@
     <select id="selectPopularRankingCandidates" resultMap="BatchPopularRankingCandidateRowMap">
         SELECT
         pv.product_id,
-        SUM(oi.quantity)::INTEGER AS sold_quantity_1m
+        CAST(SUM(oi.quantity) AS INTEGER) AS sold_quantity_1m
         FROM orders o
         JOIN order_items oi ON oi.order_id = o.order_id
         JOIN product_variants pv ON pv.product_code = oi.product_code
@@ -32,7 +32,7 @@
         AND (p.sale_end_at IS NULL OR p.sale_end_at &gt; #{asOf})
         GROUP BY pv.product_id
         ORDER BY sold_quantity_1m DESC, pv.product_id ASC
-        LIMIT 10
+        FETCH FIRST 10 ROWS ONLY
     </select>
 
     <delete id="deletePopularRankingsByDate">

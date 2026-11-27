@@ -25,7 +25,7 @@
           AND (a.published_end_at IS NULL OR a.published_end_at &gt; #{now})
         ORDER BY a.published_start_at DESC, a.announcement_id DESC
         <if test="limit != null">
-            LIMIT #{limit}
+            FETCH FIRST #{limit} ROWS ONLY
         </if>
     </select>
 

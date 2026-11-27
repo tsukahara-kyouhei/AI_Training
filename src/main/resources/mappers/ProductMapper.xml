@@ -270,14 +270,14 @@
             AND (
             <foreach collection="keywordTokens" item="keywordToken" separator=" AND ">
                 (
-                p.product_name ILIKE #{keywordToken}
-                OR p.description ILIKE #{keywordToken}
-                OR p.variation_name ILIKE #{keywordToken}
+                LOWER(p.product_name) LIKE LOWER(#{keywordToken}) 
+                OR LOWER(p.description) LIKE LOWER(#{keywordToken}) 
+                OR LOWER(p.variation_name) LIKE LOWER(#{keywordToken}) 
                 OR EXISTS (
                     SELECT 1
                     FROM product_variants pvk
                     WHERE pvk.product_id = p.product_id
-                    AND pvk.product_code ILIKE #{keywordToken}
+                    AND LOWER(pvk.product_code) LIKE LOWER(#{keywordToken}) 
                 )
                 )
             </foreach>
@@ -385,7 +385,7 @@
                 p.product_id ASC
             </otherwise>
         </choose>
-        LIMIT #{limit} OFFSET #{offset}
+        OFFSET #{offset} ROWS FETCH FIRST #{limit} ROWS ONLY 
     </select>
 
     <select id="selectProductsByIds" resultMap="ProductListRowMap">
@@ -434,7 +434,7 @@
         WHERE r.ranking_date = (SELECT MAX(ranking_date) FROM popular_product_rankings)
         GROUP BY r.rank, p.product_id, p.product_name
         ORDER BY r.rank ASC
-        LIMIT #{limit}
+        FETCH FIRST #{limit} ROWS ONLY 
     </select>
 
     <select id="selectProductDetail" resultMap="ProductDetailRowMap">
@@ -495,7 +495,7 @@
         AND r.recommendation_date = (SELECT MAX(recommendation_date) FROM recommended_related_products)
         GROUP BY r.rank, p.product_id, p.product_name
         ORDER BY r.rank ASC
-        LIMIT #{limit}
+        FETCH FIRST #{limit} ROWS ONLY 
     </select>
 
     <select id="selectActiveColorFilterOptions" resultMap="ProductFilterColorOptionRowMap">
@@ -579,7 +579,7 @@
         AND effective_start_at &lt;= #{now}
         AND (effective_end_at IS NULL OR effective_end_at &gt; #{now})
         ORDER BY effective_start_at DESC
-        LIMIT 1
+        FETCH FIRST 1 ROW ONLY
     </select>
 
 </mapper>

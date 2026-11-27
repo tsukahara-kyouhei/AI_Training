@@ -23,7 +23,7 @@
         WHERE pr.product_id = #{productId}
           AND pr.published = true
         ORDER BY pr.created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
+        OFFSET #{offset} ROWS FETCH FIRST #{limit} ROWS ONLY
     </select>
 
     <!-- ②商品のレビュー件数を取得する (countProductReviews) -->
@@ -36,7 +36,7 @@
 
     <!-- ③商品のレビュー集計（平均評価と件数）を取得する (selectProductReviewSummary) -->
     <select id="selectProductReviewSummary" resultType="jp.co.skig.officeorder.model.review.ReviewSummaryView">
-        SELECT AVG(rating) AS averageRating, COUNT(*) AS reviewCount
+        SELECT (CAST(rating AS DOUBLE)) AS averageRating, COUNT(*) AS reviewCount
         FROM product_review
         WHERE product_id = #{productId}
           AND published = true
@@ -77,8 +77,8 @@
             #{form.title},
             #{form.body},
             true,
-            NOW(),
-            NOW()
+            CURRENT_TIMESTAMP, 
+            CURRENT_TIMESTAMP 
         )
     </insert>
 
@@ -89,7 +89,7 @@
             rating = #{form.rating},
             title = #{form.title},
             body = #{form.body},
-            updated_at = NOW()
+            updated_at = CURRENT_TIMESTAMP 
         WHERE member_id = #{memberId}
           AND product_id = #{form.productId}
     </update>
